@@ -1,0 +1,11 @@
+{
+  "name": "IEEC YA Admin",
+  "short_name": "IEEC Admin",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#651FFF",
+  "description": "IEEC YA Connect administration console",
+  "orientation": "landscape-primary",
+  "prefer_related_applications": false
+}

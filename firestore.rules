@@ -1,0 +1,201 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && role in getUserData().roles;
+    }
+
+    function isStaff() {
+      return hasRole('head_leader') || hasRole('core_team');
+    }
+
+    function isTeamLeader() {
+      return hasRole('team_leader');
+    }
+
+    function signedInUserId() {
+      return request.auth.uid;
+    }
+
+    function onlyAllowedUserProfileFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid', 'fullName', 'email', 'phone', 'gender', 'dateOfBirth', 'address', 'status',
+        'firstVisitDate', 'notes', 'emergencyContact', 'spiritualGrowthStatus', 'roles',
+        'assignedTeams', 'bibleStudyGroupId', 'g5GroupId'
+      ]);
+    }
+
+    function validUserProfile() {
+      return onlyAllowedUserProfileFields()
+        && request.resource.data.uid is string
+        && request.resource.data.fullName is string
+        && request.resource.data.email is string
+        && request.resource.data.phone is string
+        && request.resource.data.gender is string
+        && request.resource.data.address is string
+        && request.resource.data.status is string
+        && request.resource.data.notes is string
+        && request.resource.data.emergencyContact is string
+        && request.resource.data.spiritualGrowthStatus is string
+        && request.resource.data.roles is list
+        && request.resource.data.assignedTeams is list
+        && request.resource.data.bibleStudyGroupId is string
+        && request.resource.data.g5GroupId is string;
+    }
+
+    function validTeam() {
+      return request.resource.data.keys().hasOnly(['id', 'name', 'targetGroupSize', 'createdAt'])
+        && request.resource.data.id is string
+        && request.resource.data.name is string
+        && request.resource.data.targetGroupSize is int
+        && request.resource.data.targetGroupSize >= 2
+        && request.resource.data.targetGroupSize <= 20;
+    }
+
+    function validGroup() {
+      return request.resource.data.keys().hasOnly(['id', 'name', 'teamId', 'leaderId', 'maxCapacity', 'memberIds', 'currentMemberCount'])
+        && request.resource.data.id is string
+        && request.resource.data.name is string
+        && request.resource.data.teamId is string
+        && request.resource.data.leaderId is string
+        && request.resource.data.maxCapacity is int
+        && request.resource.data.memberIds is list
+        && request.resource.data.currentMemberCount is int
+        && request.resource.data.currentMemberCount == request.resource.data.memberIds.size()
+        && request.resource.data.memberIds.size() <= request.resource.data.maxCapacity;
+    }
+
+    function validTeamChat() {
+      return request.resource.data.keys().hasOnly(['id', 'teamId', 'allowedMemberIds'])
+        && request.resource.data.id is string
+        && request.resource.data.teamId is string
+        && request.resource.data.allowedMemberIds is list;
+    }
+
+    function validChatMessage() {
+      return request.resource.data.keys().hasOnly(['senderId', 'senderName', 'text', 'timestamp'])
+        && (isStaff() || request.resource.data.senderId == signedInUserId())
+        && request.resource.data.senderName is string
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000;
+    }
+
+    function validContribution() {
+      return request.resource.data.keys().hasOnly(['id', 'userId', 'amount', 'monthYear', 'status', 'autoPay', 'paidDate', 'receipts'])
+        && request.resource.data.id is string
+        && request.resource.data.userId is string
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 0
+        && request.resource.data.monthYear is string
+        && request.resource.data.status in ['paid', 'pending', 'failed']
+        && request.resource.data.autoPay is bool
+        && request.resource.data.receipts is list;
+    }
+
+    function validNewComer() {
+      return request.resource.data.keys().hasOnly(['id', 'fullName', 'phone', 'email', 'status', 'assignedLeaderId', 'currentStep', 'createdAt', 'workflow'])
+        && request.resource.data.id is string
+        && request.resource.data.fullName is string
+        && request.resource.data.phone is string
+        && request.resource.data.email is string
+        && request.resource.data.status in ['registered', 'contacted', 'in_follow_up', 'active_member', 'archived']
+        && request.resource.data.assignedLeaderId is string
+        && request.resource.data.currentStep is string;
+    }
+
+    function validFollowUpUpdate() {
+      return request.resource.data.keys().hasOnly(['leaderId', 'updateText', 'date', 'outcome'])
+        && request.resource.data.leaderId is string
+        && request.resource.data.updateText is string
+        && request.resource.data.outcome is string;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isStaff() && validUserProfile();
+      allow update: if (isStaff() || signedInUserId() == userId)
+        && validUserProfile()
+        && (isStaff() || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['roles', 'assignedTeams', 'status']));
+      allow delete: if isStaff();
+    }
+
+    match /teams/{teamId} {
+      allow read: if isSignedIn();
+      allow create, update: if isStaff() && validTeam();
+      allow delete: if isStaff();
+    }
+
+    match /g5_groups/{groupId} {
+      allow read: if isSignedIn();
+      allow create: if isStaff() && validGroup();
+      allow update: if isSignedIn()
+        && (isStaff() || signedInUserId() == resource.data.leaderId)
+        && validGroup();
+      allow delete: if isStaff();
+    }
+
+    match /team_chats/{chatId} {
+      allow read: if isStaff() || (isSignedIn() && signedInUserId() in resource.data.allowedMemberIds);
+      allow create: if isStaff() && validTeamChat();
+      allow update: if isStaff() && validTeamChat();
+      allow delete: if isStaff();
+
+      match /chat_messages/{messageId} {
+        allow read: if isStaff() || (isSignedIn() && signedInUserId() in get(/databases/$(database)/documents/team_chats/$(chatId)).data.allowedMemberIds);
+        allow create: if (isStaff() || (isSignedIn() && signedInUserId() in get(/databases/$(database)/documents/team_chats/$(chatId)).data.allowedMemberIds))
+          && validChatMessage();
+        allow update, delete: if isStaff();
+      }
+    }
+
+    match /contributions/{contribId} {
+      allow read: if isStaff() || (isSignedIn() && signedInUserId() == resource.data.userId);
+      allow create, update: if isStaff() && validContribution();
+      allow delete: if isStaff();
+    }
+
+    match /new_comers/{newComerId} {
+      allow read: if isStaff() || isTeamLeader();
+      allow create, update: if (isStaff() || isTeamLeader()) && validNewComer();
+      allow delete: if isStaff();
+
+      match /follow_up_updates/{updateId} {
+        allow read: if isStaff() || isTeamLeader();
+        allow create: if (isStaff() || isTeamLeader()) && validFollowUpUpdate();
+        allow update, delete: if isStaff();
+      }
+    }
+
+    match /bible_study_groups/{groupId} {
+      allow read: if isSignedIn();
+      allow write: if isStaff();
+    }
+
+    match /people/{document=**} { allow read, write: if isStaff(); }
+    match /members/{document=**} { allow read, write: if isStaff(); }
+    match /ministers/{document=**} { allow read, write: if isStaff(); }
+    match /leadership_roles/{document=**} { allow read, write: if isStaff(); }
+    match /team_members/{document=**} { allow read, write: if isStaff(); }
+    match /team_responsibilities/{document=**} { allow read, write: if isStaff(); }
+    match /attendance/{document=**} { allow read, write: if isStaff(); }
+    match /tasks/{document=**} { allow read, write: if isStaff(); }
+    match /reports/{document=**} { allow read, write: if isStaff(); }
+    match /events/{document=**} { allow read, write: if isStaff(); }
+    match /notifications/{document=**} { allow read, write: if isStaff(); }
+
+    match /{document=**} {
+      allow read, write: if isStaff();
+    }
+  }
+}
