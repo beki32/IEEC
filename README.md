@@ -9,8 +9,9 @@ Both apps are configured to share one Firebase project and the same Firestore se
 
 ## Firebase setup
 
-1. Create/configure a Firebase project with Authentication and Cloud Firestore enabled.
-2. Replace placeholder values in both `lib/firebase_options.dart` files with the shared Firebase config.
+1. Use Firebase project `ieec-ya-connect` with Authentication and Cloud Firestore enabled.
+2. The shared Firebase Web app config and iOS mobile config are present in the generated files.
+   Add the Android Firebase app config before Android release builds.
 3. Deploy rules from `firestore.rules`.
 4. Create the initial authenticated admin user and `/users/{uid}` document with `roles: ['head_leader']`.
 5. Run the admin app and use **Seed mock data** to populate sample ministries, leaders, ministers, chats, Bible Study groups, contributions, new comers, and placeholder extension collections.

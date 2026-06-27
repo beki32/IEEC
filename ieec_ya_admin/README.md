@@ -4,8 +4,8 @@ Responsive Flutter Web console for Head Leader and Core Team administration.
 
 ## Setup
 
-1. Replace `lib/firebase_options.dart` placeholders with the shared Firebase project values.
-2. Create an authenticated admin user with a matching `/users/{uid}` document containing `head_leader` or `core_team` in `roles`.
+1. Create an authenticated admin user with a matching `/users/{uid}` document containing `head_leader` or `core_team` in `roles`.
+2. The shared Firebase Web app config is already present in `lib/firebase_options.dart`.
 3. Generate web platform files if needed and run:
 
 ```bash
