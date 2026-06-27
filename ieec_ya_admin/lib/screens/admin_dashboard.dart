@@ -1,8 +1,57 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, authSnapshot) {
+        final user = authSnapshot.data;
+        if (user == null) {
+          return const _SignedOutPanel();
+        }
+
+        return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+          builder: (context, profileSnapshot) {
+            if (profileSnapshot.hasError) {
+              return _ErrorPanel(
+                title: 'Unable to verify admin profile',
+                error: profileSnapshot.error,
+              );
+            }
+
+            if (!profileSnapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (!profileSnapshot.data!.exists) {
+              return _MissingProfilePanel(user: user);
+            }
+
+            final profile = profileSnapshot.data!.data() ?? {};
+            final roles = (profile['roles'] as List? ?? []).map((role) => role.toString()).toSet();
+            if (!roles.contains('head_leader') && !roles.contains('core_team')) {
+              return _ErrorPanel(
+                title: 'Admin role required',
+                error: 'Your /users/${user.uid} profile exists, but roles are ${roles.toList()}. Add head_leader or core_team.',
+              );
+            }
+
+            return const _DashboardMetrics();
+          },
+        );
+      },
+    );
+  }
+}
+
+class _DashboardMetrics extends StatelessWidget {
+  const _DashboardMetrics();
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +143,70 @@ class AdminDashboard extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _SignedOutPanel extends StatelessWidget {
+  const _SignedOutPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _InfoPanel(
+      icon: Icons.admin_panel_settings,
+      title: 'Sign in required',
+      message: 'Use the Admin sign in button in the top-right before loading protected ministry data.',
+    );
+  }
+}
+
+class _MissingProfilePanel extends StatelessWidget {
+  const _MissingProfilePanel({required this.user});
+  final User user;
+
+  @override
+  Widget build(BuildContext context) {
+    return _InfoPanel(
+      icon: Icons.person_off,
+      title: 'Firestore profile missing',
+      message: 'You signed in as ${user.email ?? user.uid}, but /users/${user.uid} does not exist. Create that document with roles: [head_leader].',
+    );
+  }
+}
+
+class _InfoPanel extends StatelessWidget {
+  const _InfoPanel({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: Theme.of(context).colorScheme.primary, size: 40),
+                const SizedBox(height: 12),
+                Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 8),
+                Text(message),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

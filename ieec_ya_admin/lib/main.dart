@@ -27,6 +27,33 @@ String authErrorMessage(FirebaseAuthException error) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ErrorWidget.builder = (details) => Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          color: const Color(0xFF121212),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                      const SizedBox(height: 12),
+                      const Text('IEEC YA Admin could not render this screen.', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                      const SizedBox(height: 8),
+                      Text(details.exceptionAsString()),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const IeecYaAdminApp());
 }
