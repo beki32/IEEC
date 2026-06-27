@@ -8,8 +8,8 @@ class DefaultFirebaseOptions {
     apiKey: 'REPLACE_WITH_FIREBASE_API_KEY',
     appId: 'REPLACE_WITH_FIREBASE_APP_ID',
     messagingSenderId: 'REPLACE_WITH_FIREBASE_MESSAGING_SENDER_ID',
-    projectId: 'REPLACE_WITH_FIREBASE_PROJECT_ID',
-    authDomain: 'REPLACE_WITH_FIREBASE_AUTH_DOMAIN',
-    storageBucket: 'REPLACE_WITH_FIREBASE_STORAGE_BUCKET',
+    projectId: 'ieec-ya-connect',
+    authDomain: 'ieec-ya-connect.firebaseapp.com',
+    storageBucket: 'ieec-ya-connect.firebasestorage.app',
   );
 }
