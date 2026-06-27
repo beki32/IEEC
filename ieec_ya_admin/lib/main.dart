@@ -25,7 +25,7 @@ String authErrorMessage(FirebaseAuthException error) {
   return '[${error.code}] $help';
 }
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorWidget.builder = (details) => Directionality(
         textDirection: TextDirection.ltr,
@@ -54,12 +54,18 @@ Future<void> main() async {
           ),
         ),
       );
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const IeecYaAdminApp());
+  runApp(const IeecYaAdminBootstrap());
 }
 
-class IeecYaAdminApp extends StatelessWidget {
-  const IeecYaAdminApp({super.key});
+class IeecYaAdminBootstrap extends StatelessWidget {
+  const IeecYaAdminBootstrap({super.key});
+
+  Future<FirebaseApp> _initializeFirebase() {
+    if (Firebase.apps.isNotEmpty) {
+      return Future.value(Firebase.app());
+    }
+    return Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +74,74 @@ class IeecYaAdminApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: IeecTheme.light(),
       darkTheme: IeecTheme.dark(),
-      home: const AdminShell(),
+      home: FutureBuilder<FirebaseApp>(
+        future: _initializeFirebase(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return _StartupErrorScreen(error: snapshot.error);
+          }
+
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const _StartupLoadingScreen();
+          }
+
+          return const AdminShell();
+        },
+      ),
+    );
+  }
+}
+
+class _StartupLoadingScreen extends StatelessWidget {
+  const _StartupLoadingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Starting IEEC YA Admin...'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StartupErrorScreen extends StatelessWidget {
+  const _StartupErrorScreen({required this.error});
+  final Object? error;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.cloud_off, color: Theme.of(context).colorScheme.error, size: 40),
+                  const SizedBox(height: 12),
+                  Text('Firebase failed to start', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 8),
+                  Text(error?.toString() ?? 'Unknown Firebase initialization error'),
+                  const SizedBox(height: 12),
+                  const Text('Check that you are running from ieec_ya_admin, then run flutter clean, flutter pub get, and flutter run -d chrome.'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
