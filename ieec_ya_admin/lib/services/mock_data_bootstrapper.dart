@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MockDataBootstrapper {
+  static const initialHeadLeaderUid = 'M7gdLL39oXbULvAzlj0Z4ufNeI43';
+
   static Future<void> seed(FirebaseFirestore firestore) async {
     final batch = firestore.batch();
     final now = DateTime.now();
@@ -19,7 +21,7 @@ class MockDataBootstrapper {
     }
 
     final users = [
-      _user('head-leader-001', 'Amanuel Tesfaye', 'amanuel@ieec.test', ['head_leader', 'team_leader'], ['worship'], 'bs-foundations', 'worship-g1'),
+      _user(initialHeadLeaderUid, 'IEEC Head Leader', 'admin@ieec.test', ['head_leader', 'team_leader'], ['worship'], 'bs-foundations', 'worship-g1'),
       _user('core-001', 'Miriam Bekele', 'miriam@ieec.test', ['core_team'], ['welcome'], 'bs-foundations', 'welcome-g1'),
       _user('core-002', 'Yonatan Alemu', 'yonatan@ieec.test', ['core_team', 'team_leader'], ['media'], 'bs-leaders', 'media-g1'),
       _user('leader-001', 'Sara Dawit', 'sara@ieec.test', ['team_leader', 'minister'], ['worship'], 'bs-leaders', 'worship-g1'),
@@ -37,7 +39,7 @@ class MockDataBootstrapper {
     }
 
     final groups = [
-      _group('worship-g1', 'Worship G5 Alpha', 'worship', 'leader-001', 5, ['head-leader-001', 'leader-001', 'minister-001', 'minister-004']),
+      _group('worship-g1', 'Worship G5 Alpha', 'worship', 'leader-001', 5, [initialHeadLeaderUid, 'leader-001', 'minister-001', 'minister-004']),
       _group('welcome-g1', 'Welcome G4 Alpha', 'welcome', 'leader-002', 4, ['core-001', 'leader-002', 'minister-002', 'minister-005']),
       _group('media-g1', 'Media G7 Alpha', 'media', 'leader-003', 7, ['core-002', 'leader-003', 'minister-001', 'minister-003', 'minister-005']),
     ];
@@ -47,7 +49,7 @@ class MockDataBootstrapper {
 
     final bibleGroups = [
       _bibleGroup('bs-foundations', 'Foundations Bible Study', 'core-001', users.map((u) => u['uid'] as String).where((id) => id != 'core-002').toList()),
-      _bibleGroup('bs-leaders', 'Leadership Bible Study', 'head-leader-001', ['core-002', 'leader-001', 'leader-002', 'leader-003']),
+      _bibleGroup('bs-leaders', 'Leadership Bible Study', initialHeadLeaderUid, ['core-002', 'leader-001', 'leader-002', 'leader-003']),
     ];
     for (final group in bibleGroups) {
       batch.set(firestore.collection('bible_study_groups').doc(group['id'] as String), group);

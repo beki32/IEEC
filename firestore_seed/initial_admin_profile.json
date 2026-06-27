@@ -1,0 +1,20 @@
+{
+  "uid": "M7gdLL39oXbULvAzlj0Z4ufNeI43",
+  "fullName": "IEEC Head Leader",
+  "email": "admin@ieec.test",
+  "phone": "",
+  "gender": "",
+  "dateOfBirth": null,
+  "address": "",
+  "status": "active_member",
+  "firstVisitDate": null,
+  "notes": "Initial Head Leader bootstrap profile.",
+  "emergencyContact": "",
+  "spiritualGrowthStatus": "active",
+  "roles": [
+    "head_leader"
+  ],
+  "assignedTeams": [],
+  "bibleStudyGroupId": "",
+  "g5GroupId": ""
+}

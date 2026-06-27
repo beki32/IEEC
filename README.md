@@ -12,7 +12,8 @@ Both apps are configured to share one Firebase project and the same Firestore se
 1. Use Firebase project `ieec-ya-connect` with Authentication and Cloud Firestore enabled.
 2. The shared Firebase Web, iOS, and Android app configs are present in the generated files.
 3. Deploy rules from `firestore.rules`.
-4. Create the initial authenticated admin user and `/users/{uid}` document with `roles: ['head_leader']`.
+4. Create the initial authenticated admin user and `/users/M7gdLL39oXbULvAzlj0Z4ufNeI43` document with `roles: ['head_leader']`.
+   A ready-to-copy document body is available in `firestore_seed/initial_admin_profile.json`.
 5. Run the admin app and use **Seed mock data** to populate sample ministries, leaders, ministers, chats, Bible Study groups, contributions, new comers, and placeholder extension collections.
 
 ## Firestore collections
