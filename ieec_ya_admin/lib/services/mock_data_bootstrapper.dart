@@ -21,7 +21,7 @@ class MockDataBootstrapper {
     }
 
     final users = [
-      _user(initialHeadLeaderUid, 'IEEC Head Leader', 'admin@ieec.test', ['head_leader', 'team_leader'], ['worship'], 'bs-foundations', 'worship-g1'),
+      _user(initialHeadLeaderUid, 'IEEC Head Leader', 'berekettadesse32@gmail.com', ['head_leader', 'team_leader'], ['worship'], 'bs-foundations', 'worship-g1'),
       _user('core-001', 'Miriam Bekele', 'miriam@ieec.test', ['core_team'], ['welcome'], 'bs-foundations', 'welcome-g1'),
       _user('core-002', 'Yonatan Alemu', 'yonatan@ieec.test', ['core_team', 'team_leader'], ['media'], 'bs-leaders', 'media-g1'),
       _user('leader-001', 'Sara Dawit', 'sara@ieec.test', ['team_leader', 'minister'], ['worship'], 'bs-leaders', 'worship-g1'),
