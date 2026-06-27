@@ -10,10 +10,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'FirebaseOptions have not been configured for Android. '
-          'Add the Android google-services.json config before Android release builds.',
-        );
+        return android;
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
       case TargetPlatform.linux:
@@ -39,5 +36,13 @@ class DefaultFirebaseOptions {
     projectId: 'ieec-ya-connect',
     storageBucket: 'ieec-ya-connect.firebasestorage.app',
     iosBundleId: 'IEECYaConnect',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyAjbMTIfXp9ZZRXzSy7Ohqwd5vfB0gGEvc',
+    appId: '1:598438295878:android:97fdc59e573c79a41c8d47',
+    messagingSenderId: '598438295878',
+    projectId: 'ieec-ya-connect',
+    storageBucket: 'ieec-ya-connect.firebasestorage.app',
   );
 }

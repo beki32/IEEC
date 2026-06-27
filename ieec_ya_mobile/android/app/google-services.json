@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "598438295878",
+    "project_id": "ieec-ya-connect",
+    "storage_bucket": "ieec-ya-connect.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598438295878:android:97fdc59e573c79a41c8d47",
+        "android_client_info": {
+          "package_name": "IEEC.YA.Connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjbMTIfXp9ZZRXzSy7Ohqwd5vfB0gGEvc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
