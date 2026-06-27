@@ -175,12 +175,14 @@ class _AdminTopBar extends StatelessWidget {
                       : () async {
                           if (!formKey.currentState!.validate()) return;
                           setState(() => loading = true);
+                          var keepDialogOpen = true;
                           try {
                             await FirebaseAuth.instance.signInWithEmailAndPassword(
                               email: emailController.text.trim(),
                               password: passwordController.text,
                             );
-                            if (dialogContext.mounted) Navigator.pop(dialogContext);
+                            keepDialogOpen = false;
+                            if (dialogContext.mounted) Navigator.of(dialogContext).pop();
                           } on FirebaseAuthException catch (error) {
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -190,7 +192,9 @@ class _AdminTopBar extends StatelessWidget {
                               ),
                             );
                           } finally {
-                            if (context.mounted) setState(() => loading = false);
+                            if (keepDialogOpen && context.mounted) {
+                              setState(() => loading = false);
+                            }
                           }
                         },
                   icon: loading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.login),
