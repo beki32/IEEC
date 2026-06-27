@@ -9,9 +9,23 @@ class AdminDashboard extends StatelessWidget {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
       builder: (context, usersSnapshot) {
+        if (usersSnapshot.hasError) {
+          return _ErrorPanel(
+            title: 'Unable to load user profiles',
+            error: usersSnapshot.error,
+          );
+        }
+
         return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: FirebaseFirestore.instance.collection('new_comers').snapshots(),
           builder: (context, newComerSnapshot) {
+            if (newComerSnapshot.hasError) {
+              return _ErrorPanel(
+                title: 'Unable to load follow-up pipeline',
+                error: newComerSnapshot.error,
+              );
+            }
+
             final users = usersSnapshot.data?.docs.map((doc) => doc.data()).toList() ?? [];
             final newComers = newComerSnapshot.data?.docs.map((doc) => doc.data()).toList() ?? [];
             final ministers = users.where((user) => (user['roles'] as List? ?? []).contains('minister')).length;
@@ -103,6 +117,39 @@ class _MetricCard extends StatelessWidget {
             Text(value, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900)),
             Text(label),
           ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorPanel extends StatelessWidget {
+  const _ErrorPanel({required this.title, required this.error});
+  final String title;
+  final Object? error;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 720),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 36),
+                const SizedBox(height: 12),
+                Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                const SizedBox(height: 8),
+                Text(error?.toString() ?? 'Unknown Firestore error'),
+                const SizedBox(height: 12),
+                const Text('If this says permission-denied, confirm your Firebase Auth UID has a matching /users/{uid} document with roles: [head_leader].'),
+              ],
+            ),
+          ),
         ),
       ),
     );

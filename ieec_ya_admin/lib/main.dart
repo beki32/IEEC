@@ -12,6 +12,19 @@ import 'screens/reports_screen.dart';
 import 'services/mock_data_bootstrapper.dart';
 import 'theme/app_theme.dart';
 
+String authErrorMessage(FirebaseAuthException error) {
+  final help = switch (error.code) {
+    'invalid-credential' || 'wrong-password' => 'Check the email and password, or reset the password in Firebase Authentication.',
+    'user-not-found' => 'Create this email in Firebase Authentication first.',
+    'user-disabled' => 'This Firebase Authentication user is disabled.',
+    'operation-not-allowed' => 'Enable Email/Password sign-in in Firebase Authentication.',
+    'too-many-requests' => 'Too many attempts. Wait a moment or reset the password.',
+    'network-request-failed' => 'Check your internet connection.',
+    _ => error.message ?? 'Unable to sign in.',
+  };
+  return '[${error.code}] $help';
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -83,6 +96,7 @@ class _AdminShellState extends State<AdminShell> {
             child: Column(
               children: [
                 _AdminTopBar(title: labels[_index]),
+                const _AdminProfileStatus(),
                 Expanded(child: _screens[_index]),
               ],
             ),
@@ -170,7 +184,10 @@ class _AdminTopBar extends StatelessWidget {
                           } on FirebaseAuthException catch (error) {
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(error.message ?? 'Unable to sign in.')),
+                              SnackBar(
+                                content: Text(authErrorMessage(error)),
+                                duration: const Duration(seconds: 8),
+                              ),
                             );
                           } finally {
                             if (context.mounted) setState(() => loading = false);
@@ -209,6 +226,100 @@ class _AdminTopBar extends StatelessWidget {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminProfileStatus extends StatelessWidget {
+  const _AdminProfileStatus();
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, authSnapshot) {
+        final user = authSnapshot.data;
+        if (user == null) {
+          return _StatusBanner(
+            icon: Icons.info_outline,
+            message: 'Not signed in. Use Admin sign in with your Firebase Authentication email and password.',
+            color: Theme.of(context).colorScheme.primary,
+          );
+        }
+
+        return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+          stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+          builder: (context, profileSnapshot) {
+            if (profileSnapshot.hasError) {
+              return _StatusBanner(
+                icon: Icons.error_outline,
+                message: 'Signed in as ${user.email ?? user.uid}, but Firestore profile check failed: ${profileSnapshot.error}',
+                color: Colors.red,
+              );
+            }
+
+            if (!profileSnapshot.hasData) {
+              return _StatusBanner(
+                icon: Icons.sync,
+                message: 'Signed in as ${user.email ?? user.uid}. Checking /users/${user.uid}...',
+                color: Theme.of(context).colorScheme.primary,
+              );
+            }
+
+            if (!profileSnapshot.data!.exists) {
+              return _StatusBanner(
+                icon: Icons.warning_amber,
+                message: 'Signed in as ${user.email ?? user.uid}, but /users/${user.uid} does not exist. Create it with roles: [head_leader].',
+                color: Colors.orange,
+              );
+            }
+
+            final data = profileSnapshot.data!.data() ?? {};
+            final roles = (data['roles'] as List? ?? []).join(', ');
+            if (!roles.contains('head_leader') && !roles.contains('core_team')) {
+              return _StatusBanner(
+                icon: Icons.warning_amber,
+                message: 'Signed in as ${user.email ?? user.uid}. Profile exists, but roles are [$roles]. Add head_leader or core_team for admin access.',
+                color: Colors.orange,
+              );
+            }
+
+            return _StatusBanner(
+              icon: Icons.verified_user,
+              message: 'Signed in as ${user.email ?? user.uid}. Admin profile found with roles: [$roles].',
+              color: Colors.green,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _StatusBanner extends StatelessWidget {
+  const _StatusBanner({
+    required this.icon,
+    required this.message,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String message;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+      color: color.withOpacity(0.12),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 10),
+          Expanded(child: Text(message)),
         ],
       ),
     );

@@ -22,6 +22,19 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  String _authErrorMessage(FirebaseAuthException error) {
+    final help = switch (error.code) {
+      'invalid-credential' || 'wrong-password' => 'Check the email and password, or reset the password in Firebase Authentication.',
+      'user-not-found' => 'Create this email in Firebase Authentication first.',
+      'user-disabled' => 'This Firebase Authentication user is disabled.',
+      'operation-not-allowed' => 'Enable Email/Password sign-in in Firebase Authentication.',
+      'too-many-requests' => 'Too many attempts. Wait a moment or reset the password.',
+      'network-request-failed' => 'Check your internet connection.',
+      _ => error.message ?? 'Unable to sign in. Please try again.',
+    };
+    return '[${error.code}] $help';
+  }
+
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
@@ -33,7 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.message ?? 'Unable to sign in. Please try again.')),
+        SnackBar(
+          content: Text(_authErrorMessage(error)),
+          duration: const Duration(seconds: 8),
+        ),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
