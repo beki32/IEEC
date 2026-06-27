@@ -3,13 +3,13 @@ import 'package:firebase_core/firebase_core.dart';
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform => web;
 
-  // Replace these placeholder values with the config from the shared Firebase project.
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_WITH_FIREBASE_API_KEY',
-    appId: 'REPLACE_WITH_FIREBASE_APP_ID',
-    messagingSenderId: 'REPLACE_WITH_FIREBASE_MESSAGING_SENDER_ID',
+    apiKey: 'AIzaSyCnlL-LMRPZ6MK8UQL45bX7J-4GP6D-z5E',
+    appId: '1:598438295878:web:5dbe9d98758c2b451c8d47',
+    messagingSenderId: '598438295878',
     projectId: 'ieec-ya-connect',
     authDomain: 'ieec-ya-connect.firebaseapp.com',
     storageBucket: 'ieec-ya-connect.firebasestorage.app',
+    measurementId: 'G-BFZWT6R482',
   );
 }
