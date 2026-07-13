@@ -28,6 +28,8 @@ Capture and organize the platform blueprint, ADRs, and Follow-Up requirements so
 | [RBAC engine](docs/architecture/02-rbac-engine.md) | ADR-RBAC-001/002 (+ pending 003) |
 | [Follow-Up requirements](docs/modules/follow-up.md) | Step 3 module requirements |
 | [Follow-Up workflows & states](docs/modules/follow-up-workflows-and-state-transitions.md) | From link 2 Step 3.2 / 3.3.2 |
+| [Follow-Up Firestore model](docs/modules/follow-up-firestore-data-model.md) | Collections + fields (planning) |
+| [Follow-Up permission catalog](docs/modules/follow-up-permission-catalog.md) | Leader / Assistant / Minister defaults |
 | [ADR index](docs/adr/README.md) | Decision register |
 | [Planning backlog](docs/PLANNING_BACKLOG.md) | Next planning tasks |
 | [AI development guide](docs/architecture/90-ai-development-guide.md) | Rules for future coding sessions |

@@ -13,10 +13,11 @@ Ordered next work for the planning phase (no code).
 
 ## Immediate (docs only)
 
-1. ~~Draft Step 3.2 — Follow-Up Workflows and State Transitions~~ **Done** → `docs/modules/follow-up-workflows-and-state-transitions.md`
-2. Set **documented defaults** for remaining Follow-Up admin policies where the design already implies them (capture for Configuration Engine)
-3. Draft **Follow-Up Firestore data model** (collections + fields only)
-4. Draft **Permission catalog** for Follow-Up Leader / Assistant / Minister
+1. ~~Draft Step 3.2 — Follow-Up Workflows and State Transitions~~ **Done**
+2. ~~Draft Follow-Up Firestore data model~~ **Done** → `docs/modules/follow-up-firestore-data-model.md`
+3. ~~Draft Permission catalog for Follow-Up roles~~ **Done** → `docs/modules/follow-up-permission-catalog.md`
+4. Capture remaining Configuration Engine defaults implied by the design (report Friday deadline, 7-day edit window, welcome message on, etc.)
+5. Freeze **Architecture Baseline v1.0** checklist
 
 ## Then
 

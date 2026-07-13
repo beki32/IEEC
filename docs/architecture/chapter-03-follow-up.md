@@ -4,4 +4,6 @@
 **Continues from:** Chapters 1–2 in link 1  
 
 Full requirements: [`../modules/follow-up.md`](../modules/follow-up.md)  
-Workflows & state transitions: [`../modules/follow-up-workflows-and-state-transitions.md`](../modules/follow-up-workflows-and-state-transitions.md)
+Workflows & state transitions: [`../modules/follow-up-workflows-and-state-transitions.md`](../modules/follow-up-workflows-and-state-transitions.md)  
+Firestore model: [`../modules/follow-up-firestore-data-model.md`](../modules/follow-up-firestore-data-model.md)  
+Permission catalog: [`../modules/follow-up-permission-catalog.md`](../modules/follow-up-permission-catalog.md)
