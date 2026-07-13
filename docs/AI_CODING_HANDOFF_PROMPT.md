@@ -65,9 +65,10 @@ Prefer repo docs under `docs/modules/` over re-deriving from ChatGPT.
 
 | Layer | Choice |
 | --- | --- |
-| Web | **React + TypeScript + Vite** |
-| Mobile | **React Native via Expo + TypeScript** |
-| Not allowed | **Flutter** (out of scope) |
+| Web | **React** (React DOM) + TypeScript + Vite |
+| Mobile | **React Native** via Expo + TypeScript (native screens — not a WebView of the web app) |
+| Shared | Firebase backend + shared types/contracts only (do not fork business rules) |
+| Not allowed | **Flutter**; do not ship mobile as “wrapped website” only |
 | Backend | Firebase Auth, Firestore; Functions/Storage as needed |
 | Mobile binaries | **EAS Build** → Android `.apk`/`.aab`, iOS `.ipa` |
 | First module | **Follow-Up** |

@@ -3,7 +3,10 @@
 **Phase:** Architecture Baseline **v1.0 frozen** for coding.  
 This agent/account stays planning-only (no app code here).
 
-**Product:** Web + Mobile — **React** (Vite web) + **Expo / React Native** mobile. Not Flutter. Shared Firebase backend.
+**Product:**  
+- **Web:** React (DOM) + TypeScript + Vite  
+- **Mobile:** React Native (Expo) + TypeScript — separate native UI, same Firebase backend  
+- **Not** Flutter; **not** WebView-only mobile
 
 ## Start coding
 

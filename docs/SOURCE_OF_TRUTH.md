@@ -46,10 +46,16 @@ This planning agent still does not write application code.
 
 ## Product clients (settled)
 
-IEEC YA Connect is a **web + mobile** system (both first-class).  
-**Web:** React + TypeScript + Vite.  
-**Mobile:** React Native via **Expo** + EAS Build (`.apk`/`.aab`/`.ipa`). **Not Flutter.**  
-See Ch. 13 §13.8.1.
+IEEC YA Connect is a **web + mobile** system (both first-class).
+
+| Client | UI framework | Notes |
+| --- | --- | --- |
+| **Web** | **React** + TypeScript + Vite | Browser app (React DOM) |
+| **Mobile** | **React Native** via **Expo** + TypeScript | iOS/Android native UI — **not** a WebView wrapper of the web app |
+| **Shared** | Firebase + domain contracts/types | Same Auth, Firestore, permissions, workflows — do not fork business rules |
+| **Not used** | Flutter | Out of scope |
+
+Mobile binaries: EAS Build → `.apk` / `.aab` / `.ipa`. See Ch. 13 §13.8.1.
 
 ## Approved ADR catalog (Handbook)
 
