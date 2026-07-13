@@ -40,7 +40,7 @@ Use link 1 **before that message** for chapters 1–2 detail.
 | Step 3 — Follow-Up Team Requirements | Link 2 | Drafted (policies mostly admin-configurable; attendance resolved) |
 | ADR-RBAC-001 / default grant | Link 2 + planning clarification | Approved |
 | ADR-RBAC-002 live templates | Link 2 | Approved |
-| ADR-RBAC-003 time-bound assignments | Link 2 | Pending |
+| ADR-RBAC-003 time-bound assignments | Link 1 principles + Link 2 RBAC | **Approved (Yes)** |
 
 ## Living document chapters
 

@@ -35,8 +35,7 @@ Capture and organize the platform blueprint, ADRs, and Follow-Up requirements so
 
 - ✅ Chapters 1–2 (link 1, pre-cutoff)  
 - 📝 Chapter 3 Follow-Up requirements (link 2; attendance resolved; other policies admin-configurable)  
-- ✅ ADR-RBAC-001, ADR-RBAC-002  
-- ⏳ ADR-RBAC-003  
+- ✅ ADR-RBAC-001, ADR-RBAC-002, ADR-RBAC-003  
 
 ## Out of scope for now
 

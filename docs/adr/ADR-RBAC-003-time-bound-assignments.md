@@ -2,20 +2,27 @@
 
 ## Status
 
-**Pending** — recommended in the canonical design thread, but not yet answered by the product owner.
+**Approved — Yes**
 
-Canonical source: https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
+## Sources
 
-## Proposed decision
+- Link 1 (Chapters 1–2): optional lifecycle/time control; volunteers as temporary / optionally time-based assignments
+- Link 2: RBAC decision recommending effective start/end dates on role assignments
+- Planning confirmation: do not re-open; already part of the access model
 
-Every role assignment should support:
+## Decision
+
+Every role assignment supports:
 
 - Start Date (optional)
 - End Date (optional)
 - Active/Inactive status
 
-So temporary Acting Team Leader, Conference Coordinator, and Event Volunteer Leader assignments can expire automatically.
+Temporary Acting Team Leader, Conference Coordinator, Event Volunteer Leader, and similar assignments can activate/expire without manual cleanup.
 
-## Implementation note
+## Consequences
 
-The RBAC evaluator already supports optional `startAt` / `endAt` / `isActive` so the code path is ready if this ADR is approved. Do not treat time-bounding as final product policy until the decision is recorded as Approved.
+- Authorization checks must respect effective dating
+- Expired assignments grant no permissions
+- Aligns with Volunteer and lifecycle principles from Chapter 2
+- Exceptions beyond dates still use permission overrides

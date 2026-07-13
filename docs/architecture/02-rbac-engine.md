@@ -35,9 +35,9 @@ Role templates are the single source of truth. Updating a template applies to al
 
 Because of the default grant rule + live templates: if Admin adds a permission to the Follow-Up Leader role, everyone currently assigned that role gets it automatically (within scope).
 
-## ADR-RBAC-003 — Time-bound assignments (Pending)
+## ADR-RBAC-003 — Time-bound assignments (Approved — Yes)
 
-Recommended Yes in the canonical thread; not yet confirmed. Evaluator supports optional start/end/active fields, but product policy remains pending.
+Every role assignment supports optional start date, end date, and active/inactive status. Temporary leadership and volunteer coverage expire automatically. This matches Chapter 2 lifecycle/time-control and temporary assignment principles from link 1.
 
 ## Evaluation algorithm
 
