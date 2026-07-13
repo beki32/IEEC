@@ -143,11 +143,11 @@ Retain history for registration, assignments/reassignments, entries, status chan
 
 ## 3.14 Core entities
 
-`people`, `newcomerJourneys`, `followUpAssignments`, `followUpEntries`, `followUpTasks`, `membershipRecommendations`, `statusHistory`, `notifications`, `auditLogs`, `configurations`
+`people`, `newcomerJourneys`, `followUpAssignments`, `followUpEntries` (weekly reports), `newcomerAttendance`, `newcomerBioEntries`, `calendarEvents`, `followUpTasks`, `membershipRecommendations`, `statusHistory`, `notifications`, `auditLogs`, `configurations`
 
 Team membership and permissions stay in shared Organization / RBAC engines.
 
-## Open decisions (must resolve before database design)
+## Open decisions (admin-configurable policies; defaults TBD)
 
 1. Who gives final membership approval (Follow-Up Leader, Core Team, Head Leader, or configurable workflow)?  
 2. Can one newcomer be actively assigned to more than one follow-up minister?  
@@ -157,7 +157,7 @@ Team membership and permissions stay in shared Organization / RBAC engines.
 6. Exact ready-for-member conditions?  
 7. Which fields are sensitive/pastoral?  
 8. Automatic welcome messages after registration?  
-9. Track ministry-event and Sunday attendance during follow-up?  
+9. ~~Track attendance during follow-up?~~ **Resolved — Yes**, per §3.6A (Saturday program attendance via calendar; separate from weekly report)  
 10. Multiple newcomer journeys if a person leaves and returns?  
 
-**Next design sections after these decisions:** Step 3.2 — Follow-Up Workflows and State Transitions, then the Firestore data model.
+**Next design sections:** Step 3.2 — Follow-Up Workflows and State Transitions, then the Firestore data model.
