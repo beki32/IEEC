@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasUserDoc() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isSystemAdmin() {
+      return hasUserDoc()
+        && userDoc().systemRole in ['super_admin', 'system_admin'];
+    }
+
+    function orgId() {
+      return hasUserDoc() ? userDoc().activeOrganizationId : null;
+    }
+
+    function sameOrg(data) {
+      return hasUserDoc() && data.organizationId == orgId();
+    }
+
+    function hasPermission(permission) {
+      return isSystemAdmin()
+        || (hasUserDoc()
+          && 'effectivePermissions' in userDoc()
+          && permission in userDoc().effectivePermissions);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSystemAdmin());
+      allow create, update: if isSystemAdmin()
+        || (signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['displayName', 'photoURL', 'notificationPrefs', 'activeOrganizationId', 'updatedAt']));
+    }
+
+    match /organizations/{orgId} {
+      allow read: if signedIn() && hasUserDoc()
+        && (orgId == userDoc().activeOrganizationId || isSystemAdmin());
+      allow write: if isSystemAdmin();
+    }
+
+    match /people/{personId} {
+      allow read: if signedIn() && sameOrg(resource.data)
+        && hasPermission('people.view');
+      allow create, update: if signedIn() && sameOrg(request.resource.data)
+        && hasPermission('people.manage');
+      allow delete: if false;
+    }
+
+    match /roles/{roleId} {
+      allow read: if signedIn() && sameOrg(resource.data);
+      allow write: if isSystemAdmin() || hasPermission('rbac.roles.manage');
+    }
+
+    match /roleAssignments/{assignmentId} {
+      allow read: if signedIn() && sameOrg(resource.data);
+      allow write: if isSystemAdmin() || hasPermission('rbac.assignments.manage');
+    }
+
+    match /permissionOverrides/{overrideId} {
+      allow read: if signedIn() && sameOrg(resource.data);
+      allow write: if isSystemAdmin() || hasPermission('rbac.overrides.manage');
+    }
+
+    match /newcomerJourneys/{journeyId} {
+      allow read: if signedIn() && sameOrg(resource.data)
+        && hasPermission('follow_up.view');
+      allow create, update: if signedIn() && sameOrg(request.resource.data)
+        && hasPermission('follow_up.assign');
+      allow delete: if false;
+    }
+
+    match /followUpAssignments/{assignmentId} {
+      allow read: if signedIn() && sameOrg(resource.data)
+        && (hasPermission('follow_up.view')
+          || resource.data.assignedMinisterPersonId == userDoc().personId);
+      allow create, update: if signedIn() && sameOrg(request.resource.data)
+        && hasPermission('follow_up.assign');
+      allow delete: if false;
+    }
+
+    match /followUpEntries/{entryId} {
+      allow read: if signedIn() && sameOrg(resource.data)
+        && (hasPermission('follow_up.view')
+          || resource.data.createdByPersonId == userDoc().personId);
+      allow create: if signedIn() && sameOrg(request.resource.data)
+        && hasPermission('follow_up.entry.create');
+      allow update: if signedIn() && sameOrg(request.resource.data)
+        && (hasPermission('follow_up.assign')
+          || (hasPermission('follow_up.entry.update_own')
+            && resource.data.createdByPersonId == userDoc().personId));
+      allow delete: if false;
+    }
+
+    match /membershipRecommendations/{recId} {
+      allow read: if signedIn() && sameOrg(resource.data)
+        && hasPermission('follow_up.view');
+      allow create: if signedIn() && sameOrg(request.resource.data)
+        && hasPermission('follow_up.membership.recommend');
+      allow update: if signedIn() && sameOrg(request.resource.data)
+        && hasPermission('follow_up.membership.approve');
+      allow delete: if false;
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isSystemAdmin() || hasPermission('audit.view');
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+
+    match /appSettings/{docId} {
+      allow read: if signedIn();
+      allow write: if isSystemAdmin();
+    }
+
+    // Public registration intake (Cloud Function should harden this further).
+    match /publicRegistrations/{regId} {
+      allow create: if request.resource.data.keys().hasAll(['firstName', 'lastName', 'organizationId', 'createdAt'])
+        && request.resource.data.keys().hasOnly([
+          'firstName', 'middleName', 'lastName', 'preferredName', 'phone', 'email',
+          'sex', 'ageRange', 'address', 'preferredLanguage', 'firstVisitDate',
+          'howHeard', 'invitedBy', 'preferredContactMethod', 'prayerRequest',
+          'consentToContact', 'organizationId', 'createdAt'
+        ]);
+      allow read, update, delete: if isSystemAdmin() || hasPermission('follow_up.assign');
+    }
+  }
+}

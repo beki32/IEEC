@@ -1,0 +1,26 @@
+{
+  "uid": "M7gdLL39oXbULvAzlj0Z4ufNeI43",
+  "email": "berekettadesse32@gmail.com",
+  "displayName": "Bereket Tadesse",
+  "personId": "person_head_leader",
+  "activeOrganizationId": "org_ieec_ya",
+  "systemRole": "super_admin",
+  "effectivePermissions": [
+    "people.view",
+    "people.manage",
+    "rbac.roles.manage",
+    "rbac.assignments.manage",
+    "rbac.overrides.manage",
+    "follow_up.view",
+    "follow_up.assign",
+    "follow_up.entry.create",
+    "follow_up.entry.update_own",
+    "follow_up.report.review",
+    "follow_up.sensitive.view",
+    "follow_up.membership.recommend",
+    "follow_up.membership.approve",
+    "audit.view"
+  ],
+  "createdAt": "SERVER_TIMESTAMP",
+  "updatedAt": "SERVER_TIMESTAMP"
+}
