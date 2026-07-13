@@ -1,60 +1,43 @@
-# IEEC YA Connect
+# IEEC YA Connect — Planning
 
-React + Firebase platform for IEEC Young Adult ministry operations.
+**Phase:** Architecture / planning only — **no application code yet.**
 
-**Canonical design source:** [IEEC YA Connect Design](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff)  
-Details: [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md)
+**Canonical design source:**  
+https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
 
-This branch establishes the **Platform Blueprint** foundation from that thread: reusable engines, scoped RBAC, and Follow-Up as the first business module.
+See [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md).
 
-## Stack
+## Goal of this branch
 
-- React + TypeScript (Vite) in `web/`
-- Firebase Auth + Cloud Firestore (`ieec-ya-connect`)
-- Architecture docs in `docs/`
+Capture and organize the platform blueprint, ADRs, and Follow-Up requirements so implementation can start later without redesigning core decisions.
 
-## Architecture at a glance
+## Document map
 
-| Layer | Responsibility |
+| Doc | Purpose |
 | --- | --- |
-| **Engines** | Reusable platform services (Organization, People, RBAC, Workflow, Forms, Communication, Calendar, Reporting, Audit, Configuration) |
-| **Modules** | Business features that orchestrate engines (Follow-Up first) |
-| **ADRs** | Approved decisions that constrain implementation |
+| [Source of truth](docs/SOURCE_OF_TRUTH.md) | Canonical share link + approval status |
+| [Platform blueprint](docs/architecture/00-platform-blueprint.md) | Engines, modules, milestones |
+| [People & access](docs/architecture/01-people-and-access.md) | Step 2 model |
+| [RBAC engine](docs/architecture/02-rbac-engine.md) | ADR-RBAC-001/002 (+ pending 003) |
+| [Follow-Up requirements](docs/modules/follow-up.md) | Step 3 module requirements |
+| [ADR index](docs/adr/README.md) | Decision register |
+| [AI development guide](docs/architecture/90-ai-development-guide.md) | Rules for future coding sessions |
 
-Approved from the canonical thread:
+## Current status (from canonical thread)
 
-- Step 1 Problem Definition + Step 2 People & Access
-- ADR-RBAC-001 / ADR-RBAC-002 (roles are scoped live templates)
-- Follow-Up Step 3 requirements draft
+- ✅ Step 1 — Problem Definition  
+- ✅ Step 2 — People & Access Model  
+- 📝 Step 3 — Follow-Up Team Requirements (draft; open decisions remain)  
+- ✅ ADR-RBAC-001, ADR-RBAC-002  
+- ⏳ ADR-RBAC-003 (pending answer)  
 
-Pending in-thread: ADR-RBAC-003 (time-bound assignments) and the 10 Follow-Up business decisions.
+## Next planning steps
 
-## Quick start
+1. Resolve the 10 Follow-Up business decisions  
+2. Step 3.2 — Follow-Up workflows and state transitions  
+3. Firestore data model (still planning, not implementation)  
+4. Freeze Architecture Baseline v1.0 before any coding  
 
-```bash
-cd web
-npm install
-npm run dev
-```
+## Out of scope for now
 
-Configure Firebase by copying `web/.env.example` to `web/.env` (values for project `ieec-ya-connect` are prefilled).
-
-## Bootstrap Head Leader
-
-1. Create the Auth user in Firebase Console.
-2. Seed `/users/{uid}` from `firestore_seed/initial_admin_profile.json`.
-3. Deploy rules: `firebase deploy --only firestore:rules,firestore:indexes`.
-
-## Docs
-
-- [Source of truth](docs/SOURCE_OF_TRUTH.md)
-- [Platform Blueprint](docs/architecture/00-platform-blueprint.md)
-- [People & Access Model](docs/architecture/01-people-and-access.md)
-- [RBAC Engine](docs/architecture/02-rbac-engine.md)
-- [Follow-Up Module Requirements](docs/modules/follow-up.md)
-- [ADR Index](docs/adr/README.md)
-- [AI Development Guide](docs/architecture/90-ai-development-guide.md)
-
-## Note on prior Flutter work
-
-An earlier Flutter scaffold lives on `cursor/ieec-ya-connect-55ea` (PR #1). This branch follows the React + Firebase platform architecture from the latest design thread.
+No React app, Flutter app, Firebase rules deployment, or feature implementation on this branch until planning is explicitly marked complete.

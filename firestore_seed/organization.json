@@ -1,7 +1,0 @@
-{
-  "id": "org_ieec_ya",
-  "name": "IEEC Young Adult",
-  "parentOrganizationId": "parent_ieec",
-  "type": "organization",
-  "isActive": true
-}

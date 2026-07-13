@@ -1,10 +1,14 @@
 # Canonical design source
 
-**Authoritative source for this branch:**  
+**Authoritative source for this planning branch:**  
 https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff  
 (*IEEC YA Connect Design* — latest updated design thread)
 
-An earlier share (`6a54d9c0-…`) is **not** the source of truth for implementation. Prefer this document set whenever the two conflict.
+An earlier share (`6a54d9c0-…`) is **not** the source of truth. Prefer this document set whenever sources conflict.
+
+## Phase rule
+
+**Planning only.** Do not generate application code, Firebase rules, or runnable scaffolds until Architecture Baseline v1.0 is explicitly approved for implementation.
 
 ## Status captured from the canonical thread
 
@@ -34,4 +38,5 @@ An earlier share (`6a54d9c0-…`) is **not** the source of truth for implementat
 
 1. Resolve the 10 Follow-Up business decisions listed in `docs/modules/follow-up.md`
 2. Step 3.2 — Follow-Up Workflows and State Transitions
-3. Firestore data model for Follow-Up
+3. Firestore data model for Follow-Up (design docs only)
+4. Continue RBAC decisions starting from ADR-RBAC-003
