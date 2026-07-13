@@ -19,7 +19,7 @@
 
 - Normalize Follow-Up permission key singular/plural aliases into one canonical set  
 - Close remaining soft policy items in `docs/modules/follow-up.md` “Open decisions” that are not already answered by config defaults  
-- Confirm mobile framework only if overriding the **Expo + EAS** planning default (Flutter alternate); either way document APK/AAB + IPA build commands in the coding README  
+- Document APK/AAB + IPA build commands in the coding README (Expo + EAS; React only — not Flutter)  
 - Absorb Ch. 4–13 into a future PDF handbook revision  
 
 ## Not done by this planning agent

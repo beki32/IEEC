@@ -21,7 +21,7 @@ Allowed now:
 
 Not allowed yet:
 
-- React / Flutter / other app code
+- React / Expo (React Native) / other app code
 - Deployable Firestore rules or indexes as product delivery
 - Feature implementation PRs
 

@@ -4,8 +4,9 @@
 **Depends on:** Chapters 1–12  
 **Clients:** Web application + Mobile application (iOS/Android) — both first-class  
 **Web stack:** React + TypeScript + Vite  
+**Mobile stack:** React Native via **Expo** (TypeScript) + EAS Build  
 **Backend:** Firebase (Auth, Firestore; Functions/Storage as needed)  
-**Mobile:** Shares the same backend, permissions, and domain rules (framework confirmed at coding freeze; must not fork business logic)
+**Not used:** Flutter (out of scope for this product baseline)
 
 ---
 
@@ -88,7 +89,7 @@ The mobile app is a **real native binary**, not “save the website as an app.�
 | Android | `.aab` (Android App Bundle) | Google Play Store upload (preferred for store) |
 | iOS | `.ipa` | TestFlight / App Store (requires Apple Developer Program) |
 
-**Planning default (aligned with React web):** **Expo (React Native) + EAS Build**
+**Settled stack (aligned with React web):** **Expo (React Native) + EAS Build**
 
 ```text
 eas build --platform android   →  .apk and/or .aab
@@ -98,14 +99,7 @@ eas submit                     →  Play Console / App Store Connect (optional)
 
 Local/dev alternatives still exist (`npx expo run:android`, Xcode archive, Android Studio), but **CI/cloud builds via EAS** are the standard release path so the team does not depend on one person’s laptop.
 
-**If the team freezes on Flutter instead:**
-
-```text
-flutter build apk            →  .apk
-flutter build appbundle      →  .aab
-flutter build ipa            →  .ipa (macOS + Xcode + Apple signing)
-```
-
+**Flutter is not part of this baseline.** Do not introduce a Flutter client.
 **Accounts and signing (required either way):**
 
 1. **Google Play Console** developer account — signing key / Play App Signing for Android store releases  

@@ -64,8 +64,8 @@ Build a **people-centered** Young Adult ministry platform for IEEC YA.
 - **Engines vs Modules**: shared platform engines; Follow-Up is the first business module
 - **Clients:** **Web + Mobile** (both first-class; mobile is not “later”)
 - **Web stack:** React + TypeScript + Vite
-- **Mobile:** iOS/Android app sharing the same Firebase backend and permission model
-- **Mobile framework (planning default):** **Expo (React Native) + EAS Build** → Android `.apk`/`.aab` and iOS `.ipa` (Flutter allowed only if explicitly frozen instead — do not fork workflows/data)
+- **Mobile stack:** **React Native (Expo) + TypeScript** — **not Flutter**
+- **Mobile binaries:** EAS Build → Android `.apk`/`.aab` and iOS `.ipa`
 - **Backend:** Firebase Auth, Firestore; Functions/Storage as needed
 - Multi-org capable later; start with one organization (`ieec_ya` / project `ieec-ya-connect` if configs exist)
 
@@ -160,7 +160,7 @@ Implement as organization/Follow-Up settings with these **defaults from the desi
 
 ### Mobile binaries (how APK / IPA are made)
 
-- **Default:** Expo + EAS Build  
+- **Stack:** Expo (React Native) + EAS Build — **React only; not Flutter**  
   - `eas build --platform android` → `.apk` (testing) and/or `.aab` (Play Store)  
   - `eas build --platform ios` → `.ipa` (TestFlight / App Store)  
 - Requires Apple Developer Program + Google Play Console + signing setup  
@@ -170,7 +170,7 @@ Implement as organization/Follow-Up settings with these **defaults from the desi
 
 ## Engineering standards
 
-- TypeScript strict on web (and on mobile if RN/Expo)
+- TypeScript strict on web and mobile (Expo / React Native)
 - Clear folder split: `engines/` (shared) vs `modules/follow-up/` (business); shared contracts usable by web + mobile
 - No business rules only in one client — mirror in Firestore rules / trusted backend
 - Prefer extending engines over duplicating logic inside Follow-Up

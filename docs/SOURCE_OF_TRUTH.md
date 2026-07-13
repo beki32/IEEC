@@ -47,7 +47,7 @@ Coding uses `docs/AI_CODING_HANDOFF_PROMPT.md` in a **separate Cursor account** 
 
 IEEC YA Connect is a **web + mobile** system (both first-class).  
 Shared Firebase backend and handbook engines; do not plan “web only, mobile later.”  
-Mobile framework **planning default:** Expo (React Native) + EAS Build for `.apk`/`.aab` and `.ipa`. Flutter remains an alternate only if explicitly chosen at freeze — same backend, no forked rules. See Ch. 13 §13.8.1.
+**Mobile stack (settled):** React Native via **Expo** + EAS Build for `.apk`/`.aab` and `.ipa`. **Not Flutter.** See Ch. 13 §13.8.1.
 
 ## Approved ADR catalog (Handbook)
 

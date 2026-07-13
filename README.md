@@ -2,7 +2,7 @@
 
 **Phase:** Architecture / planning only — **no application code in this agent/account.**
 
-**Product:** Web app + Mobile app (both first-class), shared Firebase backend.
+**Product:** Web app + Mobile app (both first-class) — **React** on web (Vite) and mobile (**Expo / React Native**). Not Flutter. Shared Firebase backend.
 
 ## Design authority
 
