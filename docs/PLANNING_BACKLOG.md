@@ -14,7 +14,7 @@
 ## Next (human)
 
 1. Open a **separate Cursor coding account/agent**  
-2. Paste the full contents of `docs/AI_CODING_HANDOFF_PROMPT.md` (everything below its horizontal rule / from “YOUR ROLE”)  
+2. Paste the full contents of `docs/AI_CODING_HANDOFF_PROMPT.md` (or use the PDF `docs/AI_CODING_HANDOFF_PROMPT.pdf`) — from “YOUR ROLE” downward  
 3. Point the agent at this repo / branch  
 4. Approve its Phase A plan, then let it implement  
 

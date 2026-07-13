@@ -1,7 +1,9 @@
 # AI Coding Command Prompt — IEEC YA Connect
 
 **Status:** READY for coding (Architecture Baseline v1.0 — planning freeze)  
-**Use:** Open a **new Cursor coding agent / different Cursor account**, paste **everything below the line**, and point it at this repo.
+**Markdown:** this file  
+**PDF:** [`AI_CODING_HANDOFF_PROMPT.pdf`](AI_CODING_HANDOFF_PROMPT.pdf)  
+**Use:** Open a **new Cursor coding agent / different Cursor account**, paste **everything below the line** (or from the PDF “YOUR ROLE” section), and point it at this repo.
 
 Planning agent does **not** write application code. This prompt is for the **implementation** agent only.
 

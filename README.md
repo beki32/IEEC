@@ -24,7 +24,7 @@ Authority order: [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md).
 
 | Doc | Purpose |
 | --- | --- |
-| [**AI coding command prompt**](docs/AI_CODING_HANDOFF_PROMPT.md) | **Paste into coding Cursor account** |
+| [**AI coding command prompt**](docs/AI_CODING_HANDOFF_PROMPT.md) | Paste into coding Cursor account ([PDF](docs/AI_CODING_HANDOFF_PROMPT.pdf)) |
 | [Handbook index](docs/handbook/README.md) | Ch. 1–3 PDF + Ch. 4–13 drafts |
 | [Source of truth](docs/SOURCE_OF_TRUTH.md) | Authority order + cutoff rules |
 | [ADR index](docs/adr/README.md) | ADR-001…007 + RBAC clarifications |
