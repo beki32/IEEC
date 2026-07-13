@@ -138,7 +138,7 @@ Public registration fields (core workflow): first name, last name, sex, phone, e
 
 ### Creating an assignment
 
-Authorized: Follow-Up Team Leader, Assistant Leader, or `follow_up.assignment.create`.
+Authorized: Follow-Up Team Leader, Assistant Leader, or `follow_up.assignments.create`.
 
 Select journey, assigned minister, type, primary/secondary, start/optional end, supervising leader, notes, expected frequency.
 
@@ -383,8 +383,8 @@ Requires reason, actor, whether prior assignments resume, new reporting cycle?, 
 | --- | --- |
 | Create journey | `follow_up.journey.create` |
 | Review duplicates | `follow_up.duplicate.review` |
-| Assign / reassign | `follow_up.assignment.create` / `.reassign` |
-| Submit / edit report | `follow_up.report.submit` / `.edit_own` / `.edit_locked` |
+| Assign / reassign | `follow_up.assignments.create` / `.reassign` |
+| Submit / edit report | `follow_up.reports.submit` / `.edit_own` / `.edit_locked` |
 | Mark inactive / close / reopen | `follow_up.journey.mark_inactive` / `.close` / `.reopen` |
 | Membership recommend / approve | `membership.recommendation.submit` / workflow step |
 | View sensitive escalation | category-based |

@@ -92,7 +92,7 @@ Examples (normalize with Chapter 6 catalog):
 
 - `forms.definition.view` / `forms.definition.manage`
 - `forms.publish`
-- Module-specific submit/view permissions remain on the module (e.g. `follow_up.report.submit`)
+- Module-specific submit/view permissions remain on the module (e.g. `follow_up.reports.submit`)
 
 Managing form structure is separate from submitting answers.
 

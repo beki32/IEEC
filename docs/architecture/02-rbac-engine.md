@@ -50,11 +50,13 @@ Every role assignment supports optional start date, end date, and active/inactiv
 ## Follow-Up permission examples
 
 - `follow_up.view`
-- `follow_up.assign`
-- `follow_up.entry.create`
-- `follow_up.entry.update_own`
-- `follow_up.report.review`
-- `follow_up.chat.manage`
-- `follow_up.sensitive.view`
-- `follow_up.membership.recommend`
-- `follow_up.membership.approve`
+- `follow_up.assignments.create`
+- `follow_up.reports.submit`
+- `follow_up.reports.edit_own`
+- `follow_up.reports.review`
+- `follow_up.chat.manage_members`
+- `follow_up.bio.view_sensitive`
+- `membership.recommendations.submit`
+- `follow_up.membership_review.start`
+
+Canonical catalog: `docs/modules/follow-up-permission-catalog.md`.
