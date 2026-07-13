@@ -13,7 +13,7 @@ Notifications and Tasks are shared platform services. Modules request them; they
 
 1. Organization-scoped delivery.  
 2. Separate **notification** (inform) from **task** (actionable work item).  
-3. Channel abstraction: in-app (MVP), email, push; SMS/WhatsApp later.  
+3. Channel abstraction: in-app (web + mobile), push (especially mobile), email; SMS/WhatsApp later.  
 4. Idempotent triggers where possible (avoid duplicate storms).  
 5. User notification preferences may mute channels but must not disable critical security notices without admin policy.  
 6. Tasks have owners, due dates, status, and optional escalation.  
@@ -72,11 +72,11 @@ Guardrail: no deadline automation without timezone (Chapter 8).
 
 ## 11.6 Delivery architecture (planning)
 
-MVP path:
+Baseline path:
 
 1. Workflow / module writes `notifications` / `tasks` docs.  
-2. Cloud Functions (when enabled) fan out email/push.  
-3. In-app inbox reads Firestore notifications for the Person.  
+2. Cloud Functions (when enabled) fan out email and mobile/web push.  
+3. In-app inbox on **web and mobile** reads Firestore notifications for the Person.  
 
 Failures retry with backoff; permanent failures mark `failed` and may create admin-visible alerts.
 

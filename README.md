@@ -2,6 +2,8 @@
 
 **Phase:** Architecture / planning only — **no application code in this agent/account.**
 
+**Product:** Web app + Mobile app (both first-class), shared Firebase backend.
+
 ## Design authority
 
 **Architecture Handbook v0.3** (Ch. 1–3 PDF) + **Ch. 4–13 drafts** → [`docs/handbook/`](docs/handbook/)

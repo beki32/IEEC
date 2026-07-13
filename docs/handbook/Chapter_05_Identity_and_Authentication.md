@@ -88,11 +88,12 @@ Track at least: `invitationStatus`, `invitedAt`, `invitedBy`, `activatedAt`, `la
 - Re-invite is allowed when prior invite expired or failed; prior attempts remain in audit/history.
 - Activation must not invent permissions; permissions come only from Chapter 6 assignments.
 
-## 5.6 Authentication methods (MVP)
+## 5.6 Authentication methods (baseline)
 
-- **Email / password** via Firebase Auth for MVP.
-- Password reset and email verification use Firebase-supported flows.
-- Additional providers (Google, SSO, phone) are future options and must still resolve to the same User Account → Person chain.
+- **Email / password** via Firebase Auth for web and mobile.
+- Password reset and email verification use Firebase-supported flows on both clients.
+- Mobile sessions use the same Auth UID → User Account → Person chain as web.
+- Additional providers (Google, SSO, phone, biometrics as device UX) are future options and must still resolve to the same User Account → Person chain.
 
 ## 5.7 Session and active organization context
 

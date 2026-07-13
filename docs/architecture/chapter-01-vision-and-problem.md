@@ -40,7 +40,7 @@ Shepherd people from **newcomer → member → minister / leadership**, with cle
 
 ## Technical direction (from phase 1 framing)
 
-React + Firebase (Auth, Firestore, later Functions/Storage as needed).
+**Web + Mobile** clients sharing Firebase (Auth, Firestore, later Functions/Storage as needed). Web: React + TypeScript. Mobile is a first-class app surface, not a deferred add-on.
 
 ## Note
 

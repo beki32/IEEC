@@ -43,6 +43,12 @@ Repo Follow-Up docs under `docs/modules/` capture link 2 detail for coding hando
 **Planning only in this branch/agent.** No application code here.  
 Coding uses `docs/AI_CODING_HANDOFF_PROMPT.md` in a **separate Cursor account** after baseline freeze.
 
+## Product clients (settled)
+
+IEEC YA Connect is a **web + mobile** system (both first-class).  
+Shared Firebase backend and handbook engines; do not plan “web only, mobile later.”  
+Mobile framework (e.g. React Native/Expo vs Flutter) is confirmed at coding freeze without forking business rules.
+
 ## Approved ADR catalog (Handbook)
 
 ADR-001 Person record · ADR-002 Roles as templates · ADR-003 One org calendar · ADR-004 Chat ≠ team membership · ADR-005 Dynamic forms · ADR-006 Soft delete + audit · ADR-007 Federated multi-org  

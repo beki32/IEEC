@@ -2,13 +2,16 @@
 
 **Status:** Draft handbook chapter (planning authority until PDF revision)  
 **Depends on:** Chapters 1–12  
-**Stack:** React + TypeScript + Vite + Firebase (Auth, Firestore; Functions/Storage as needed)  
+**Clients:** Web application + Mobile application (iOS/Android) — both first-class  
+**Web stack:** React + TypeScript + Vite  
+**Backend:** Firebase (Auth, Firestore; Functions/Storage as needed)  
+**Mobile:** Shares the same backend, permissions, and domain rules (framework confirmed at coding freeze; must not fork business logic)
 
 ---
 
 ## 13.1 Purpose
 
-This chapter sets engineering standards so modules stay consistent, secure, and maintainable. AI coding assistants and human developers must follow these rules unless an ADR changes them.
+This chapter sets engineering standards so modules stay consistent, secure, and maintainable across **web and mobile**. AI coding assistants and human developers must follow these rules unless an ADR changes them.
 
 ## 13.2 Engines vs modules
 
@@ -64,13 +67,16 @@ Auth UID → userAccounts → Person → effective permissions → allow/deny
 - Functions re-check permissions and write audit.  
 - Client may do direct Firestore access only where rules fully encode the policy.
 
-## 13.8 Frontend standards
+## 13.8 Client standards (web + mobile)
 
-- TypeScript strict.  
-- Permission-gated routes and actions.  
-- Engines expose hooks/services; modules compose them.  
-- Accessible forms; mobile-usable layouts for minister weekly ops.  
-- Do not redesign architecture in UI convenience refactors.
+- Product ships **two clients**: Web and Mobile. Neither is a permanent “phase 2 only” surface.  
+- **Parity rule:** Follow-Up minister operations (assigned queue, weekly report, Saturday attendance, bio, basic newcomer profile) must work on mobile and web. Heavy admin/config may start web-primary.  
+- Shared domain contracts (types, permission keys, workflow states) must not diverge per client.  
+- Permission-gated navigation and actions on every client.  
+- Engines expose shared services; each client composes UI only.  
+- Mobile UX is touch-first; web may optimize denser leader dashboards.  
+- Push notifications are expected for mobile task/reminder channels (Chapter 11).  
+- Do not redesign architecture for one client’s convenience.
 
 ## 13.9 Testing standards
 
@@ -103,12 +109,13 @@ A module is compliant only when it:
 
 ## 13.12 MVP coding freeze note
 
-For the first Follow-Up coding milestone, Chapters 1–13 drafts + Follow-Up module pack + ADRs are sufficient to implement Phase A (platform foundation) and Phase B (Follow-Up MVP) in the handoff prompt. Parent-org product depth, SMS/WhatsApp, and other ministry modules remain out of scope until specified.
+For the first Follow-Up coding milestone, Chapters 1–13 drafts + Follow-Up module pack + ADRs are sufficient to implement Phase A (platform foundation) and Phase B (Follow-Up MVP) **for web and mobile** in the handoff prompt. Parent-org product depth, SMS/WhatsApp, and other ministry modules remain out of scope until specified.
 
 ## 13.13 Chapter completion criteria
 
 - Engine/module boundary and Firestore standards are explicit.
-- Security enforcement layers are mandatory.
+- **Web + mobile** clients are both first-class with shared backend contracts.
+- Security enforcement layers are mandatory on every client.
 - Permission naming and config guardrails documented.
 - Testing and AI implementation protocol defined.
 - Compliance checklist exists for future modules.

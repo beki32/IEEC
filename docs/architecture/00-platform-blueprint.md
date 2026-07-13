@@ -58,12 +58,13 @@ Follow-Up (first complete module), Members, Ministers, Bible Study, G5, Worship,
 
 ## Technical architecture
 
-- React + TypeScript web app
-- Firebase Authentication
-- Cloud Firestore
-- Cloud Functions (planned for invites, workflow automation)
-- Firebase Storage (planned)
-- Security Rules enforcing scoped RBAC
+**Product surfaces (both first-class):** Web app + Mobile app (iOS/Android).
+
+- **Web:** React + TypeScript (+ Vite)
+- **Mobile:** Native/cross-platform mobile client against the same backend (in scope — not deferred). Technology choice at coding freeze must share Firebase contracts and must not fork business rules (React Native/Expo aligns with this TS baseline; Flutter may be used if the team standardizes on it)
+- **Shared backend:** Firebase Authentication, Cloud Firestore, Cloud Functions (invites, workflow automation), Firebase Storage (planned)
+- Security Rules enforcing scoped RBAC for every client
+- Push notifications are part of the mobile + web notification channels (Chapter 11)
 
 ## Organization hierarchy
 
