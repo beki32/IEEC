@@ -44,4 +44,5 @@ Capture and organize the platform blueprint, ADRs, and Follow-Up requirements so
 
 ## Out of scope for now
 
-No React/Flutter app, Firebase rules deployment, or feature implementation until planning is explicitly marked complete.
+No React/Flutter app, Firebase rules deployment, or feature implementation on this planning branch.  
+When ready to code, use **`docs/AI_CODING_HANDOFF_PROMPT.md`** in a different Cursor account.

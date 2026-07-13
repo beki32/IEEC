@@ -16,8 +16,9 @@ Ordered next work for the planning phase (no code).
 1. ~~Draft Step 3.2 — Follow-Up Workflows and State Transitions~~ **Done**
 2. ~~Draft Follow-Up Firestore data model~~ **Done** → `docs/modules/follow-up-firestore-data-model.md`
 3. ~~Draft Permission catalog for Follow-Up roles~~ **Done** → `docs/modules/follow-up-permission-catalog.md`
-4. Capture remaining Configuration Engine defaults implied by the design (report Friday deadline, 7-day edit window, welcome message on, etc.)
+4. Capture remaining Configuration Engine defaults implied by the design (report Friday deadline, 7-day edit window, welcome message on, etc.) → see `docs/modules/follow-up-config-defaults.md`
 5. Freeze **Architecture Baseline v1.0** checklist
+6. Use `docs/AI_CODING_HANDOFF_PROMPT.md` in a **different Cursor account** for implementation (planning agent does not code)
 
 ## Then
 
