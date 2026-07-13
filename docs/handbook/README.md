@@ -2,27 +2,31 @@
 
 Official platform design authority:
 
-- **PDF (signed artifact for Ch. 1–3):** [IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf](IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf)
-- **Markdown extract (Ch. 1–3):** [Architecture_Handbook_v0.3.md](Architecture_Handbook_v0.3.md)
+| Artifact | Role |
+| --- | --- |
+| **[IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf](IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf)** | **Current handbook PDF (Ch. 1–13)** |
+| [Architecture_Handbook_v0.4.md](Architecture_Handbook_v0.4.md) | Searchable markdown of v0.4 |
+| [IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf](IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf) | Prior signed PDF (Ch. 1–3 only) |
+| [Architecture_Handbook_v0.3.md](Architecture_Handbook_v0.3.md) | Extract of v0.3 |
 
-## Chapter status
+## Chapter status (v0.4)
 
-| Chapter | Status | Location |
-| --- | --- | --- |
-| 1 Purpose, Scope, Design Authority | In PDF v0.3 | extract above |
-| 2 Core Design Principles & Engines | In PDF v0.3 | extract above |
-| 3 Organization and Tenant Model | In PDF v0.3 | extract above |
-| 4 People and Account Model | **Draft in repo** | [Chapter_04_People_and_Account_Model.md](Chapter_04_People_and_Account_Model.md) |
-| 5 Identity and Authentication | **Draft in repo** | [Chapter_05_Identity_and_Authentication.md](Chapter_05_Identity_and_Authentication.md) |
-| 6 Authorization and Permission Engine | **Draft in repo** | [Chapter_06_Authorization_and_Permission_Engine.md](Chapter_06_Authorization_and_Permission_Engine.md) |
-| 7 Dynamic Forms Engine | **Draft in repo** | [Chapter_07_Dynamic_Forms_Engine.md](Chapter_07_Dynamic_Forms_Engine.md) |
-| 8 Workflow Engine | **Draft in repo** | [Chapter_08_Workflow_Engine.md](Chapter_08_Workflow_Engine.md) |
-| 9 Ministry Calendar Engine | **Draft in repo** | [Chapter_09_Ministry_Calendar_Engine.md](Chapter_09_Ministry_Calendar_Engine.md) |
-| 10 Chat and Collaboration | **Draft in repo** | [Chapter_10_Chat_and_Collaboration.md](Chapter_10_Chat_and_Collaboration.md) |
-| 11 Notifications and Tasks | **Draft in repo** | [Chapter_11_Notifications_and_Tasks.md](Chapter_11_Notifications_and_Tasks.md) |
-| 12 Audit and History | **Draft in repo** | [Chapter_12_Audit_and_History.md](Chapter_12_Audit_and_History.md) |
-| 13 Data and Engineering Standards | **Draft in repo** | [Chapter_13_Data_and_Engineering_Standards.md](Chapter_13_Data_and_Engineering_Standards.md) |
+| Chapter | Status |
+| --- | --- |
+| 1 Purpose, Scope, Design Authority | In handbook v0.4 |
+| 2 Core Design Principles & Engines | In handbook v0.4 |
+| 3 Organization and Tenant Model | In handbook v0.4 |
+| 4 People and Account Model | In handbook v0.4 |
+| 5 Identity and Authentication | In handbook v0.4 |
+| 6 Authorization and Permission Engine | In handbook v0.4 |
+| 7 Dynamic Forms Engine | In handbook v0.4 |
+| 8 Workflow Engine | In handbook v0.4 |
+| 9 Ministry Calendar Engine | In handbook v0.4 |
+| 10 Chat and Collaboration | In handbook v0.4 |
+| 11 Notifications and Tasks | In handbook v0.4 |
+| 12 Audit and History | In handbook v0.4 |
+| 13 Data and Engineering Standards | In handbook v0.4 |
 
-Until a later PDF absorbs Chapters 4–13, the draft markdown chapters above are **planning authority** for those topics (still subject to ADR changes).
+Per-chapter working drafts also remain as `Chapter_04_*.md` … `Chapter_13_*.md` for editing.
 
 Module-level Follow-Up specs live under `docs/modules/` and must not contradict this handbook.

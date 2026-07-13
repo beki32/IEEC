@@ -16,7 +16,7 @@ This agent/account stays planning-only (no app code here).
 
 ## Design authority
 
-**Architecture Handbook v0.3** (Ch. 1–3 PDF) + **Ch. 4–13 drafts** → [`docs/handbook/`](docs/handbook/)
+**Architecture Handbook v0.4** (Ch. 1–13 PDF) → [`docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf`](docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf)
 
 Authority order: [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md).
 
@@ -24,8 +24,9 @@ Authority order: [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md).
 
 | Doc | Purpose |
 | --- | --- |
+| [**Architecture Handbook v0.4 (PDF)**](docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf) | Formal design authority (Ch. 1–13) |
 | [**AI coding command prompt**](docs/AI_CODING_HANDOFF_PROMPT.md) | Paste into coding Cursor account ([PDF](docs/AI_CODING_HANDOFF_PROMPT.pdf)) |
-| [Handbook index](docs/handbook/README.md) | Ch. 1–3 PDF + Ch. 4–13 drafts |
+| [Handbook index](docs/handbook/README.md) | Handbook versions + chapter map |
 | [Source of truth](docs/SOURCE_OF_TRUTH.md) | Authority order + cutoff rules |
 | [ADR index](docs/adr/README.md) | ADR-001…007 + RBAC clarifications |
 | [Follow-Up requirements](docs/modules/follow-up.md) | Module requirements |

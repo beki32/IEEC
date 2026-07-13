@@ -2,32 +2,16 @@
 
 ## Design authority (highest)
 
-**Architecture Handbook v0.3** (July 13, 2026)
+**Architecture Handbook v0.4** (July 13, 2026) — Chapters 1–13
 
-- PDF: `docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf`
-- Searchable extract: `docs/handbook/Architecture_Handbook_v0.3.md`
+- PDF: `docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf`
+- Searchable: `docs/handbook/Architecture_Handbook_v0.4.md`
+
+Prior signed foundation (Ch. 1–3 only): Handbook **v0.3** PDF/extract under `docs/handbook/`.
 
 If a module spec conflicts with the handbook, **the handbook wins** unless an approved ADR changes the standard.
 
-Handbook TOC status:
-
-| Chapter | Status |
-| --- | --- |
-| 1 Purpose, Scope, Design Authority | Present in PDF v0.3 |
-| 2 Core Design Principles & Engines | Present in PDF v0.3 |
-| 3 Organization and Tenant Model | Present in PDF v0.3 |
-| 4 People and Account Model | **Draft:** `docs/handbook/Chapter_04_People_and_Account_Model.md` |
-| 5 Identity and Authentication | **Draft:** `docs/handbook/Chapter_05_Identity_and_Authentication.md` |
-| 6 Authorization and Permission Engine | **Draft:** `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md` |
-| 7 Dynamic Forms Engine | **Draft:** `docs/handbook/Chapter_07_Dynamic_Forms_Engine.md` |
-| 8 Workflow Engine | **Draft:** `docs/handbook/Chapter_08_Workflow_Engine.md` |
-| 9 Ministry Calendar Engine | **Draft:** `docs/handbook/Chapter_09_Ministry_Calendar_Engine.md` |
-| 10 Chat and Collaboration | **Draft:** `docs/handbook/Chapter_10_Chat_and_Collaboration.md` |
-| 11 Notifications and Tasks | **Draft:** `docs/handbook/Chapter_11_Notifications_and_Tasks.md` |
-| 12 Audit and History | **Draft:** `docs/handbook/Chapter_12_Audit_and_History.md` |
-| 13 Data and Engineering Standards | **Draft:** `docs/handbook/Chapter_13_Data_and_Engineering_Standards.md` |
-
-Chapters 4–13 drafts are planning authority for those topics until a later PDF revision absorbs them.
+Handbook TOC status: **all Chapters 1–13 present in v0.4**.
 
 ## ChatGPT design threads (module detail)
 

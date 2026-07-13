@@ -25,10 +25,8 @@ You are implementing **IEEC YA Connect**, a people-centered Young Adult ministry
 ### Highest authority
 
 1. `docs/SOURCE_OF_TRUTH.md`
-2. `docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf`  
-   (searchable: `docs/handbook/Architecture_Handbook_v0.3.md`)
-3. Handbook drafts Ch. 4–13 under `docs/handbook/Chapter_*.md`
-4. ADRs: `docs/adr/` (ADR-001…007 + ADR-RBAC-001…003)
+2. `docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.4.pdf` (searchable: `Architecture_Handbook_v0.4.md`)
+3. `docs/adr/` (ADR-001…007 + ADR-RBAC-001…003)
 
 If a module doc conflicts with the handbook/ADR, **handbook/ADR wins**.
 
@@ -43,18 +41,9 @@ Prefer repo docs under `docs/modules/` over re-deriving from ChatGPT.
 
 ### Required reading before coding
 
+- `docs/handbook/Architecture_Handbook_v0.4.md` (or the v0.4 PDF)
 - `docs/architecture/00-platform-blueprint.md`
 - `docs/architecture/90-ai-development-guide.md`
-- `docs/handbook/Chapter_04_People_and_Account_Model.md`
-- `docs/handbook/Chapter_05_Identity_and_Authentication.md`
-- `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md`
-- `docs/handbook/Chapter_07_Dynamic_Forms_Engine.md`
-- `docs/handbook/Chapter_08_Workflow_Engine.md`
-- `docs/handbook/Chapter_09_Ministry_Calendar_Engine.md`
-- `docs/handbook/Chapter_10_Chat_and_Collaboration.md`
-- `docs/handbook/Chapter_11_Notifications_and_Tasks.md`
-- `docs/handbook/Chapter_12_Audit_and_History.md`
-- `docs/handbook/Chapter_13_Data_and_Engineering_Standards.md`
 - `docs/modules/follow-up.md`
 - `docs/modules/follow-up-workflows-and-state-transitions.md`
 - `docs/modules/follow-up-firestore-data-model.md`
