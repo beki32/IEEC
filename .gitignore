@@ -1,8 +1,4 @@
 node_modules/
-web/node_modules/
-web/dist/
 .firebase/
 *.log
 .DS_Store
-web/.env.local
-web/.env
