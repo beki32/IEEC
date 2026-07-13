@@ -65,5 +65,6 @@ These must not be collapsed into one “role” field.
 
 ## Continuation
 
-RBAC decision records continue in **link 2** (ADR-RBAC-001/002 approved; ADR-RBAC-003 pending).  
-Default grant clarification: assigning a role grants **all permissions on that template within scope**.
+RBAC decision records continue in **link 2** (ADR-RBAC-001/002/003 approved).  
+Default grant clarification: assigning a role grants **all permissions on that template within scope**.  
+Time-bound assignments: optional start/end dates and active/inactive (ADR-RBAC-003).
