@@ -21,5 +21,6 @@ Ordered next work for the planning phase (no code).
 
 ## Then
 
-5. Freeze **Architecture Baseline v1.0**
-6. Begin implementation only after that freeze
+5. Human reviews planning pack + `docs/AI_CODING_HANDOFF_PROMPT.md`
+6. Freeze **Architecture Baseline v1.0**
+7. Human pastes the handoff prompt into a **separate Cursor coding account/agent** to implement (this planning branch/agent does not write app code)

@@ -30,6 +30,8 @@ Capture and organize the platform blueprint, ADRs, and Follow-Up requirements so
 | [Follow-Up workflows & states](docs/modules/follow-up-workflows-and-state-transitions.md) | From link 2 Step 3.2 / 3.3.2 |
 | [Follow-Up Firestore model](docs/modules/follow-up-firestore-data-model.md) | Collections + fields (planning) |
 | [Follow-Up permission catalog](docs/modules/follow-up-permission-catalog.md) | Leader / Assistant / Minister defaults |
+| [AI coding handoff prompt](docs/AI_CODING_HANDOFF_PROMPT.md) | Paste into a separate Cursor coding account when baseline is frozen |
+| [Follow-Up config defaults](docs/modules/follow-up-config-defaults.md) | Admin-configurable defaults |
 | [ADR index](docs/adr/README.md) | Decision register |
 | [Planning backlog](docs/PLANNING_BACKLOG.md) | Next planning tasks |
 | [AI development guide](docs/architecture/90-ai-development-guide.md) | Rules for future coding sessions |
