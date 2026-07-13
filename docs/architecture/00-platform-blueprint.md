@@ -1,7 +1,9 @@
 # IEEC YA Connect Platform Blueprint
 
-**Status:** Draft v0.2  
-**Canonical source:** [IEEC YA Connect Design](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff)  
+**Sources:**  
+- Chapters 1–2: [Link 1](https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd) (pre-cutoff only)  
+- Chapter 3+: [Link 2](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff)  
+
 See also [`../SOURCE_OF_TRUTH.md`](../SOURCE_OF_TRUTH.md).
 
 ## Vision (Step 1 — Approved)

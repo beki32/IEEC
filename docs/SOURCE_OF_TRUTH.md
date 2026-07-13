@@ -1,44 +1,52 @@
-# Canonical design source
+# Canonical design sources
 
-**Authoritative source for this planning branch:**  
-https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff  
-(*IEEC YA Connect Design* — latest updated design thread)
+IEEC YA Connect design spans **two ChatGPT shares** as one continuous project.
 
-## First share exclusion rule
+## Source map
 
-Earlier share: https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd
+| Phase | Content | Share |
+| --- | --- | --- |
+| **Chapters / Steps 1–2** (first phase) | Vision, problem definition, org structure, ministry journey, design principles, people & access, RBAC foundations | [Link 1](https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd) |
+| **Chapter / Step 3+** (continuation) | Follow-Up requirements, RBAC ADRs refinement, platform engines, later design | [Link 2](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff) |
 
-**Do not use any information from that first share that appears after this user message:**
+Link 2 **continues** the project started in link 1. It does not replace chapters 1–2.
+
+## Link 1 cutoff rule
+
+In link 1, **do not use** any information that appears **after** this user message:
 
 > Give me over all content from step 1 and step 2 in pdf
 
-That post-cutoff content (PDF dump, regenerated Step 1/2 packaging, later Step 3 expansions, Firebase React RBAC guide material, etc.) is out of scope for planning and implementation.
+That post-cutoff material (PDF packaging / regenerated dumps / later noise) is out of scope.
 
-If Step 1 / Step 2 material is needed, use the versions carried into the **canonical second share** (and this `docs/` set), not the first-share post-cutoff regeneration.
+Use link 1 **before that message** for chapters 1–2 detail.
 
-When sources conflict, the second share + this repo’s planning docs win.
+## How to resolve conflicts
+
+1. Chapters 1–2 → prefer **link 1 (pre-cutoff)**
+2. Chapter 3+ (Follow-Up, later ADRs, engines) → prefer **link 2**
+3. If link 2 restates Step 1–2 as context, treat that as a **handoff summary**, not a replacement of link 1 chapters 1–2
 
 ## Phase rule
 
-**Planning only.** Do not generate application code, Firebase rules, or runnable scaffolds until Architecture Baseline v1.0 is explicitly approved for implementation.
+**Planning only.** No application code until Architecture Baseline v1.0 is explicitly approved for implementation.
 
-## Status captured from the canonical thread
+## Status
 
-| Area | Status |
-| --- | --- |
-| Step 1 — Problem Definition | Approved |
-| Step 2 — People & Access Model | Approved |
-| Step 3 — Follow-Up Team Requirements | Drafted (remaining policies are admin-configurable; attendance resolved) |
-| ADR-RBAC-001 — Roles are templates | Approved |
-| ADR-RBAC-001 default grant — assigned role gives all template permissions (in scope) | Approved (planning clarification) |
-| ADR-RBAC-002 — Role templates are live (Option A) | Approved |
-| ADR-RBAC-003 — Time-bound role assignments | **Pending** (recommended Yes; not yet answered in-thread) |
+| Area | Source | Status |
+| --- | --- | --- |
+| Step 1 — Problem Definition / Foundation | Link 1 (pre-cutoff) | Approved |
+| Step 2 — People & Access | Link 1 (pre-cutoff) | Approved |
+| Step 3 — Follow-Up Team Requirements | Link 2 | Drafted (policies mostly admin-configurable; attendance resolved) |
+| ADR-RBAC-001 / default grant | Link 2 + planning clarification | Approved |
+| ADR-RBAC-002 live templates | Link 2 | Approved |
+| ADR-RBAC-003 time-bound assignments | Link 2 | Pending |
 
-## Living document chapters (from the design thread)
+## Living document chapters
 
-1. Vision & Requirements  
-2. Organization Structure  
-3. Access Control (RBAC)  
+1. Vision & Requirements *(link 1)*  
+2. Organization Structure / People & Access *(link 1)*  
+3. Access Control (RBAC) *(started link 1, continued link 2)*  
 4. Database Design  
 5. API Design  
 6. UI/UX  
@@ -47,9 +55,4 @@ When sources conflict, the second share + this repo’s planning docs win.
 9. Reports  
 10. Deployment  
 
-## Next design steps (per thread)
-
-1. Set defaults for remaining Follow-Up admin-configurable policies (`docs/modules/follow-up.md`)
-2. Step 3.2 — Follow-Up Workflows and State Transitions
-3. Firestore data model for Follow-Up (design docs only)
-4. Continue RBAC decisions starting from ADR-RBAC-003
+Follow-Up module detail lives under Step 3 in link 2 → `docs/modules/follow-up.md`.
