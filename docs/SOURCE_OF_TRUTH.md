@@ -11,12 +11,17 @@ If a module spec conflicts with the handbook, **the handbook wins** unless an ap
 
 Handbook TOC status:
 
-| Chapter | Status in v0.3 |
+| Chapter | Status |
 | --- | --- |
-| 1 Purpose, Scope, Design Authority | Present |
-| 2 Core Design Principles & Engines | Present |
-| 3 Organization and Tenant Model | Present |
-| 4–13 (People, AuthN, AuthZ, Forms, Workflow, Calendar, Chat, Notifications, Audit, Data standards) | Planned |
+| 1 Purpose, Scope, Design Authority | Present in PDF v0.3 |
+| 2 Core Design Principles & Engines | Present in PDF v0.3 |
+| 3 Organization and Tenant Model | Present in PDF v0.3 |
+| 4 People and Account Model | **Draft:** `docs/handbook/Chapter_04_People_and_Account_Model.md` |
+| 5 Identity and Authentication | **Draft:** `docs/handbook/Chapter_05_Identity_and_Authentication.md` |
+| 6 Authorization and Permission Engine | **Draft:** `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md` |
+| 7–13 (Forms, Workflow, Calendar, Chat, Notifications, Audit, Data standards) | Planned |
+
+Chapters 4–6 drafts are planning authority for those topics until a later PDF revision absorbs them.
 
 ## ChatGPT design threads (module detail)
 

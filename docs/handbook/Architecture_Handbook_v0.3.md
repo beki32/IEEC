@@ -419,3 +419,15 @@ Next Chapter
 Chapter 4 will define the People and Account Model, including organization-owned Person profiles, 
 newcomer-to-leadership progression, user accounts, invitations, returning people, duplicate detection, 
 profile completion, status history, and access to multiple organizations.
+
+---
+
+## Repo extension (not in PDF v0.3)
+
+Draft Chapters 4–6 now live in this repo as planning authority until a later PDF revision:
+
+- `docs/handbook/Chapter_04_People_and_Account_Model.md`
+- `docs/handbook/Chapter_05_Identity_and_Authentication.md`
+- `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md`
+
+See `docs/handbook/README.md`.

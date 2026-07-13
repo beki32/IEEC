@@ -1,6 +1,6 @@
 # Authorization Engine (RBAC)
 
-**Canonical source:** Architecture Handbook v0.3 (`docs/handbook/`) + Follow-Up link 2 detail
+**Canonical source:** Handbook Chapter 6 draft (`docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md`) + Handbook v0.3 §2.4 + Follow-Up link 2 detail
 
 ## ADR-RBAC-001 — Roles are templates (Approved)
 

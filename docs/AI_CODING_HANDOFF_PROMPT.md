@@ -34,15 +34,18 @@ If a module doc conflicts with the handbook, **follow the handbook** unless an a
 ### Repo docs to read first
 
 1. `docs/SOURCE_OF_TRUTH.md`
-2. `docs/handbook/README.md` + Handbook v0.3
-3. `docs/adr/README.md` (ADR-001…007 + ADR-RBAC-001…003)
-4. `docs/architecture/00-platform-blueprint.md`
-5. `docs/architecture/90-ai-development-guide.md`
-6. `docs/modules/follow-up.md`
-7. `docs/modules/follow-up-workflows-and-state-transitions.md`
-8. `docs/modules/follow-up-firestore-data-model.md`
-9. `docs/modules/follow-up-permission-catalog.md`
-10. `docs/modules/follow-up-config-defaults.md`
+2. `docs/handbook/README.md` + Handbook v0.3 extract + **Ch. 4–6 drafts**
+3. `docs/handbook/Chapter_04_People_and_Account_Model.md`
+4. `docs/handbook/Chapter_05_Identity_and_Authentication.md`
+5. `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md`
+6. `docs/adr/README.md` (ADR-001…007 + ADR-RBAC-001…003)
+7. `docs/architecture/00-platform-blueprint.md`
+8. `docs/architecture/90-ai-development-guide.md`
+9. `docs/modules/follow-up.md`
+10. `docs/modules/follow-up-workflows-and-state-transitions.md`
+11. `docs/modules/follow-up-firestore-data-model.md`
+12. `docs/modules/follow-up-permission-catalog.md`
+13. `docs/modules/follow-up-config-defaults.md`
 
 ---
 

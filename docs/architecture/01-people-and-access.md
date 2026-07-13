@@ -1,7 +1,7 @@
 # People & Access Model
 
-**Canonical source:** https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff  
-**Status:** Step 2 — Approved
+**Canonical source:** Handbook Chapters 4–6 drafts (`docs/handbook/Chapter_04_*.md` … `Chapter_06_*.md`) + Link 2  
+**Status:** Step 2 approved; expanded in handbook Ch. 4–6 drafts
 
 ## Separations (approved)
 
