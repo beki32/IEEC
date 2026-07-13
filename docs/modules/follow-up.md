@@ -64,11 +64,43 @@ Keep full assignment history. Reassignment must not erase prior assignment or fo
 
 Assignment may be manual or rule-based (workload, sex, language, location, age group, inviter, other configurable rules). Automatic assignment is optional.
 
-## 3.6 Follow-up records
+## 3.6 Follow-up records (weekly report)
 
-Every interaction is a follow-up entry (newcomer, minister, contact datetime/method/outcome, summary, prayer request, need, attendance, spiritual progress, next action/date, escalation, visibility, attachments, audit fields).
+Every interaction may be recorded as a weekly follow-up report/entry (newcomer, minister, contact datetime/method/outcome, summary, prayer request, need, spiritual progress, next action/date, escalation, visibility, attachments, audit fields).
 
 Contact methods and outcomes are configurable (phone, text, WhatsApp, email, in person, video, social, other; reached, no answer, left message, wrong info, contact later, not interested, attended, pastoral attention, completed, other).
+
+**Attendance is not stored inside the weekly report.**
+
+## 3.6A Newcomer attendance (Approved)
+
+From the design thread: attendance during follow-up is **On**, with these rules.
+
+### How it works
+
+- One **ministry-wide calendar** for the organization
+- Regular program: **Saturday, 6:30 PM–9:30 PM**
+- Newcomer profile dashboard lets the assigned Follow-Up member: view history, add weekly report, **add attendance**, add bio notes
+- For attendance, the user **only selects a status for that specific Saturday program date** (linked calendar event)
+- Recorded by the **assigned Follow-Up team member**, each week, **separate from the weekly report**
+- Can be recorded even if the weekly report is not submitted yet
+- Weekly report may reference attendance but must not embed it
+- Leaders/Assistants may review and **correct** attendance when permitted; corrections keep history
+- Attendance is one factor for membership readiness — **never the only factor**
+
+### MVP attendance statuses
+
+- `attended`
+- `did_not_attend`
+- `unknown`
+
+### Planning data shape
+
+Collection: `newcomerAttendance/{attendanceId}`
+
+Fields: organizationId, personId, journeyId, assignmentId, calendarEventId, programDate, attendanceStatus, recordedByPersonId, recordedAt, updatedAt, updatedByPersonId
+
+**Uniqueness:** one record per `personId + calendarEventId`.
 
 ## 3.7 Schedule
 
