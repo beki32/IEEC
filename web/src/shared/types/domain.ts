@@ -22,6 +22,7 @@ export type FollowUpPermission =
   | 'follow_up.entry.create'
   | 'follow_up.entry.update_own'
   | 'follow_up.report.review'
+  | 'follow_up.chat.manage'
   | 'follow_up.sensitive.view'
   | 'follow_up.membership.recommend'
   | 'follow_up.membership.approve'

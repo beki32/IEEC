@@ -1,10 +1,21 @@
 # ADR-RBAC-003 — Time-Bound Role Assignments
 
-## Decision (recommended)
+## Status
 
-Every role assignment supports optional start date, end date, and active/inactive status so temporary leadership and volunteer roles expire automatically.
+**Pending** — recommended in the canonical design thread, but not yet answered by the product owner.
 
-## Consequences
+Canonical source: https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
 
-- Acting leaders and event coordinators do not require manual cleanup
-- Authorization checks must respect effective dating
+## Proposed decision
+
+Every role assignment should support:
+
+- Start Date (optional)
+- End Date (optional)
+- Active/Inactive status
+
+So temporary Acting Team Leader, Conference Coordinator, and Event Volunteer Leader assignments can expire automatically.
+
+## Implementation note
+
+The RBAC evaluator already supports optional `startAt` / `endAt` / `isActive` so the code path is ready if this ADR is approved. Do not treat time-bounding as final product policy until the decision is recorded as Approved.

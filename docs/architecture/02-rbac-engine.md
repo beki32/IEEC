@@ -1,12 +1,15 @@
 # Authorization Engine (RBAC)
 
-## ADR-RBAC-001 — Roles are templates
+**Canonical source:** https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
+
+## ADR-RBAC-001 — Roles are templates (Approved)
 
 A role is a reusable template that groups permissions. It grants no authority until assigned within a specific scope.
 
 - A person may have multiple roles
 - The same role may be assigned multiple times in different scopes
 - Permissions are always evaluated within the assignment scope
+- Roles never bypass the permission engine
 
 Example:
 
@@ -16,13 +19,13 @@ Person: John
 2. Bible Study Leader @ IEEC → Young Adult → Bible Study Team
 ```
 
-## ADR-RBAC-002 — Role templates are live
+## ADR-RBAC-002 — Role templates are live (Approved — Option A)
 
-Role templates are the single source of truth. Updating a template applies to all current and future assignments. Exceptions use permission overrides, not frozen copies.
+Role templates are the single source of truth. Updating a template applies to all current and future assignments. Do not snapshot permissions onto assignments. Exceptions use individual permission overrides.
 
-## ADR-RBAC-003 — Time-bound assignments (recommended)
+## ADR-RBAC-003 — Time-bound assignments (Pending)
 
-Role assignments support optional start/end dates and active/inactive status for temporary leadership and volunteer coverage.
+Recommended Yes in the canonical thread; not yet confirmed. Evaluator supports optional start/end/active fields, but product policy remains pending.
 
 ## Evaluation algorithm
 
@@ -39,6 +42,7 @@ Role assignments support optional start/end dates and active/inactive status for
 - `follow_up.entry.create`
 - `follow_up.entry.update_own`
 - `follow_up.report.review`
+- `follow_up.chat.manage`
 - `follow_up.sensitive.view`
 - `follow_up.membership.recommend`
 - `follow_up.membership.approve`

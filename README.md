@@ -2,7 +2,10 @@
 
 React + Firebase platform for IEEC Young Adult ministry operations.
 
-This branch establishes the **Platform Blueprint** foundation: reusable engines, scoped RBAC, and the Follow-Up module as the first business module.
+**Canonical design source:** [IEEC YA Connect Design](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff)  
+Details: [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md)
+
+This branch establishes the **Platform Blueprint** foundation from that thread: reusable engines, scoped RBAC, and Follow-Up as the first business module.
 
 ## Stack
 
@@ -18,13 +21,13 @@ This branch establishes the **Platform Blueprint** foundation: reusable engines,
 | **Modules** | Business features that orchestrate engines (Follow-Up first) |
 | **ADRs** | Approved decisions that constrain implementation |
 
-Key approved decisions:
+Approved from the canonical thread:
 
-- Engines vs Modules separation
-- Multi-organization tenancy with optional parent oversight
-- Person ≠ User Account
-- Roles are scoped permission templates (live updates + overrides)
-- Follow-Up is the first complete ministry module
+- Step 1 Problem Definition + Step 2 People & Access
+- ADR-RBAC-001 / ADR-RBAC-002 (roles are scoped live templates)
+- Follow-Up Step 3 requirements draft
+
+Pending in-thread: ADR-RBAC-003 (time-bound assignments) and the 10 Follow-Up business decisions.
 
 ## Quick start
 
@@ -44,6 +47,7 @@ Configure Firebase by copying `web/.env.example` to `web/.env` (values for proje
 
 ## Docs
 
+- [Source of truth](docs/SOURCE_OF_TRUTH.md)
 - [Platform Blueprint](docs/architecture/00-platform-blueprint.md)
 - [People & Access Model](docs/architecture/01-people-and-access.md)
 - [RBAC Engine](docs/architecture/02-rbac-engine.md)
@@ -53,4 +57,4 @@ Configure Firebase by copying `web/.env.example` to `web/.env` (values for proje
 
 ## Note on prior Flutter work
 
-An earlier Flutter scaffold lives on `cursor/ieec-ya-connect-55ea` (PR #1). This branch pivots to the React + Firebase platform architecture from the system design sessions.
+An earlier Flutter scaffold lives on `cursor/ieec-ya-connect-55ea` (PR #1). This branch follows the React + Firebase platform architecture from the latest design thread.

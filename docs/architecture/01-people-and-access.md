@@ -1,5 +1,8 @@
 # People & Access Model
 
+**Canonical source:** https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff  
+**Status:** Step 2 — Approved
+
 ## Separations (approved)
 
 | Concept | Meaning | Not the same as |
@@ -22,10 +25,12 @@
 - Default deny
 - Roles provide default permissions
 - Individual overrides can grant or revoke
-- Permissions are evaluated inside an assignment **scope**
+- Permissions are dynamic and evaluated inside an assignment **scope**
 - Soft delete by default
 - Audit all permission changes
 - Separate technical authority from ministry authority
+- Separate oversight from team membership
+- Least-privilege security
 
 ## Permission scopes
 

@@ -1,54 +1,131 @@
 # Follow-Up Module Requirements
 
-**Status:** Requirements draft (Step 3)  
-**Purpose:** First complete ministry module; establishes reusable patterns for other teams.
+**Status:** Step 3 requirements draft  
+**Canonical source:** https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
+
+Follow-Up is the first complete ministry module and establishes patterns for Bible Study, G5, Worship, Media, Usher, and other teams.
 
 ## 3.1 Purpose
 
-Manage the relationship between IEEC YA and newcomers from registration until membership transition.
+Manage the relationship between IEEC YA and newcomers from initial registration until they are ready to transition into active membership.
 
-Goals: contact every newcomer, assign clear responsibility, record activity, surface needs, prevent forgotten people, support newcomer→member transition, give leadership visibility.
+Goals:
 
-## Team structure
+- Ensure every newcomer is contacted and cared for
+- Assign clear responsibility for each person
+- Record all follow-up activity
+- Identify spiritual, personal, and practical needs
+- Prevent newcomers from being forgotten
+- Support the transition from newcomer to member
+- Provide leadership with visibility into progress and concerns
 
-- **Team Leader** — view all, assign/reassign, manage membership requests, CRUD follow-up records, overdue review, recommend/approve status changes, reports, optional rule config, team announcements
-- **Assistant Leader** — view all, assign/reassign, create/update records, overdue review, recommend transitions, limited notifications
-- **Follow-Up Minister** — view assigned newcomers, limited contact info, add/update own entries, record needs/attendance/next steps, receive reminders, escalate
+## 3.2 Team structure
 
-Sensitive deletes, cross-assignment access, and pastoral notes require separate permissions.
+### Team Leader
 
-## Registration channels
+View all newcomers; assign/reassign; manage team membership requests; view/create/update/remove follow-up records; review overdue follow-ups; approve or recommend status changes; view reports; configure follow-up rules when permitted; send team announcements.
 
-Public web form, QR link, mobile app, internal form for authorized users. Public registration must not require an account. Form fields are configurable (required / optional / hidden / internal).
+### Assistant Leader
 
-## Processing flow
+View all newcomers; assign/reassign; view/create/update follow-up records; review overdue follow-ups; send notifications when permitted; recommend transitions; support the Team Leader.
 
-1. Duplicate check (manual review, no auto-merge)
-2. Create/update Person
-3. Ministry status = Newcomer
-4. Create newcomer journey
-5. Notify Follow-Up leaders
-6. Enter unassigned queue
-7. Assign primary (optional secondary) minister
-8. Notify assignee
-9. Calculate first follow-up deadline
-10. Audit all actions
+### Follow-Up Minister
 
-## Core entities
+View assigned newcomers; limited contact info; add follow-up updates; update own entries; view assigned history when permitted; record needs/attendance/responses/next steps; receive reminders; escalate concerns.
+
+Deleting records, viewing sensitive information, or accessing newcomers assigned to other ministers requires separate permission.
+
+## 3.3 Registration channels
+
+Public web form, QR link, mobile app, and internal form for authorized users. Public registration must not require an account.
+
+Collectable fields: first/middle/last/preferred name, phone, email, sex, DOB or age range, address, preferred language, first visit date, how heard, who invited, preferred contact method, prayer request, notes, consent.
+
+Each field is configurable as required / optional / hidden / internal only. Public form must not expose internal notes or admin fields.
+
+## 3.4 Registration processing
+
+1. Duplicate check (manual review; no auto-merge)  
+2. Create/update Person  
+3. Ministry status = `Newcomer`  
+4. Create newcomer journey  
+5. Notify Follow-Up Team Leader and Assistant Leader  
+6. Enter unassigned queue  
+7. Assign to follow-up minister  
+8. Notify assignee  
+9. Calculate first follow-up deadline  
+10. Audit all actions  
+
+## 3.5 Assignment
+
+A newcomer may have one primary minister, optional secondary, supervising leader, start/end dates, reason, and status (`pending`, `active`, `temporarily_paused`, `reassigned`, `completed`, `cancelled`).
+
+Keep full assignment history. Reassignment must not erase prior assignment or follow-up history.
+
+Assignment may be manual or rule-based (workload, sex, language, location, age group, inviter, other configurable rules). Automatic assignment is optional.
+
+## 3.6 Follow-up records
+
+Every interaction is a follow-up entry (newcomer, minister, contact datetime/method/outcome, summary, prayer request, need, attendance, spiritual progress, next action/date, escalation, visibility, attachments, audit fields).
+
+Contact methods and outcomes are configurable (phone, text, WhatsApp, email, in person, video, social, other; reached, no answer, left message, wrong info, contact later, not interested, attended, pastoral attention, completed, other).
+
+## 3.7 Schedule
+
+Configurable schedule example: first contact within 24–48h, second within one week, weekly updates, monthly leadership review, escalation after failed contact attempts.
+
+Lifecycle controls: enable/disable deadlines and reminders, reminder frequency, escalation rules, pause, manual deadline changes with audit reason.
+
+## 3.8 Journey status (separate from Person)
+
+`newly_registered`, `awaiting_assignment`, `assigned`, `contact_initiated`, `actively_participating`, `inconsistent_participation`, `unable_to_contact`, `temporarily_inactive`, `ready_for_membership_review`, `transitioned_to_member`, `declined_continued_follow_up`, `moved_to_another_ministry`, `archived`.
+
+Statuses are configurable; some system statuses may remain protected.
+
+## 3.9 Transition to member
+
+Not automatic by time alone. Criteria may include participation period, attendance, completed follow-up, orientation/discipleship, ministry expectations, leadership review, completed profile fields.
+
+Recommended process: minister recommends → Follow-Up Leader reviews → Core Team / authorized leader approves → ministry status becomes Member → journey completed → optional G5/Bible Study assignment → history + notifications. Approving authority must be configurable.
+
+## 3.10 Sensitive information
+
+Visibility levels: assigned minister only, Follow-Up leadership, selected ministry leaders, pastoral/Head Leader, general follow-up history.
+
+Sensitive notes require explicit permission. System admins do not automatically receive ministry-content access. Safeguarding escalations use a separate stricter path.
+
+## 3.11 Notifications
+
+Trigger on registration, assignment/change, approaching/overdue deadlines, missing weekly update, escalations, membership recommendation/decision, no successful contact, return after inactivity.
+
+Channels: in-app, push, email, SMS/WhatsApp (future). Users control non-critical prefs; critical alerts may be mandatory for responsible roles.
+
+## 3.12 Dashboards
+
+**Minister:** assigned newcomers, due today, overdue, recent activity, next actions, notifications.  
+**Leader:** active/unassigned/new registrations, completed/overdue, no successful contact, workload, ready for review, transition rate, average first-response time, inactive, escalations.
+
+## 3.13 History and audit
+
+Retain history for registration, assignments/reassignments, entries, status changes, recommendations, approvals/rejections, sensitive access, corrections, archive/restore. Soft-delete entries; keep originals for authorized auditors.
+
+## 3.14 Core entities
 
 `people`, `newcomerJourneys`, `followUpAssignments`, `followUpEntries`, `followUpTasks`, `membershipRecommendations`, `statusHistory`, `notifications`, `auditLogs`, `configurations`
 
 Team membership and permissions stay in shared Organization / RBAC engines.
 
-## Open decisions (from design session)
+## Open decisions (must resolve before database design)
 
-1. Final membership approver (configurable workflow preferred)
-2. Multiple active ministers per newcomer?
-3. History visibility for newly assigned ministers
-4. Edit window for past follow-up entries
-5. Minimum follow-up frequency
-6. Ready-for-member criteria
-7. Sensitive/pastoral field classification
-8. Automatic welcome messages
-9. Attendance tracking during follow-up
-10. Multiple journeys if a person leaves and returns
+1. Who gives final membership approval (Follow-Up Leader, Core Team, Head Leader, or configurable workflow)?  
+2. Can one newcomer be actively assigned to more than one follow-up minister?  
+3. Should ministers see complete history or only post-assignment records?  
+4. Can ministers edit previous entries, and for how long?  
+5. Expected minimum follow-up frequency?  
+6. Exact ready-for-member conditions?  
+7. Which fields are sensitive/pastoral?  
+8. Automatic welcome messages after registration?  
+9. Track ministry-event and Sunday attendance during follow-up?  
+10. Multiple newcomer journeys if a person leaves and returns?  
+
+**Next design sections after these decisions:** Step 3.2 — Follow-Up Workflows and State Transitions, then the Firestore data model.
