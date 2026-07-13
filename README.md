@@ -5,7 +5,8 @@
 **Canonical design source:**  
 https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
 
-See [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md).
+See [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md).  
+Do **not** use content from the earlier share after: `Give me over all content from step 1 and step 2 in pdf`.
 
 ## Goal of this branch
 
