@@ -424,10 +424,17 @@ profile completion, status history, and access to multiple organizations.
 
 ## Repo extension (not in PDF v0.3)
 
-Draft Chapters 4–6 now live in this repo as planning authority until a later PDF revision:
+Draft Chapters 4–13 now live in this repo as planning authority until a later PDF revision:
 
 - `docs/handbook/Chapter_04_People_and_Account_Model.md`
 - `docs/handbook/Chapter_05_Identity_and_Authentication.md`
 - `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md`
+- `docs/handbook/Chapter_07_Dynamic_Forms_Engine.md`
+- `docs/handbook/Chapter_08_Workflow_Engine.md`
+- `docs/handbook/Chapter_09_Ministry_Calendar_Engine.md`
+- `docs/handbook/Chapter_10_Chat_and_Collaboration.md`
+- `docs/handbook/Chapter_11_Notifications_and_Tasks.md`
+- `docs/handbook/Chapter_12_Audit_and_History.md`
+- `docs/handbook/Chapter_13_Data_and_Engineering_Standards.md`
 
 See `docs/handbook/README.md`.

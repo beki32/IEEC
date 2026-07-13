@@ -19,9 +19,15 @@ Handbook TOC status:
 | 4 People and Account Model | **Draft:** `docs/handbook/Chapter_04_People_and_Account_Model.md` |
 | 5 Identity and Authentication | **Draft:** `docs/handbook/Chapter_05_Identity_and_Authentication.md` |
 | 6 Authorization and Permission Engine | **Draft:** `docs/handbook/Chapter_06_Authorization_and_Permission_Engine.md` |
-| 7–13 (Forms, Workflow, Calendar, Chat, Notifications, Audit, Data standards) | Planned |
+| 7 Dynamic Forms Engine | **Draft:** `docs/handbook/Chapter_07_Dynamic_Forms_Engine.md` |
+| 8 Workflow Engine | **Draft:** `docs/handbook/Chapter_08_Workflow_Engine.md` |
+| 9 Ministry Calendar Engine | **Draft:** `docs/handbook/Chapter_09_Ministry_Calendar_Engine.md` |
+| 10 Chat and Collaboration | **Draft:** `docs/handbook/Chapter_10_Chat_and_Collaboration.md` |
+| 11 Notifications and Tasks | **Draft:** `docs/handbook/Chapter_11_Notifications_and_Tasks.md` |
+| 12 Audit and History | **Draft:** `docs/handbook/Chapter_12_Audit_and_History.md` |
+| 13 Data and Engineering Standards | **Draft:** `docs/handbook/Chapter_13_Data_and_Engineering_Standards.md` |
 
-Chapters 4–6 drafts are planning authority for those topics until a later PDF revision absorbs them.
+Chapters 4–13 drafts are planning authority for those topics until a later PDF revision absorbs them.
 
 ## ChatGPT design threads (module detail)
 
@@ -45,6 +51,6 @@ RBAC clarifications: ADR-RBAC-001/002/003 (scoped live templates, full default g
 
 ## Next planning steps
 
-1. Human review Handbook v0.3 + Follow-Up pack  
-2. Continue handbook chapters 4–6 (People, AuthN, AuthZ) when ready — or freeze v0.3 + Follow-Up pack as enough for first coding milestone  
+1. Human review Handbook v0.3 + Ch. 4–13 drafts + Follow-Up pack  
+2. Freeze Architecture Baseline v1.0 (optional polish: permission key normalization, remaining Follow-Up open decisions)  
 3. Paste `docs/AI_CODING_HANDOFF_PROMPT.md` into the coding Cursor account after freeze

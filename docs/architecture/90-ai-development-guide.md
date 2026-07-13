@@ -1,6 +1,6 @@
 # AI Development Guide
 
-**Canonical source:** Architecture Handbook v0.3 (`docs/handbook/`) + Follow-Up docs
+**Canonical source:** Architecture Handbook v0.3 + Ch. 4–13 drafts (`docs/handbook/`) + Follow-Up docs
 
 **Coding:** use `docs/AI_CODING_HANDOFF_PROMPT.md` in a separate Cursor account. This planning agent does not write app code.
 
