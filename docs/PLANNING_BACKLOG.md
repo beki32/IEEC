@@ -13,8 +13,8 @@ Ordered next work for the planning phase (no code).
 
 ## Immediate (docs only)
 
-1. Set **documented defaults** for remaining Follow-Up admin policies (approver, edit window, welcome message, etc.) — not as new product questions if already implied; capture defaults for the Configuration Engine
-2. Draft **Step 3.2 — Follow-Up Workflows and State Transitions**
+1. ~~Draft Step 3.2 — Follow-Up Workflows and State Transitions~~ **Done** → `docs/modules/follow-up-workflows-and-state-transitions.md`
+2. Set **documented defaults** for remaining Follow-Up admin policies where the design already implies them (capture for Configuration Engine)
 3. Draft **Follow-Up Firestore data model** (collections + fields only)
 4. Draft **Permission catalog** for Follow-Up Leader / Assistant / Minister
 

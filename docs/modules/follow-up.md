@@ -160,4 +160,4 @@ Team membership and permissions stay in shared Organization / RBAC engines.
 9. ~~Track attendance during follow-up?~~ **Resolved — Yes**, per §3.6A (Saturday program attendance via calendar; separate from weekly report)  
 10. Multiple newcomer journeys if a person leaves and returns?  
 
-**Next design sections:** Step 3.2 — Follow-Up Workflows and State Transitions, then the Firestore data model.
+**Next design sections:** Workflows & state transitions are documented in [`follow-up-workflows-and-state-transitions.md`](follow-up-workflows-and-state-transitions.md). Next: Firestore data model + permission catalog.
