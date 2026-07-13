@@ -61,10 +61,11 @@ Follow-Up (first complete module), Members, Ministers, Bible Study, G5, Worship,
 **Product surfaces (both first-class):** Web app + Mobile app (iOS/Android).
 
 - **Web:** React + TypeScript (+ Vite)
-- **Mobile:** Native/cross-platform mobile client against the same backend (in scope — not deferred). Technology choice at coding freeze must share Firebase contracts and must not fork business rules (React Native/Expo aligns with this TS baseline; Flutter may be used if the team standardizes on it)
+- **Mobile:** Native/cross-platform mobile client against the same backend (in scope — not deferred). **Planning default:** Expo (React Native) + **EAS Build** to produce Android `.apk`/`.aab` and iOS `.ipa`. Flutter remains an allowed alternate if the team freezes on it — same Firebase contracts, no forked business rules.
 - **Shared backend:** Firebase Authentication, Cloud Firestore, Cloud Functions (invites, workflow automation), Firebase Storage (planned)
 - Security Rules enforcing scoped RBAC for every client
 - Push notifications are part of the mobile + web notification channels (Chapter 11)
+- **Mobile release:** EAS (or Flutter CI) builds → internal test (App Distribution / TestFlight) → Play Store (AAB) / App Store (IPA). Requires Google Play + Apple Developer accounts and signing keys.
 
 ## Organization hierarchy
 

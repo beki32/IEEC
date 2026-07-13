@@ -64,7 +64,8 @@ Build a **people-centered** Young Adult ministry platform for IEEC YA.
 - **Engines vs Modules**: shared platform engines; Follow-Up is the first business module
 - **Clients:** **Web + Mobile** (both first-class; mobile is not “later”)
 - **Web stack:** React + TypeScript + Vite
-- **Mobile:** iOS/Android app sharing the same Firebase backend and permission model (confirm RN/Expo vs Flutter at coding start — do not fork workflows/data)
+- **Mobile:** iOS/Android app sharing the same Firebase backend and permission model
+- **Mobile framework (planning default):** **Expo (React Native) + EAS Build** → Android `.apk`/`.aab` and iOS `.ipa` (Flutter allowed only if explicitly frozen instead — do not fork workflows/data)
 - **Backend:** Firebase Auth, Firestore; Functions/Storage as needed
 - Multi-org capable later; start with one organization (`ieec_ya` / project `ieec-ya-connect` if configs exist)
 
@@ -156,6 +157,14 @@ Implement as organization/Follow-Up settings with these **defaults from the desi
 - Redesigning RBAC or Follow-Up process “improvements” not in the docs
 
 **In scope (not deferred):** Web app **and** Mobile app. Ministers must be able to do core Follow-Up ops (assigned newcomers, weekly report, Saturday attendance, bio) on mobile; admin/config may be web-primary but must not be web-only forever.
+
+### Mobile binaries (how APK / IPA are made)
+
+- **Default:** Expo + EAS Build  
+  - `eas build --platform android` → `.apk` (testing) and/or `.aab` (Play Store)  
+  - `eas build --platform ios` → `.ipa` (TestFlight / App Store)  
+- Requires Apple Developer Program + Google Play Console + signing setup  
+- See handbook `docs/handbook/Chapter_13_Data_and_Engineering_Standards.md` §13.8.1  
 
 ---
 

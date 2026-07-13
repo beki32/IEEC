@@ -78,13 +78,52 @@ Auth UID → userAccounts → Person → effective permissions → allow/deny
 - Push notifications are expected for mobile task/reminder channels (Chapter 11).  
 - Do not redesign architecture for one client’s convenience.
 
+### 13.8.1 How iOS and Android installables are generated
+
+The mobile app is a **real native binary**, not “save the website as an app.” Builds produce:
+
+| Platform | Artifact | Typical use |
+| --- | --- | --- |
+| Android | `.apk` | Internal/test install / sideload |
+| Android | `.aab` (Android App Bundle) | Google Play Store upload (preferred for store) |
+| iOS | `.ipa` | TestFlight / App Store (requires Apple Developer Program) |
+
+**Planning default (aligned with React web):** **Expo (React Native) + EAS Build**
+
+```text
+eas build --platform android   →  .apk and/or .aab
+eas build --platform ios       →  .ipa
+eas submit                     →  Play Console / App Store Connect (optional)
+```
+
+Local/dev alternatives still exist (`npx expo run:android`, Xcode archive, Android Studio), but **CI/cloud builds via EAS** are the standard release path so the team does not depend on one person’s laptop.
+
+**If the team freezes on Flutter instead:**
+
+```text
+flutter build apk            →  .apk
+flutter build appbundle      →  .aab
+flutter build ipa            →  .ipa (macOS + Xcode + Apple signing)
+```
+
+**Accounts and signing (required either way):**
+
+1. **Google Play Console** developer account — signing key / Play App Signing for Android store releases  
+2. **Apple Developer Program** — certificates, provisioning profiles, bundle id for IPA / TestFlight / App Store  
+3. Store listing, privacy policy, and Firebase config (`google-services` / `GoogleService-Info.plist`) wired per environment (dev/staging/prod)
+
+**Not how we ship mobile:** wrapping the Vite web URL in a WebView-only shell as the long-term app. Web remains a first-class browser client; mobile is a native client on the same Firebase backend.
+
+**MVP distribution path:** internal testers via Firebase App Distribution and/or TestFlight + internal Play track, then public store when ready.
+
 ## 13.9 Testing standards
 
 Minimum before calling a slice done:
 
 - Unit tests for permission resolution and workflow guards where logic is pure.  
 - Rules tests (emulator) for allow and deny paths on Follow-Up collections.  
-- Smoke tests for public registration and authenticated report/attendance happy paths.  
+- Smoke tests for public registration and authenticated report/attendance happy paths on **web and mobile**.  
+- At least one successful **Android build artifact** (apk/aab) and one **iOS build path** documented before calling mobile “shippable” (TestFlight optional until Apple account is ready).  
 
 ## 13.10 AI / human implementation protocol
 
