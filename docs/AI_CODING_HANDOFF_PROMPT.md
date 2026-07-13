@@ -17,26 +17,32 @@ This coding session is on a **different machine/account** from the planning agen
 
 ## Source map (mandatory)
 
+### Highest authority
+
+`docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf`  
+(searchable: `docs/handbook/Architecture_Handbook_v0.3.md`)
+
+If a module doc conflicts with the handbook, **follow the handbook** unless an approved ADR says otherwise.
+
+### ChatGPT threads (supporting detail)
+
 | Phase | Authority |
 | --- | --- |
-| Chapters 1–2 (vision, people & access) | https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd — **only content BEFORE** the user message `Give me over all content from step 1 and step 2 in pdf` |
-| Chapter 3+ (Follow-Up, RBAC ADRs, data model) | https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff |
+| Steps 1–2 narrative | https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd — only BEFORE `Give me over all content from step 1 and step 2 in pdf` |
+| Follow-Up Step 3+ | https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff |
 
-Repo docs override chat memory. Read these first:
+### Repo docs to read first
 
 1. `docs/SOURCE_OF_TRUTH.md`
-2. `docs/architecture/chapter-01-vision-and-problem.md`
-3. `docs/architecture/chapter-02-people-and-access.md`
-4. `docs/architecture/chapter-03-follow-up.md`
-5. `docs/architecture/00-platform-blueprint.md`
-6. `docs/architecture/01-people-and-access.md`
-7. `docs/architecture/02-rbac-engine.md`
-8. `docs/architecture/90-ai-development-guide.md`
-9. `docs/modules/follow-up.md`
-10. `docs/modules/follow-up-workflows-and-state-transitions.md`
-11. `docs/modules/follow-up-firestore-data-model.md`
-12. `docs/modules/follow-up-permission-catalog.md`
-13. `docs/adr/README.md` and all ADR files
+2. `docs/handbook/README.md` + Handbook v0.3
+3. `docs/adr/README.md` (ADR-001…007 + ADR-RBAC-001…003)
+4. `docs/architecture/00-platform-blueprint.md`
+5. `docs/architecture/90-ai-development-guide.md`
+6. `docs/modules/follow-up.md`
+7. `docs/modules/follow-up-workflows-and-state-transitions.md`
+8. `docs/modules/follow-up-firestore-data-model.md`
+9. `docs/modules/follow-up-permission-catalog.md`
+10. `docs/modules/follow-up-config-defaults.md`
 
 ---
 

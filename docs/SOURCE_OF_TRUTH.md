@@ -1,58 +1,45 @@
 # Canonical design sources
 
-IEEC YA Connect design spans **two ChatGPT shares** as one continuous project.
+## Design authority (highest)
 
-## Source map
+**Architecture Handbook v0.3** (July 13, 2026)
 
-| Phase | Content | Share |
-| --- | --- | --- |
-| **Chapters / Steps 1–2** (first phase) | Vision, problem definition, org structure, ministry journey, design principles, people & access, RBAC foundations | [Link 1](https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd) |
-| **Chapter / Step 3+** (continuation) | Follow-Up requirements, RBAC ADRs refinement, platform engines, later design | [Link 2](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff) |
+- PDF: `docs/handbook/IEEC_YA_Connect_Architecture_Handbook_v0.3.pdf`
+- Searchable extract: `docs/handbook/Architecture_Handbook_v0.3.md`
 
-Link 2 **continues** the project started in link 1. It does not replace chapters 1–2.
+If a module spec conflicts with the handbook, **the handbook wins** unless an approved ADR changes the standard.
 
-## Link 1 cutoff rule
+Handbook TOC status:
 
-In link 1, **do not use** any information that appears **after** this user message:
+| Chapter | Status in v0.3 |
+| --- | --- |
+| 1 Purpose, Scope, Design Authority | Present |
+| 2 Core Design Principles & Engines | Present |
+| 3 Organization and Tenant Model | Present |
+| 4–13 (People, AuthN, AuthZ, Forms, Workflow, Calendar, Chat, Notifications, Audit, Data standards) | Planned |
 
-> Give me over all content from step 1 and step 2 in pdf
+## ChatGPT design threads (module detail)
 
-That post-cutoff material (PDF packaging / regenerated dumps / later noise) is out of scope.
+| Phase | Authority |
+| --- | --- |
+| Chapters / Steps 1–2 foundation narrative | [Link 1](https://chatgpt.com/share/6a54d9c0-23d4-83ea-b8d6-6e3675729fbd) — **only before** `Give me over all content from step 1 and step 2 in pdf` |
+| Follow-Up Step 3+ detail | [Link 2](https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff) |
 
-Use link 1 **before that message** for chapters 1–2 detail.
-
-## How to resolve conflicts
-
-1. Chapters 1–2 → prefer **link 1 (pre-cutoff)**
-2. Chapter 3+ (Follow-Up, later ADRs, engines) → prefer **link 2**
-3. If link 2 restates Step 1–2 as context, treat that as a **handoff summary**, not a replacement of link 1 chapters 1–2
+Repo Follow-Up docs under `docs/modules/` capture link 2 detail for coding handoff.
 
 ## Phase rule
 
-**Planning only.** No application code until Architecture Baseline v1.0 is explicitly approved for implementation.
+**Planning only in this branch/agent.** No application code here.  
+Coding uses `docs/AI_CODING_HANDOFF_PROMPT.md` in a **separate Cursor account** after baseline freeze.
 
-## Status
+## Approved ADR catalog (Handbook)
 
-| Area | Source | Status |
-| --- | --- | --- |
-| Step 1 — Problem Definition / Foundation | Link 1 (pre-cutoff) | Approved |
-| Step 2 — People & Access | Link 1 (pre-cutoff) | Approved |
-| Step 3 — Follow-Up Team Requirements | Link 2 | Drafted (policies mostly admin-configurable; attendance resolved) |
-| ADR-RBAC-001 / default grant | Link 2 + planning clarification | Approved |
-| ADR-RBAC-002 live templates | Link 2 | Approved |
-| ADR-RBAC-003 time-bound assignments | Link 1 principles + Link 2 RBAC | **Approved (Yes)** |
+ADR-001 Person record · ADR-002 Roles as templates · ADR-003 One org calendar · ADR-004 Chat ≠ team membership · ADR-005 Dynamic forms · ADR-006 Soft delete + audit · ADR-007 Federated multi-org  
 
-## Living document chapters
+RBAC clarifications: ADR-RBAC-001/002/003 (scoped live templates, full default grant, time bounds).
 
-1. Vision & Requirements *(link 1)*  
-2. Organization Structure / People & Access *(link 1)*  
-3. Access Control (RBAC) *(started link 1, continued link 2)*  
-4. Database Design  
-5. API Design  
-6. UI/UX  
-7. Workflows  
-8. Notifications  
-9. Reports  
-10. Deployment  
+## Next planning steps
 
-Follow-Up module detail lives under Step 3 in link 2 → `docs/modules/follow-up.md`.
+1. Human review Handbook v0.3 + Follow-Up pack  
+2. Continue handbook chapters 4–6 (People, AuthN, AuthZ) when ready — or freeze v0.3 + Follow-Up pack as enough for first coding milestone  
+3. Paste `docs/AI_CODING_HANDOFF_PROMPT.md` into the coding Cursor account after freeze

@@ -1,6 +1,6 @@
 # Authorization Engine (RBAC)
 
-**Canonical source:** https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
+**Canonical source:** Architecture Handbook v0.3 (`docs/handbook/`) + Follow-Up link 2 detail
 
 ## ADR-RBAC-001 — Roles are templates (Approved)
 

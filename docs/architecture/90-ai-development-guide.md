@@ -1,6 +1,8 @@
 # AI Development Guide
 
-**Canonical source:** https://chatgpt.com/share/6a54dabb-eca4-83ea-b88e-fdae1dd5d0ff
+**Canonical source:** Architecture Handbook v0.3 (`docs/handbook/`) + Follow-Up docs
+
+**Coding:** use `docs/AI_CODING_HANDOFF_PROMPT.md` in a separate Cursor account. This planning agent does not write app code.
 
 ## Current phase
 

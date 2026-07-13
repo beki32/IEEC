@@ -1,27 +1,20 @@
 # Planning backlog
 
-Ordered next work for the planning phase (no code).
+## Done (planning)
 
-## Already settled (do not re-ask)
+- Source map (link 1 Ch.1–2 / link 2 Follow-Up; PDF cutoff rule)
+- Follow-Up requirements, workflows, Firestore model, permissions, config defaults
+- AI coding handoff prompt (for a separate Cursor account)
+- Architecture Handbook **v0.3** ingested as design authority (Ch. 1–3 + ADR-001…007)
 
-- Chapters 1–2 from link 1 (pre-PDF-cutoff)
-- Chapter 3 Follow-Up requirements from link 2
-- ADR-RBAC-001 / default grant / ADR-RBAC-002 / **ADR-RBAC-003 (Yes)**
-- Attendance: Saturday calendar-linked, separate from weekly report
-- Most Follow-Up policies: Admin-configurable
-- Roles managed from Admin; assignment grants all template permissions in scope
+## Next
 
-## Immediate (docs only)
+1. **Human review** of Handbook v0.3 + Follow-Up pack  
+2. Choose:
+   - **A)** Freeze baseline now (Handbook v0.3 + Follow-Up docs → start coding via handoff prompt), or  
+   - **B)** Continue handbook **Chapter 4–6** (People, AuthN, AuthZ) before coding  
+3. When frozen: paste `docs/AI_CODING_HANDOFF_PROMPT.md` into the **coding** Cursor account  
 
-1. ~~Draft Step 3.2 — Follow-Up Workflows and State Transitions~~ **Done**
-2. ~~Draft Follow-Up Firestore data model~~ **Done** → `docs/modules/follow-up-firestore-data-model.md`
-3. ~~Draft Permission catalog for Follow-Up roles~~ **Done** → `docs/modules/follow-up-permission-catalog.md`
-4. Capture remaining Configuration Engine defaults implied by the design (report Friday deadline, 7-day edit window, welcome message on, etc.) → see `docs/modules/follow-up-config-defaults.md`
-5. Freeze **Architecture Baseline v1.0** checklist
-6. Use `docs/AI_CODING_HANDOFF_PROMPT.md` in a **different Cursor account** for implementation (planning agent does not code)
+## Not done by this planning agent
 
-## Then
-
-5. Human reviews planning pack + `docs/AI_CODING_HANDOFF_PROMPT.md`
-6. Freeze **Architecture Baseline v1.0**
-7. Human pastes the handoff prompt into a **separate Cursor coding account/agent** to implement (this planning branch/agent does not write app code)
+- Application code (React/Firebase implementation)
