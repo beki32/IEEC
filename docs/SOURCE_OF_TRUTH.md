@@ -18,6 +18,7 @@ An earlier share (`6a54d9c0-…`) is **not** the source of truth. Prefer this do
 | Step 2 — People & Access Model | Approved |
 | Step 3 — Follow-Up Team Requirements | Drafted (open business decisions remain) |
 | ADR-RBAC-001 — Roles are templates | Approved |
+| ADR-RBAC-001 default grant — assigned role gives all template permissions (in scope) | Approved (planning clarification) |
 | ADR-RBAC-002 — Role templates are live (Option A) | Approved |
 | ADR-RBAC-003 — Time-bound role assignments | **Pending** (recommended Yes; not yet answered in-thread) |
 

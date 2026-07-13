@@ -11,17 +11,29 @@ A role is a reusable template that groups permissions. It grants no authority un
 - Permissions are always evaluated within the assignment scope
 - Roles never bypass the permission engine
 
+### Default grant rule (Approved)
+
+**By default, a person receives all permissions defined on their assigned role template(s), within each assignment’s scope.**
+
+- No extra per-permission setup is required at assignment time
+- Assigning “Follow-Up Leader” means they get every permission currently on that template for that scope
+- Exceptions are handled only through **permission overrides** (grant or deny), not by stripping permissions during assignment
+
 Example:
 
 ```text
 Person: John
 1. Follow-Up Leader @ IEEC → Young Adult → Follow-Up Team
+   → receives all Follow-Up Leader permissions in that team scope
 2. Bible Study Leader @ IEEC → Young Adult → Bible Study Team
+   → receives all Bible Study Leader permissions in that team scope
 ```
 
 ## ADR-RBAC-002 — Role templates are live (Approved — Option A)
 
 Role templates are the single source of truth. Updating a template applies to all current and future assignments. Do not snapshot permissions onto assignments. Exceptions use individual permission overrides.
+
+Because of the default grant rule + live templates: if Admin adds a permission to the Follow-Up Leader role, everyone currently assigned that role gets it automatically (within scope).
 
 ## ADR-RBAC-003 — Time-bound assignments (Pending)
 
