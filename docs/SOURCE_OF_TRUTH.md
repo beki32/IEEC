@@ -40,14 +40,16 @@ Repo Follow-Up docs under `docs/modules/` capture link 2 detail for coding hando
 
 ## Phase rule
 
-**Planning only in this branch/agent.** No application code here.  
-Coding uses `docs/AI_CODING_HANDOFF_PROMPT.md` in a **separate Cursor account** after baseline freeze.
+**Planning is frozen as Architecture Baseline v1.0 for coding.**  
+This planning agent still does not write application code.  
+**Coding:** paste `docs/AI_CODING_HANDOFF_PROMPT.md` into a **separate Cursor coding account**.
 
 ## Product clients (settled)
 
 IEEC YA Connect is a **web + mobile** system (both first-class).  
-Shared Firebase backend and handbook engines; do not plan “web only, mobile later.”  
-**Mobile stack (settled):** React Native via **Expo** + EAS Build for `.apk`/`.aab` and `.ipa`. **Not Flutter.** See Ch. 13 §13.8.1.
+**Web:** React + TypeScript + Vite.  
+**Mobile:** React Native via **Expo** + EAS Build (`.apk`/`.aab`/`.ipa`). **Not Flutter.**  
+See Ch. 13 §13.8.1.
 
 ## Approved ADR catalog (Handbook)
 
@@ -55,8 +57,8 @@ ADR-001 Person record · ADR-002 Roles as templates · ADR-003 One org calendar 
 
 RBAC clarifications: ADR-RBAC-001/002/003 (scoped live templates, full default grant, time bounds).
 
-## Next planning steps
+## Coding handoff
 
-1. Human review Handbook v0.3 + Ch. 4–13 drafts + Follow-Up pack  
-2. Freeze Architecture Baseline v1.0 (optional polish: permission key normalization, remaining Follow-Up open decisions)  
-3. Paste `docs/AI_CODING_HANDOFF_PROMPT.md` into the coding Cursor account after freeze
+1. Use `docs/AI_CODING_HANDOFF_PROMPT.md` (status: **READY**)  
+2. New Cursor coding agent / different account  
+3. Agent must propose Phase A plan and wait for approval before implementing

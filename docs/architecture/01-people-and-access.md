@@ -1,7 +1,7 @@
 # People & Access Model
 
-**Canonical source:** Handbook Chapters 4–6 drafts (`docs/handbook/Chapter_04_*.md` … `Chapter_06_*.md`) + Link 2  
-**Status:** Step 2 approved; expanded in handbook Ch. 4–6 drafts
+**Canonical source:** Handbook Chapter 6 + Follow-Up permission catalog (canonical plural keys)  
+**Status:** Baseline v1.0 — use catalog keys as written; do not reintroduce singular aliases
 
 ## Separations (approved)
 
