@@ -33,8 +33,8 @@ import {
   type UserAccount,
 } from '@ieec/shared';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v6';
-export const DEMO_SEED_VERSION = 6;
+const STORAGE_KEY = 'ieec-ya-connect-demo-v7';
+export const DEMO_SEED_VERSION = 7;
 const SEED_VERSION = DEMO_SEED_VERSION;
 const ACTIVE_TEAM_KEY = 'ieec-ya-connect-active-team';
 
@@ -213,6 +213,7 @@ function createSeed(): DemoState {
     email: { address: email, normalized: normalizeEmail(email), verified: true },
     contactPreference: { method: 'text', preferredTime: 'evening', customTimeNote: null },
     photoFileId: null,
+    photoUrl: null,
     currentMinistryStatus: status,
     recordStatus: 'active',
     hasUserAccount: hasAccount,
@@ -680,6 +681,7 @@ export const demoStore = {
     localStorage.removeItem('ieec-ya-connect-demo-v2');
     localStorage.removeItem('ieec-ya-connect-demo-v4');
     localStorage.removeItem('ieec-ya-connect-demo-v5');
+    localStorage.removeItem('ieec-ya-connect-demo-v6');
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(ACTIVE_TEAM_KEY);
     const seed = createSeed();
@@ -709,12 +711,14 @@ export const demoStore = {
       localStorage.getItem('ieec-ya-connect-demo-v1') ||
       localStorage.getItem('ieec-ya-connect-demo-v2') ||
       localStorage.getItem('ieec-ya-connect-demo-v4') ||
-      localStorage.getItem('ieec-ya-connect-demo-v5');
+      localStorage.getItem('ieec-ya-connect-demo-v5') ||
+      localStorage.getItem('ieec-ya-connect-demo-v6');
     if (legacy && !localStorage.getItem(STORAGE_KEY)) {
       localStorage.removeItem('ieec-ya-connect-demo-v1');
       localStorage.removeItem('ieec-ya-connect-demo-v2');
       localStorage.removeItem('ieec-ya-connect-demo-v4');
       localStorage.removeItem('ieec-ya-connect-demo-v5');
+      localStorage.removeItem('ieec-ya-connect-demo-v6');
     }
     load();
   },
@@ -903,6 +907,7 @@ export const demoStore = {
         customTimeNote: null,
       },
       photoFileId: null,
+      photoUrl: null,
       currentMinistryStatus: 'newcomer',
       recordStatus: 'active',
       hasUserAccount: false,
@@ -1291,6 +1296,68 @@ export const demoStore = {
     return state.people.filter((p) =>
       state.roleAssignments.some((ra) => ra.personId === p.id && ra.active),
     );
+  },
+
+  updateMyProfile(input: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    contactMethod?: string;
+    preferredTime?: string | null;
+    photoUrl?: string | null;
+    clearPhoto?: boolean;
+  }) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const person = state.people.find((p) => p.id === session.person.id);
+    if (!person) throw new Error('Person not found');
+
+    const prev = { ...person };
+    if (input.firstName !== undefined) {
+      person.firstName = input.firstName.trim();
+      person.normalizedFirstName = normalizeName(person.firstName);
+    }
+    if (input.lastName !== undefined) {
+      person.lastName = input.lastName.trim();
+      person.normalizedLastName = normalizeName(person.lastName);
+    }
+    if (input.phone !== undefined) {
+      person.phone = { display: input.phone.trim(), normalized: normalizePhone(input.phone) };
+    }
+    if (input.contactMethod !== undefined) {
+      person.contactPreference = {
+        ...person.contactPreference,
+        method: input.contactMethod,
+      };
+    }
+    if (input.preferredTime !== undefined) {
+      person.contactPreference = {
+        ...person.contactPreference,
+        preferredTime: input.preferredTime,
+      };
+    }
+    if (input.clearPhoto) {
+      person.photoUrl = null;
+      person.photoFileId = null;
+    } else if (input.photoUrl !== undefined) {
+      person.photoUrl = input.photoUrl;
+      person.photoFileId = input.photoUrl ? 'local_photo' : null;
+    }
+    person.updatedAt = nowIso();
+    person.updatedBy = session.person.id;
+    audit(state, 'person.profile.update', 'person', person.id, session.person.id, {
+      previousValue: prev,
+      newValue: {
+        firstName: person.firstName,
+        lastName: person.lastName,
+        phone: person.phone,
+        contactPreference: person.contactPreference,
+        hasPhoto: !!person.photoUrl,
+      },
+    });
+    save(state);
+    return person;
   },
 
   listCalendarEvents(includeCancelled = false) {

@@ -1,6 +1,7 @@
 import { Permissions } from '@ieec/shared';
 import { FormEvent, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { Avatar } from '../components/Avatar';
 import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
 
@@ -67,7 +68,7 @@ export function QueuePage() {
       (a) => a.journeyId === journeyId && a.assignmentStatus === 'active' && a.assignmentType === 'primary',
     );
     setAssignJourneyId(journeyId);
-    setSelectedAssigneeId(current?.assignedPersonId || assignees[0]?.person.id || '');
+    setSelectedAssigneeId(current?.assignedPersonId ?? '');
     setAssignError('');
   }
 
@@ -141,8 +142,17 @@ export function QueuePage() {
               return (
                 <tr key={journey.id}>
                   <td>
-                    <strong>{person!.firstName} {person!.lastName}</strong>
-                    <div className="muted">{person!.email.address}</div>
+                    <div className="person-cell">
+                      <Avatar
+                        name={`${person!.firstName} ${person!.lastName}`}
+                        photoUrl={person!.photoUrl}
+                        size="sm"
+                      />
+                      <div>
+                        <strong>{person!.firstName} {person!.lastName}</strong>
+                        <div className="muted">{person!.email.address}</div>
+                      </div>
+                    </div>
                   </td>
                   <td>
                     <span className={`badge ${journey.journeyStatus.includes('duplicate') ? 'warn' : ''}`}>
@@ -150,7 +160,18 @@ export function QueuePage() {
                     </span>
                   </td>
                   <td>
-                    {assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unassigned'}
+                    {assignee ? (
+                      <div className="person-cell">
+                        <Avatar
+                          name={`${assignee.firstName} ${assignee.lastName}`}
+                          photoUrl={assignee.photoUrl}
+                          size="sm"
+                        />
+                        <span>{assignee.firstName} {assignee.lastName}</span>
+                      </div>
+                    ) : (
+                      'Unassigned'
+                    )}
                   </td>
                   <td className="row">
                     <Link to={`/app/people/${person!.id}`}>Open</Link>
@@ -184,34 +205,57 @@ export function QueuePage() {
           onClick={() => setAssignJourneyId(null)}
         >
           <form
-            className="modal-panel grid"
+            className="modal-panel assign-modal grid"
             onClick={(e) => e.stopPropagation()}
             onSubmit={confirmAssign}
           >
             <h2 id="assign-title">
               {existingPrimary ? 'Reassign' : 'Assign'} {assignPerson.firstName} {assignPerson.lastName}
             </h2>
-            <p className="muted">Choose a Follow-Up team member. Prior assignment history is kept on reassign.</p>
-            <label>
-              Assign to <span className="error">*</span>
-              <select
-                required
-                value={selectedAssigneeId}
-                onChange={(e) => {
-                  setSelectedAssigneeId(e.target.value);
-                  setAssignError('');
-                }}
-              >
-                <option value="" disabled>
-                  Select a name…
-                </option>
-                {assignees.map(({ person, roleName }) => (
-                  <option key={person.id} value={person.id}>
-                    {person.firstName} {person.lastName} — {roleName}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <p className="muted">
+              Pick a Follow-Up team member. Prior assignment history is kept on reassign.
+            </p>
+
+            <fieldset className="assignee-picker">
+              <legend>
+                Assign to <span className="error">*</span>
+              </legend>
+              {assignees.length === 0 ? (
+                <p className="error">No assignable team members.</p>
+              ) : (
+                <div className="assignee-list" role="listbox" aria-label="Assignable team members">
+                  {assignees.map(({ person, roleName }) => {
+                    const selected = selectedAssigneeId === person.id;
+                    const isCurrent = existingPrimary?.assignedPersonId === person.id;
+                    const name = `${person.firstName} ${person.lastName}`;
+                    return (
+                      <button
+                        key={person.id}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        className={`assignee-option ${selected ? 'selected' : ''}`}
+                        onClick={() => {
+                          setSelectedAssigneeId(person.id);
+                          setAssignError('');
+                        }}
+                      >
+                        <Avatar name={name} photoUrl={person.photoUrl} size="md" />
+                        <span className="assignee-meta">
+                          <strong>{name}</strong>
+                          <span className="muted">{roleName}</span>
+                          {isCurrent ? <span className="badge ok">Current</span> : null}
+                        </span>
+                        <span className={`assignee-check ${selected ? 'on' : ''}`} aria-hidden="true">
+                          {selected ? '✓' : ''}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </fieldset>
+
             {assignError ? <p className="error">{assignError}</p> : null}
             <div className="row">
               <button type="submit" disabled={!selectedAssigneeId || assignees.length === 0}>

@@ -87,6 +87,8 @@ export interface Person {
     customTimeNote: string | null;
   };
   photoFileId: string | null;
+  /** Demo/local display URL or data URL until File service is wired */
+  photoUrl?: string | null;
   currentMinistryStatus: MinistryStatus;
   recordStatus: RecordStatus;
   hasUserAccount: boolean;

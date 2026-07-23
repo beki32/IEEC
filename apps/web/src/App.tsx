@@ -4,6 +4,7 @@ import { SessionProvider, useSession } from './lib/session';
 import { demoStore } from './lib/demoStore';
 import { ChatDockProvider, useChatDock } from './lib/chatDock';
 import { ADMIN_MENUS, SHARED_MENUS, TEAM_MODULE_MENUS, type MenuItem } from './lib/teamMenus';
+import { Avatar } from './components/Avatar';
 import { ChatDock } from './components/ChatDock';
 import { NotificationsBell } from './components/NotificationsBell';
 import { LoginPage } from './pages/LoginPage';
@@ -12,6 +13,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { QueuePage } from './pages/QueuePage';
 import { AssignedPage } from './pages/AssignedPage';
 import { PersonProfilePage } from './pages/PersonProfilePage';
+import { AccountPage } from './pages/AccountPage';
 import { AdminRolesPage } from './pages/AdminRolesPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { ChatPage } from './pages/ChatPage';
@@ -107,9 +109,17 @@ function CmsShell() {
         </nav>
 
         <div className="cms-sidebar-foot">
-          <div className="cms-user">
-            {person.firstName} {person.lastName}
-          </div>
+          <NavLink to="/app/account" className="cms-user-link">
+            <Avatar
+              name={`${person.firstName} ${person.lastName}`}
+              photoUrl={person.photoUrl}
+              size="sm"
+            />
+            <span className="cms-user">
+              <strong>{person.firstName} {person.lastName}</strong>
+              <span>Account</span>
+            </span>
+          </NavLink>
           <div className="cms-foot-actions">
             <NavLink to="/register">Register</NavLink>
             <button
@@ -176,6 +186,7 @@ export default function App() {
             <Route path="assigned" element={<AssignedPage />} />
             <Route path="queue" element={<QueuePage />} />
             <Route path="people/:personId" element={<PersonProfilePage />} />
+            <Route path="account" element={<AccountPage />} />
             <Route path="calendar" element={<CalendarPage />} />
             <Route path="chat" element={<ChatPage />} />
             <Route path="notifications" element={<NotificationsPage />} />

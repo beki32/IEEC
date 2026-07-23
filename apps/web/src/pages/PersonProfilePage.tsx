@@ -1,6 +1,7 @@
 import { Permissions, type AttendanceStatus } from '@ieec/shared';
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Avatar } from '../components/Avatar';
 import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
 
@@ -198,11 +199,20 @@ export function PersonProfilePage() {
       <section className="hero">
         <Link to="/app/assigned" className="muted">← Back</Link>
         <p className="badge">Journey controls v3 · reason required</p>
-        <h1>{person.firstName} {person.lastName}</h1>
-        <p className="muted">
-          Ministry status: <strong>{person.currentMinistryStatus}</strong>
-          {journey ? <> · Journey: <span className="badge">{journey.journeyStatus}</span></> : null}
-        </p>
+        <div className="profile-hero-row">
+          <Avatar
+            name={`${person.firstName} ${person.lastName}`}
+            photoUrl={person.photoUrl}
+            size="lg"
+          />
+          <div>
+            <h1>{person.firstName} {person.lastName}</h1>
+            <p className="muted">
+              Ministry status: <strong>{person.currentMinistryStatus}</strong>
+              {journey ? <> · Journey: <span className="badge">{journey.journeyStatus}</span></> : null}
+            </p>
+          </div>
+        </div>
         {message ? <p className="success">{message}</p> : null}
       </section>
 
