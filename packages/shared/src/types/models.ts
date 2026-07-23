@@ -19,6 +19,58 @@ export interface Organization {
   status: 'draft' | 'active' | 'suspended' | 'archived';
 }
 
+export interface Ministry {
+  id: string;
+  organizationId: string;
+  name: string;
+  status: 'active' | 'archived' | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Team {
+  id: string;
+  organizationId: string;
+  ministryId: string;
+  name: string;
+  description: string | null;
+  /** Drives CMS module menus for this team */
+  moduleKey: 'follow_up' | 'bible_study' | 'media' | 'worship' | 'generic' | string;
+  teamStatus: 'active' | 'archived' | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Team roster membership — independent of chat membership and of role permissions. */
+export interface TeamMembership {
+  id: string;
+  organizationId: string;
+  teamId: string;
+  personId: string;
+  membershipStatus: 'active' | 'inactive' | 'removed' | string;
+  titleLabel: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppNotification {
+  id: string;
+  organizationId: string;
+  recipientPersonId: string;
+  type: string;
+  title: string;
+  body: string;
+  linkPath: string | null;
+  relatedEntityType: string | null;
+  relatedEntityId: string | null;
+  teamId: string | null;
+  channel: 'in_app' | string;
+  status: 'pending' | 'sent' | 'read' | 'dismissed' | 'failed' | string;
+  createdAt: string;
+  readAt: string | null;
+  dismissedAt: string | null;
+}
+
 export interface Person {
   id: string;
   organizationId: string;

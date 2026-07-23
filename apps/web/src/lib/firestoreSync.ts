@@ -29,6 +29,9 @@ export async function hydrateDemoStateFromFirestore(
   const organization = orgSnap.data() as DemoState['organization'];
 
   const [
+    ministries,
+    teams,
+    teamMemberships,
     people,
     userAccounts,
     roleTemplates,
@@ -43,8 +46,12 @@ export async function hydrateDemoStateFromFirestore(
     chatChannels,
     chatMemberships,
     chatMessages,
+    notifications,
     auditLogs,
   ] = await Promise.all([
+    loadOrgCollection(db, 'ministries', organizationId),
+    loadOrgCollection(db, 'teams', organizationId),
+    loadOrgCollection(db, 'teamMemberships', organizationId),
     loadOrgCollection(db, 'people', organizationId),
     loadOrgCollection(db, 'userAccounts', organizationId),
     loadOrgCollection(db, 'roleTemplates', organizationId),
@@ -59,6 +66,7 @@ export async function hydrateDemoStateFromFirestore(
     loadOrgCollection(db, 'chatChannels', organizationId),
     loadOrgCollection(db, 'chatMemberships', organizationId),
     loadOrgCollection(db, 'chatMessages', organizationId),
+    loadOrgCollection(db, 'notifications', organizationId),
     loadOrgCollection(db, 'auditLogs', organizationId),
   ]);
 
@@ -70,6 +78,9 @@ export async function hydrateDemoStateFromFirestore(
       timezone: organization.timezone,
       status: organization.status,
     },
+    ministries: ministries as unknown as DemoState['ministries'],
+    teams: teams as unknown as DemoState['teams'],
+    teamMemberships: teamMemberships as unknown as DemoState['teamMemberships'],
     people: people as unknown as DemoState['people'],
     userAccounts: userAccounts as unknown as DemoState['userAccounts'],
     roleTemplates: roleTemplates as unknown as DemoState['roleTemplates'],
@@ -84,6 +95,7 @@ export async function hydrateDemoStateFromFirestore(
     chatChannels: chatChannels as unknown as DemoState['chatChannels'],
     chatMemberships: chatMemberships as unknown as DemoState['chatMemberships'],
     chatMessages: chatMessages as unknown as DemoState['chatMessages'],
+    notifications: notifications as unknown as DemoState['notifications'],
     auditLogs: auditLogs as unknown as DemoState['auditLogs'],
     sessionAuthUid: null,
   };
@@ -103,8 +115,10 @@ export async function persistDemoStateToFirestore(db: Firestore, state: DemoStat
     }
   };
 
+  writeRows('ministries', state.ministries);
+  writeRows('teams', state.teams);
+  writeRows('teamMemberships', state.teamMemberships);
   writeRows('people', state.people);
-  // userAccounts / organizations are Auth-linked and admin-seeded — do not client-write
   writeRows('roleTemplates', state.roleTemplates);
   writeRows('roleAssignments', state.roleAssignments);
   writeRows('permissionOverrides', state.overrides);
@@ -117,6 +131,7 @@ export async function persistDemoStateToFirestore(db: Firestore, state: DemoStat
   writeRows('chatChannels', state.chatChannels);
   writeRows('chatMemberships', state.chatMemberships);
   writeRows('chatMessages', state.chatMessages);
+  writeRows('notifications', state.notifications);
   writeRows('auditLogs', state.auditLogs);
 
   for (let i = 0; i < pending.length; i += 400) {

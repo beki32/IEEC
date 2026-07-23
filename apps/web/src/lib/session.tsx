@@ -1,4 +1,4 @@
-import { can, type PermissionKey, type Person, type Organization } from '@ieec/shared';
+import { can, type PermissionKey, type Person, type Organization, type Team } from '@ieec/shared';
 import {
   createContext,
   useCallback,
@@ -18,8 +18,12 @@ interface SessionValue {
   person: Person | null;
   organization: Organization | null;
   permissions: Set<PermissionKey>;
+  myTeams: Team[];
+  activeTeam: Team | null;
+  unreadCount: number;
   mode: 'demo' | 'firebase';
   refresh: () => void;
+  setActiveTeam: (teamId: string) => void;
   login: (
     email: string,
     password?: string,
@@ -89,8 +93,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       person: session?.person ?? null,
       organization: session?.organization ?? null,
       permissions,
+      myTeams: session?.myTeams ?? [],
+      activeTeam: session?.activeTeam ?? null,
+      unreadCount: demoStore.getSession() ? demoStore.unreadNotificationCount() : 0,
       mode: (isDemoMode() ? 'demo' : 'firebase') as 'demo' | 'firebase',
       refresh,
+      setActiveTeam: (teamId: string) => {
+        demoStore.setActiveTeamId(teamId);
+        refresh();
+      },
       login: async (email: string, password = 'demo-password') => {
         if (isDemoMode()) {
           const result = demoStore.login(email);

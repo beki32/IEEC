@@ -101,6 +101,28 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /ministries/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /teams/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /teamMemberships/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /notifications/{id} {
+      allow read: if signedIn() && userAccount().personId == resource.data.recipientPersonId;
+      allow create: if sameOrg(request.resource.data.organizationId);
+      allow update: if signedIn() && userAccount().personId == resource.data.recipientPersonId;
+      allow delete: if false;
+    }
+
     match /auditLogs/{id} {
       allow read: if sameOrg(resource.data.organizationId);
       allow create: if sameOrg(request.resource.data.organizationId);

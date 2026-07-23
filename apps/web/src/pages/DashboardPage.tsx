@@ -4,7 +4,7 @@ import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
 
 export function DashboardPage() {
-  const { person, permissions, has } = useSession();
+  const { person, permissions, has, activeTeam, myTeams, unreadCount } = useSession();
   const state = demoStore.getState();
 
   const unassigned = state.journeys.filter((j) =>
@@ -16,18 +16,21 @@ export function DashboardPage() {
   const activeJourneys = state.journeys.filter((j) =>
     ['assigned', 'active_follow_up', 'membership_approval_in_progress'].includes(j.journeyStatus),
   );
+  const isFollowUp = activeTeam?.moduleKey === 'follow_up';
 
   return (
     <div className="grid">
       <section className="hero">
+        <p className="badge">{activeTeam ? `${activeTeam.name} workspace` : 'Workspace'}</p>
         <h1>Welcome, {person?.firstName}</h1>
         <p className="muted">
-          Permissions loaded: {permissions.size}. Role-driven UI — Security Rules must mirror these checks in production.
+          You are on {myTeams.length} team(s). Switch teams in the sidebar to change module menus.
+          Permissions loaded: {permissions.size}.
         </p>
       </section>
 
       <div className="grid two">
-        {has(Permissions.newcomersViewUnassigned) || has(Permissions.newcomersViewAll) ? (
+        {isFollowUp && (has(Permissions.newcomersViewUnassigned) || has(Permissions.newcomersViewAll)) ? (
           <div className="panel">
             <h2>Unassigned / review queue</h2>
             <p className="muted">{unassigned.length} journeys need attention</p>
@@ -35,10 +38,31 @@ export function DashboardPage() {
           </div>
         ) : null}
 
+        {isFollowUp ? (
+          <div className="panel">
+            <h2>My assigned newcomers</h2>
+            <p className="muted">{myAssignments.length} active assignment(s)</p>
+            <Link className="btn" to="/app/assigned">View assigned</Link>
+          </div>
+        ) : (
+          <div className="panel">
+            <h2>{activeTeam?.name ?? 'Team'} home</h2>
+            <p className="muted">
+              Team modules change with the sidebar switcher. Calendar, Chat, and Notifications stay shared.
+            </p>
+            {activeTeam?.moduleKey === 'bible_study' ? (
+              <Link className="btn" to="/app/modules/bible-study">Open Bible Study</Link>
+            ) : null}
+            {activeTeam?.moduleKey === 'media' ? (
+              <Link className="btn" to="/app/modules/media">Open Media desk</Link>
+            ) : null}
+          </div>
+        )}
+
         <div className="panel">
-          <h2>My assigned newcomers</h2>
-          <p className="muted">{myAssignments.length} active assignment(s)</p>
-          <Link className="btn" to="/app/assigned">View assigned</Link>
+          <h2>Notifications</h2>
+          <p className="muted">{unreadCount} unread</p>
+          <Link className="btn secondary" to="/app/notifications">Open inbox</Link>
         </div>
 
         <div className="panel">
@@ -55,7 +79,7 @@ export function DashboardPage() {
           <Link className="btn secondary" to="/app/chat">Open chat</Link>
         </div>
 
-        {has(Permissions.newcomersViewAll) ? (
+        {isFollowUp && has(Permissions.newcomersViewAll) ? (
           <div className="panel">
             <h2>Active follow-up</h2>
             <p className="muted">{activeJourneys.length} journeys in progress</p>

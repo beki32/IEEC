@@ -12,12 +12,14 @@ import {
   weekBounds,
   type AttendanceStatus,
   type AuditLog,
+  type AppNotification,
   type CalendarEvent,
   type ChatChannel,
   type ChatMembership,
   type ChatMessage,
   type FollowUpAssignment,
   type FollowUpReport,
+  type Ministry,
   type NewcomerAttendance,
   type NewcomerBioEntry,
   type NewcomerJourney,
@@ -26,16 +28,22 @@ import {
   type PermissionOverride,
   type RoleAssignment,
   type RoleTemplate,
+  type Team,
+  type TeamMembership,
   type UserAccount,
 } from '@ieec/shared';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v5';
-export const DEMO_SEED_VERSION = 5;
+const STORAGE_KEY = 'ieec-ya-connect-demo-v6';
+export const DEMO_SEED_VERSION = 6;
 const SEED_VERSION = DEMO_SEED_VERSION;
+const ACTIVE_TEAM_KEY = 'ieec-ya-connect-active-team';
 
 export interface DemoState {
   seedVersion: number;
   organization: Organization;
+  ministries: Ministry[];
+  teams: Team[];
+  teamMemberships: TeamMembership[];
   people: Person[];
   userAccounts: UserAccount[];
   roleTemplates: RoleTemplate[];
@@ -50,6 +58,7 @@ export interface DemoState {
   chatChannels: ChatChannel[];
   chatMemberships: ChatMembership[];
   chatMessages: ChatMessage[];
+  notifications: AppNotification[];
   auditLogs: AuditLog[];
   sessionAuthUid: string | null;
 }
@@ -104,6 +113,85 @@ function createSeed(): DemoState {
     createdAt: ts,
     updatedAt: ts,
   };
+  const roleBibleFacilitator: RoleTemplate = {
+    id: 'role_bs_facilitator',
+    organizationId: orgId,
+    name: 'Bible Study Facilitator',
+    description: 'Bible Study team coordination (module placeholder)',
+    permissions: [Permissions.followUpView, Permissions.calendarEventCreate],
+    recordStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  };
+  const roleMediaMember: RoleTemplate = {
+    id: 'role_media_member',
+    organizationId: orgId,
+    name: 'Media Team Member',
+    description: 'Media desk access (module placeholder)',
+    permissions: [Permissions.followUpView, Permissions.calendarEventCreate],
+    recordStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  };
+
+  const ministryYa: Ministry = {
+    id: ministryId,
+    organizationId: orgId,
+    name: 'Young Adult',
+    status: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  };
+
+  const teamFollowUp: Team = {
+    id: teamId,
+    organizationId: orgId,
+    ministryId,
+    name: 'Follow-Up',
+    description: 'Newcomer shepherding',
+    moduleKey: 'follow_up',
+    teamStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  };
+  const teamBibleStudy: Team = {
+    id: 'team_bible_study',
+    organizationId: orgId,
+    ministryId,
+    name: 'Bible Study',
+    description: 'Groups and classes',
+    moduleKey: 'bible_study',
+    teamStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  };
+  const teamMedia: Team = {
+    id: 'team_media',
+    organizationId: orgId,
+    ministryId,
+    name: 'Media',
+    description: 'Production and communications',
+    moduleKey: 'media',
+    teamStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  };
+
+  const mkTeamMember = (
+    mid: string,
+    tid: string,
+    personId: string,
+    titleLabel: string | null = null,
+  ): TeamMembership => ({
+    id: mid,
+    organizationId: orgId,
+    teamId: tid,
+    personId,
+    membershipStatus: 'active',
+    titleLabel,
+    createdAt: ts,
+    updatedAt: ts,
+  });
 
   const mkPerson = (
     pid: string,
@@ -347,6 +435,17 @@ function createSeed(): DemoState {
       timezone: 'America/New_York',
       status: 'active',
     },
+    ministries: [ministryYa],
+    teams: [teamFollowUp, teamBibleStudy, teamMedia],
+    teamMemberships: [
+      // Leader is on three teams (CMS multi-team demo)
+      mkTeamMember('tm_leader_fu', teamFollowUp.id, leaderPersonId, 'Follow-Up Leader'),
+      mkTeamMember('tm_leader_bs', teamBibleStudy.id, leaderPersonId, 'Facilitator'),
+      mkTeamMember('tm_leader_media', teamMedia.id, leaderPersonId, 'Coordinator'),
+      mkTeamMember('tm_assistant_fu', teamFollowUp.id, assistantPersonId, 'Assistant Leader'),
+      mkTeamMember('tm_minister_fu', teamFollowUp.id, ministerPersonId, 'Minister'),
+      mkTeamMember('tm_minister_bs', teamBibleStudy.id, ministerPersonId, 'Host'),
+    ],
     people: [
       mkPerson(leaderPersonId, 'Sarah', 'Leader', 'leader@ieec.demo', 'minister', null, true),
       mkPerson(assistantPersonId, 'Abel', 'Assistant', 'assistant@ieec.demo', 'minister', null, true),
@@ -359,11 +458,23 @@ function createSeed(): DemoState {
       mkAccount('uid_assistant', assistantPersonId, 'assistant@ieec.demo'),
       mkAccount('uid_minister', ministerPersonId, 'minister@ieec.demo'),
     ],
-    roleTemplates: [roleLeader, roleAssistant, roleMinister],
+    roleTemplates: [roleLeader, roleAssistant, roleMinister, roleBibleFacilitator, roleMediaMember],
     roleAssignments: [
       mkAssignment('ra_leader', leaderPersonId, roleLeader.id),
       mkAssignment('ra_assistant', assistantPersonId, roleAssistant.id),
       mkAssignment('ra_minister', ministerPersonId, roleMinister.id),
+      {
+        ...mkAssignment('ra_leader_bs', leaderPersonId, roleBibleFacilitator.id),
+        teamId: teamBibleStudy.id,
+      },
+      {
+        ...mkAssignment('ra_minister_bs', ministerPersonId, roleBibleFacilitator.id),
+        teamId: teamBibleStudy.id,
+      },
+      {
+        ...mkAssignment('ra_leader_media', leaderPersonId, roleMediaMember.id),
+        teamId: teamMedia.id,
+      },
     ],
     overrides: [],
     journeys: [journey1, journey2],
@@ -381,6 +492,59 @@ function createSeed(): DemoState {
       mkChatMember('cm_leaders_assistant', leadersOnlyChannel.id, assistantPersonId),
     ],
     chatMessages: seedMessages,
+    notifications: [
+      {
+        id: 'notif_assign_seed',
+        organizationId: orgId,
+        recipientPersonId: ministerPersonId,
+        type: 'assignment.created',
+        title: 'New Follow-Up assignment',
+        body: 'You were assigned to Hanna Tesfaye.',
+        linkPath: `/app/people/${newcomer2Id}`,
+        relatedEntityType: 'followUpAssignment',
+        relatedEntityId: 'assign_2',
+        teamId: teamFollowUp.id,
+        channel: 'in_app',
+        status: 'sent',
+        createdAt: ts,
+        readAt: null,
+        dismissedAt: null,
+      },
+      {
+        id: 'notif_queue_seed',
+        organizationId: orgId,
+        recipientPersonId: leaderPersonId,
+        type: 'registration.queued',
+        title: 'Newcomer in queue',
+        body: 'Daniel Bekele is awaiting assignment.',
+        linkPath: '/app/queue',
+        relatedEntityType: 'newcomerJourney',
+        relatedEntityId: 'journey_1',
+        teamId: teamFollowUp.id,
+        channel: 'in_app',
+        status: 'sent',
+        createdAt: ts,
+        readAt: null,
+        dismissedAt: null,
+      },
+      {
+        id: 'notif_cal_seed',
+        organizationId: orgId,
+        recipientPersonId: assistantPersonId,
+        type: 'calendar.event',
+        title: 'Saturday program scheduled',
+        body: 'IEEC YA Saturday Program is on the ministry calendar.',
+        linkPath: '/app/calendar',
+        relatedEntityType: 'calendarEvent',
+        relatedEntityId: 'cal_sat_program',
+        teamId: teamFollowUp.id,
+        channel: 'in_app',
+        status: 'sent',
+        createdAt: ts,
+        readAt: null,
+        dismissedAt: null,
+      },
+    ],
     auditLogs: [],
     sessionAuthUid: null,
   };
@@ -464,6 +628,50 @@ function audit(
   });
 }
 
+function pushNotification(
+  state: DemoState,
+  input: {
+    recipientPersonId: string;
+    type: string;
+    title: string;
+    body: string;
+    linkPath?: string | null;
+    relatedEntityType?: string | null;
+    relatedEntityId?: string | null;
+    teamId?: string | null;
+  },
+) {
+  if (!input.recipientPersonId) return;
+  state.notifications.unshift({
+    id: id('notif'),
+    organizationId: state.organization.id,
+    recipientPersonId: input.recipientPersonId,
+    type: input.type,
+    title: input.title,
+    body: input.body,
+    linkPath: input.linkPath ?? null,
+    relatedEntityType: input.relatedEntityType ?? null,
+    relatedEntityId: input.relatedEntityId ?? null,
+    teamId: input.teamId ?? null,
+    channel: 'in_app',
+    status: 'sent',
+    createdAt: nowIso(),
+    readAt: null,
+    dismissedAt: null,
+  });
+}
+
+function notifyMany(
+  state: DemoState,
+  recipientPersonIds: string[],
+  input: Omit<Parameters<typeof pushNotification>[1], 'recipientPersonId'>,
+) {
+  const unique = [...new Set(recipientPersonIds.filter(Boolean))];
+  for (const recipientPersonId of unique) {
+    pushNotification(state, { ...input, recipientPersonId });
+  }
+}
+
 export const demoStore = {
   reset() {
     runtimeState = null;
@@ -471,7 +679,9 @@ export const demoStore = {
     localStorage.removeItem('ieec-ya-connect-demo-v1');
     localStorage.removeItem('ieec-ya-connect-demo-v2');
     localStorage.removeItem('ieec-ya-connect-demo-v4');
+    localStorage.removeItem('ieec-ya-connect-demo-v5');
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(ACTIVE_TEAM_KEY);
     const seed = createSeed();
     save(seed);
     return seed;
@@ -498,11 +708,13 @@ export const demoStore = {
     const legacy =
       localStorage.getItem('ieec-ya-connect-demo-v1') ||
       localStorage.getItem('ieec-ya-connect-demo-v2') ||
-      localStorage.getItem('ieec-ya-connect-demo-v4');
+      localStorage.getItem('ieec-ya-connect-demo-v4') ||
+      localStorage.getItem('ieec-ya-connect-demo-v5');
     if (legacy && !localStorage.getItem(STORAGE_KEY)) {
       localStorage.removeItem('ieec-ya-connect-demo-v1');
       localStorage.removeItem('ieec-ya-connect-demo-v2');
       localStorage.removeItem('ieec-ya-connect-demo-v4');
+      localStorage.removeItem('ieec-ya-connect-demo-v5');
     }
     load();
   },
@@ -546,13 +758,106 @@ export const demoStore = {
       roleAssignments: state.roleAssignments,
       overrides: state.overrides,
     });
+    const myTeams = this.listMyTeams(person.id);
+    const activeTeamId = this.getActiveTeamId(person.id);
+    const activeTeam = myTeams.find((t) => t.id === activeTeamId) ?? myTeams[0] ?? null;
     return {
       account,
       person,
       organization: state.organization,
       permissions: resolved.permissions,
       config: DEFAULT_FOLLOW_UP_CONFIG,
+      myTeams,
+      activeTeam,
     };
+  },
+
+  listMyTeams(personId?: string) {
+    const state = load();
+    const session = this.getSessionRawPersonId(personId);
+    if (!session) return [];
+    const memberships = state.teamMemberships ?? [];
+    const teams = state.teams ?? [];
+    const teamIds = new Set(
+      memberships
+        .filter((m) => m.personId === session && m.membershipStatus === 'active')
+        .map((m) => m.teamId),
+    );
+    return teams
+      .filter((t) => t.teamStatus === 'active' && teamIds.has(t.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  getSessionRawPersonId(personId?: string) {
+    if (personId) return personId;
+    const state = load();
+    if (!state.sessionAuthUid) return null;
+    return state.userAccounts.find((a) => a.id === state.sessionAuthUid)?.personId ?? null;
+  },
+
+  getActiveTeamId(personId?: string) {
+    const teams = this.listMyTeams(personId);
+    if (!teams.length) return null;
+    const stored = localStorage.getItem(ACTIVE_TEAM_KEY);
+    if (stored && teams.some((t) => t.id === stored)) return stored;
+    return teams[0].id;
+  },
+
+  setActiveTeamId(teamId: string) {
+    const teams = this.listMyTeams();
+    if (!teams.some((t) => t.id === teamId)) {
+      throw new Error('Not a member of that team');
+    }
+    localStorage.setItem(ACTIVE_TEAM_KEY, teamId);
+  },
+
+  listMyNotifications(includeRead = true) {
+    const state = load();
+    const personId = this.getSessionRawPersonId();
+    if (!personId) return [];
+    return (state.notifications ?? [])
+      .filter((n) => n.recipientPersonId === personId && n.status !== 'dismissed')
+      .filter((n) => includeRead || n.status !== 'read')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+
+  unreadNotificationCount() {
+    return this.listMyNotifications(true).filter((n) => n.status !== 'read').length;
+  },
+
+  markNotificationRead(notificationId: string) {
+    const state = load();
+    const personId = this.getSessionRawPersonId();
+    const n = state.notifications.find((x) => x.id === notificationId && x.recipientPersonId === personId);
+    if (!n) throw new Error('Notification not found');
+    n.status = 'read';
+    n.readAt = nowIso();
+    save(state);
+    return n;
+  },
+
+  markAllNotificationsRead() {
+    const state = load();
+    const personId = this.getSessionRawPersonId();
+    if (!personId) return;
+    for (const n of state.notifications) {
+      if (n.recipientPersonId === personId && n.status !== 'read' && n.status !== 'dismissed') {
+        n.status = 'read';
+        n.readAt = nowIso();
+      }
+    }
+    save(state);
+  },
+
+  dismissNotification(notificationId: string) {
+    const state = load();
+    const personId = this.getSessionRawPersonId();
+    const n = state.notifications.find((x) => x.id === notificationId && x.recipientPersonId === personId);
+    if (!n) throw new Error('Notification not found');
+    n.status = 'dismissed';
+    n.dismissedAt = nowIso();
+    save(state);
+    return n;
   },
 
   registerNewcomer(input: {
@@ -634,6 +939,42 @@ export const demoStore = {
     audit(state, 'registration.create', 'newcomerJourney', journeyId, null, {
       newValue: { personId, duplicateCandidates: duplicates.map((d) => d.id) },
     });
+
+    const followUpTeamId = state.teams.find((t) => t.moduleKey === 'follow_up')?.id ?? 'team_follow_up';
+    const leaderRecipients = state.roleAssignments
+      .filter((ra) => ra.active && (ra.teamId === followUpTeamId || ra.roleTemplateId === 'role_fu_leader'))
+      .map((ra) => ra.personId);
+    // Also notify Follow-Up team members who hold leader-like templates
+    const fuMemberIds = state.teamMemberships
+      .filter((m) => m.teamId === followUpTeamId && m.membershipStatus === 'active')
+      .map((m) => m.personId);
+    const queueWatchers = state.people
+      .filter((p) => fuMemberIds.includes(p.id))
+      .filter((p) => {
+        const resolved = resolvePermissions({
+          personId: p.id,
+          organizationId: state.organization.id,
+          roleTemplates: state.roleTemplates,
+          roleAssignments: state.roleAssignments,
+          overrides: state.overrides,
+        });
+        return (
+          resolved.permissions.has(Permissions.newcomersViewUnassigned) ||
+          resolved.permissions.has(Permissions.newcomersViewAll)
+        );
+      })
+      .map((p) => p.id);
+
+    notifyMany(state, [...leaderRecipients, ...queueWatchers], {
+      type: status === 'duplicate_review_required' ? 'registration.duplicate_review' : 'registration.queued',
+      title: status === 'duplicate_review_required' ? 'Duplicate review needed' : 'Newcomer in queue',
+      body: `${person.firstName} ${person.lastName} registered and needs Follow-Up attention.`,
+      linkPath: '/app/queue',
+      relatedEntityType: 'newcomerJourney',
+      relatedEntityId: journeyId,
+      teamId: followUpTeamId,
+    });
+
     save(state);
     return { person, journey, duplicateCandidateIds: duplicates.map((d) => d.id) };
   },
@@ -701,6 +1042,20 @@ export const demoStore = {
     journey.journeyStatus = 'assigned';
     journey.updatedAt = nowIso();
     audit(state, 'assignment.create', 'followUpAssignment', assignment.id, session.person.id);
+
+    const newcomer = state.people.find((p) => p.id === journey.personId);
+    const followUpTeamId = state.teams.find((t) => t.moduleKey === 'follow_up')?.id ?? 'team_follow_up';
+    pushNotification(state, {
+      recipientPersonId: assignedPersonId,
+      type: 'assignment.created',
+      title: 'New Follow-Up assignment',
+      body: `You were assigned to ${newcomer ? `${newcomer.firstName} ${newcomer.lastName}` : 'a newcomer'}.`,
+      linkPath: `/app/people/${journey.personId}`,
+      relatedEntityType: 'followUpAssignment',
+      relatedEntityId: assignment.id,
+      teamId: followUpTeamId,
+    });
+
     save(state);
     return assignment;
   },
@@ -1027,6 +1382,20 @@ export const demoStore = {
       newValue: { title: event.title, conflicts: conflicts.map((c) => c.id), forced: !!input.forceOverride },
       reason: input.forceOverride ? 'conflict override' : undefined,
     });
+
+    const recipients = state.teamMemberships
+      .filter((m) => m.membershipStatus === 'active' && m.personId !== session.person.id)
+      .map((m) => m.personId);
+    notifyMany(state, recipients, {
+      type: 'calendar.event',
+      title: 'Calendar event added',
+      body: `${event.title} was scheduled.`,
+      linkPath: '/app/calendar',
+      relatedEntityType: 'calendarEvent',
+      relatedEntityId: event.id,
+      teamId: event.organizingTeamId,
+    });
+
     save(state);
     return { event, warningConflicts: conflicts.filter((c) => c.conflictPolicy === 'warning') };
   },
@@ -1313,6 +1682,21 @@ export const demoStore = {
     audit(state, 'chat.message.send', 'chatMessage', message.id, session.person.id, {
       newValue: { channelId },
     });
+
+    const memberIds = state.chatMemberships
+      .filter((m) => m.channelId === channelId && m.membershipStatus === 'active' && m.personId !== session.person.id)
+      .map((m) => m.personId);
+    const preview = trimmed.length > 80 ? `${trimmed.slice(0, 77)}…` : trimmed;
+    notifyMany(state, memberIds, {
+      type: 'chat.message',
+      title: `New message in ${channel.name}`,
+      body: preview,
+      linkPath: '/app/chat',
+      relatedEntityType: 'chatMessage',
+      relatedEntityId: message.id,
+      teamId: channel.relatedTeamId,
+    });
+
     save(state);
     return message;
   },
