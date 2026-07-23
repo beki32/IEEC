@@ -1,29 +1,27 @@
-# Planning backlog
+# Planning / delivery backlog
 
 ## Done (planning)
 
-- Source map (link 1 Ch.1–2 / link 2 Follow-Up; PDF cutoff rule)
-- Follow-Up requirements, workflows, Firestore model, permissions, config defaults
-- Architecture Handbook **v0.3** ingested (Ch. 1–3 + ADR-001…007)
-- Handbook **Chapters 4–13 drafts**
-- Web + mobile settled (**React / Expo**; not Flutter); EAS for APK/IPA
-- Permission keys normalized to canonical plural form
-- Architecture Handbook **v0.4 PDF** (Ch. 1–13 formal handbook style)
-- **Architecture Baseline v1.0 frozen for coding**
-- **AI coding command prompt ready:** `docs/AI_CODING_HANDOFF_PROMPT.md` (+ PDF)
+- Architecture Handbook v0.3 + **v0.4 PDF** (Ch. 1–13)
+- Follow-Up module pack + canonical permissions
+- Web + React Native (Expo) settled; EAS for APK/IPA
+- AI coding command prompt (MD + PDF)
 
-## Next (human)
+## Done (implementation — this branch)
 
-1. Open a **separate Cursor coding account/agent**  
-2. Paste the full contents of `docs/AI_CODING_HANDOFF_PROMPT.md` (or use the PDF `docs/AI_CODING_HANDOFF_PROMPT.pdf`) — from “YOUR ROLE” downward  
-3. Point the agent at this repo / branch  
-4. Approve its Phase A plan, then let it implement  
+- Monorepo: `packages/shared`, `apps/web`, `apps/mobile`
+- Shared RBAC resolver + permission catalog
+- Web Follow-Up MVP (demo store): register, queue, assign, report, attendance, bio, membership recommend/approve, RBAC admin view
+- Expo mobile Follow-Up minister flows (demo store)
+- Firestore rules/indexes stubs + README runbook
 
-## Optional later (not blockers)
+## Next
 
-- Human polish of Handbook v0.4 layout in LibreOffice (visual parity with v0.3 Writer styles)  
-- Close remaining soft narrative items in `docs/modules/follow-up.md` “Open decisions” that config defaults already supersede  
+1. Wire demo store → real Firebase project (`ieec-ya-connect` only after human confirmation)
+2. Harden Security Rules with resolved-permission helpers / Functions for privileged transitions
+3. EAS project id + first APK/IPA build
+4. Expand membership multi-step approval UI from workflow templates
 
-## Not done by this planning agent
+## Coding prompt
 
-- Application code (web + Expo mobile / Firebase implementation)
+`docs/AI_CODING_HANDOFF_PROMPT.md`
