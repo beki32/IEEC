@@ -55,21 +55,39 @@ export function PersonProfilePage() {
   const reports = state.reports.filter((r) => r.newcomerPersonId === personId);
   const attendance = state.attendance.filter((a) => a.personId === personId);
   const bios = state.bioEntries.filter((b) => b.personId === personId && b.recordStatus === 'active');
-  const event = state.calendarEvents[0];
+  const calendarEvents = demoStore
+    .listCalendarEvents(false)
+    .filter((e) => e.eventStatus === 'scheduled' || e.eventStatus === 'confirmed');
+  const defaultEventId =
+    calendarEvents.find((e) => e.eventPriority === 'organization_reserved')?.id ??
+    calendarEvents[0]?.id ??
+    '';
 
   const [summary, setSummary] = useState('');
   const [bio, setBio] = useState('');
   const [attStatus, setAttStatus] = useState<AttendanceStatus>('attended');
+  const [selectedEventId, setSelectedEventId] = useState(defaultEventId);
   const [message, setMessage] = useState('');
   const [journeyAction, setJourneyAction] = useState<JourneyAction | null>(null);
   const [journeyReason, setJourneyReason] = useState('');
   const [journeyError, setJourneyError] = useState('');
+
+  const selectedEvent =
+    calendarEvents.find((e) => e.id === selectedEventId) ??
+    calendarEvents.find((e) => e.id === defaultEventId) ??
+    null;
 
   useEffect(() => {
     // Force users off stale localStorage seeds that predate reason/reopen UI
     demoStore.ensureLatestSeed();
     refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!selectedEventId || !calendarEvents.some((e) => e.id === selectedEventId)) {
+      setSelectedEventId(defaultEventId);
+    }
+  }, [calendarEvents, defaultEventId, selectedEventId]);
 
   if (!person) {
     return <div className="main"><p>Person not found. <Link to="/app">Back</Link></p></div>;
@@ -123,15 +141,18 @@ export function PersonProfilePage() {
 
   function onAttendance(e: FormEvent) {
     e.preventDefault();
-    if (!journey || !event) return;
+    if (!journey || !selectedEvent) {
+      setMessage('Select a calendar event before recording attendance.');
+      return;
+    }
     demoStore.recordAttendance({
       personId: person!.id,
       journeyId: journey.id,
       assignmentId: assignment?.id ?? null,
-      calendarEventId: event.id,
+      calendarEventId: selectedEvent.id,
       status: attStatus,
     });
-    setMessage(`Attendance saved for Saturday program: ${attStatus}`);
+    setMessage(`Attendance saved for ${selectedEvent.title}: ${attStatus}`);
     bump();
   }
 
@@ -310,7 +331,24 @@ export function PersonProfilePage() {
 
           <form className="panel grid" onSubmit={onAttendance}>
             <h2>Saturday attendance</h2>
-            <p className="muted">{event?.title} · unique person + calendar event</p>
+            <p className="muted">Pick the program event · unique person + calendar event</p>
+            <label>
+              Calendar event
+              <select
+                required
+                value={selectedEvent?.id ?? ''}
+                onChange={(e) => setSelectedEventId(e.target.value)}
+              >
+                {calendarEvents.length === 0 ? (
+                  <option value="">No scheduled events</option>
+                ) : null}
+                {calendarEvents.map((ev) => (
+                  <option key={ev.id} value={ev.id}>
+                    {ev.title} · {new Date(ev.startAt).toLocaleString()}
+                  </option>
+                ))}
+              </select>
+            </label>
             <label>
               Status
               <select value={attStatus} onChange={(e) => setAttStatus(e.target.value as AttendanceStatus)}>
@@ -319,7 +357,7 @@ export function PersonProfilePage() {
                 <option value="unknown">unknown</option>
               </select>
             </label>
-            <button type="submit">Save attendance</button>
+            <button type="submit" disabled={!selectedEvent}>Save attendance</button>
           </form>
         </div>
       ) : null}

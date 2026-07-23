@@ -9,6 +9,7 @@ import { QueuePage } from './pages/QueuePage';
 import { AssignedPage } from './pages/AssignedPage';
 import { PersonProfilePage } from './pages/PersonProfilePage';
 import { AdminRolesPage } from './pages/AdminRolesPage';
+import { CalendarPage } from './pages/CalendarPage';
 
 function Shell() {
   const { person, organization, logout, has } = useSession();
@@ -29,6 +30,7 @@ function Shell() {
           {(has(Permissions.newcomersViewUnassigned) || has(Permissions.newcomersViewAll)) && (
             <NavLink to="/app/queue">Queue</NavLink>
           )}
+          <NavLink to="/app/calendar">Calendar</NavLink>
           {has(Permissions.rolesManage) && <NavLink to="/app/admin/roles">RBAC</NavLink>}
           <NavLink to="/register">Public register</NavLink>
           <button
@@ -64,6 +66,7 @@ export default function App() {
           <Route path="assigned" element={<AssignedPage />} />
           <Route path="queue" element={<QueuePage />} />
           <Route path="people/:personId" element={<PersonProfilePage />} />
+          <Route path="calendar" element={<CalendarPage />} />
           <Route path="admin/roles" element={<AdminRolesPage />} />
         </Route>
       </Routes>

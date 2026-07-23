@@ -4,6 +4,7 @@ import {
   FOLLOW_UP_LEADER_PERMISSIONS,
   FOLLOW_UP_MINISTER_PERMISSIONS,
   HEAD_LEADER_PERMISSIONS,
+  Permissions,
   normalizeEmail,
   normalizeName,
   normalizePhone,
@@ -25,8 +26,8 @@ import {
   type UserAccount,
 } from '@ieec/shared';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v3';
-const SEED_VERSION = 3;
+const STORAGE_KEY = 'ieec-ya-connect-demo-v4';
+const SEED_VERSION = 4;
 
 export interface DemoState {
   seedVersion: number;
@@ -196,7 +197,7 @@ function createSeed(): DemoState {
     id: 'cal_sat_program',
     organizationId: orgId,
     title: 'IEEC YA Saturday Program',
-    description: 'Weekly YA program',
+    description: 'Weekly YA program 6:30 PM–9:30 PM',
     organizingTeamId: teamId,
     eventScope: 'organization',
     eventPriority: 'organization_reserved',
@@ -205,6 +206,30 @@ function createSeed(): DemoState {
     endAt: nextSatEnd.toISOString(),
     timezone: 'America/New_York',
     recurrence: { enabled: true, frequency: 'weekly', daysOfWeek: ['saturday'] },
+    parentRecurringEventId: null,
+    eventStatus: 'scheduled',
+    createdByPersonId: leaderPersonId,
+    createdAt: ts,
+    updatedAt: ts,
+  };
+
+  const welcomeEventStart = new Date(nextSat);
+  welcomeEventStart.setHours(17, 30, 0, 0);
+  const welcomeEventEnd = new Date(nextSat);
+  welcomeEventEnd.setHours(18, 15, 0, 0);
+  const welcomeEvent: CalendarEvent = {
+    id: 'cal_welcome_window',
+    organizationId: orgId,
+    title: 'Newcomer Welcome Window',
+    description: 'Greeters available before program',
+    organizingTeamId: teamId,
+    eventScope: 'team',
+    eventPriority: 'normal',
+    conflictPolicy: 'warning',
+    startAt: welcomeEventStart.toISOString(),
+    endAt: welcomeEventEnd.toISOString(),
+    timezone: 'America/New_York',
+    recurrence: { enabled: false, frequency: 'none', daysOfWeek: [] },
     parentRecurringEventId: null,
     eventStatus: 'scheduled',
     createdByPersonId: leaderPersonId,
@@ -279,7 +304,7 @@ function createSeed(): DemoState {
     reports: [],
     attendance: [],
     bioEntries: [],
-    calendarEvents: [saturdayEvent],
+    calendarEvents: [saturdayEvent, welcomeEvent],
     auditLogs: [],
     sessionAuthUid: null,
   };
@@ -784,5 +809,158 @@ export const demoStore = {
     return state.people.filter((p) =>
       state.roleAssignments.some((ra) => ra.personId === p.id && ra.active),
     );
+  },
+
+  listCalendarEvents(includeCancelled = false) {
+    const state = load();
+    return state.calendarEvents
+      .filter((e) => includeCancelled || e.eventStatus !== 'cancelled')
+      .sort((a, b) => a.startAt.localeCompare(b.startAt));
+  },
+
+  findCalendarConflicts(input: {
+    startAt: string;
+    endAt: string;
+    excludeEventId?: string;
+  }) {
+    const start = new Date(input.startAt).getTime();
+    const end = new Date(input.endAt).getTime();
+    return this.listCalendarEvents(false).filter((e) => {
+      if (input.excludeEventId && e.id === input.excludeEventId) return false;
+      const s = new Date(e.startAt).getTime();
+      const en = new Date(e.endAt).getTime();
+      return start < en && end > s;
+    });
+  },
+
+  createCalendarEvent(input: {
+    title: string;
+    description?: string;
+    startAt: string;
+    endAt: string;
+    eventScope?: string;
+    eventPriority?: string;
+    conflictPolicy?: 'hard_block' | 'warning' | 'informational';
+    recurrenceWeeklySaturday?: boolean;
+    forceOverride?: boolean;
+  }) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    if (new Date(input.endAt) <= new Date(input.startAt)) {
+      throw new Error('End time must be after start time');
+    }
+
+    const conflicts = this.findCalendarConflicts({
+      startAt: input.startAt,
+      endAt: input.endAt,
+    });
+    const hard = conflicts.filter((c) => c.conflictPolicy === 'hard_block' || c.eventPriority === 'organization_reserved');
+    if (hard.length && !input.forceOverride) {
+      throw new Error(
+        `Hard conflict with: ${hard.map((h) => h.title).join(', ')}. Use conflict override permission to force.`,
+      );
+    }
+    if (hard.length && input.forceOverride) {
+      const resolved = resolvePermissions({
+        personId: session.person.id,
+        organizationId: state.organization.id,
+        roleTemplates: state.roleTemplates,
+        roleAssignments: state.roleAssignments,
+        overrides: state.overrides,
+      });
+      if (!resolved.permissions.has(Permissions.calendarConflictOverride) && !resolved.permissions.has(Permissions.rolesManage)) {
+        throw new Error('Missing calendar.conflict.override permission');
+      }
+    }
+
+    const event: CalendarEvent = {
+      id: id('cal'),
+      organizationId: state.organization.id,
+      title: input.title.trim(),
+      description: input.description?.trim() || null,
+      organizingTeamId: 'team_follow_up',
+      eventScope: input.eventScope ?? 'organization',
+      eventPriority: input.eventPriority ?? 'normal',
+      conflictPolicy: input.conflictPolicy ?? 'warning',
+      startAt: new Date(input.startAt).toISOString(),
+      endAt: new Date(input.endAt).toISOString(),
+      timezone: state.organization.timezone,
+      recurrence: input.recurrenceWeeklySaturday
+        ? { enabled: true, frequency: 'weekly', daysOfWeek: ['saturday'] }
+        : { enabled: false, frequency: 'none', daysOfWeek: [] },
+      parentRecurringEventId: null,
+      eventStatus: 'scheduled',
+      createdByPersonId: session.person.id,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    };
+    state.calendarEvents.push(event);
+    audit(state, 'calendar.create', 'calendarEvent', event.id, session.person.id, {
+      newValue: { title: event.title, conflicts: conflicts.map((c) => c.id), forced: !!input.forceOverride },
+      reason: input.forceOverride ? 'conflict override' : undefined,
+    });
+    save(state);
+    return { event, warningConflicts: conflicts.filter((c) => c.conflictPolicy === 'warning') };
+  },
+
+  updateCalendarEvent(
+    eventId: string,
+    patch: Partial<Pick<CalendarEvent, 'title' | 'description' | 'startAt' | 'endAt' | 'eventStatus' | 'conflictPolicy' | 'eventPriority'>>,
+    forceOverride = false,
+  ) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const event = state.calendarEvents.find((e) => e.id === eventId);
+    if (!event) throw new Error('Event not found');
+
+    const nextStart = patch.startAt ?? event.startAt;
+    const nextEnd = patch.endAt ?? event.endAt;
+    if (new Date(nextEnd) <= new Date(nextStart)) {
+      throw new Error('End time must be after start time');
+    }
+
+    if (patch.startAt || patch.endAt) {
+      const conflicts = this.findCalendarConflicts({
+        startAt: nextStart,
+        endAt: nextEnd,
+        excludeEventId: eventId,
+      });
+      const hard = conflicts.filter((c) => c.conflictPolicy === 'hard_block' || c.eventPriority === 'organization_reserved');
+      if (hard.length && !forceOverride) {
+        throw new Error(`Hard conflict with: ${hard.map((h) => h.title).join(', ')}`);
+      }
+    }
+
+    const prev = { ...event };
+    Object.assign(event, patch, { updatedAt: nowIso() });
+    audit(state, 'calendar.update', 'calendarEvent', eventId, session.person.id, {
+      previousValue: prev,
+      newValue: event,
+      reason: forceOverride ? 'conflict override' : undefined,
+    });
+    save(state);
+    return event;
+  },
+
+  cancelCalendarEvent(eventId: string, reason: string) {
+    const trimmed = reason.trim();
+    if (trimmed.length < 3) throw new Error('Cancel reason required');
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const event = state.calendarEvents.find((e) => e.id === eventId);
+    if (!event) throw new Error('Event not found');
+    const prev = event.eventStatus;
+    event.eventStatus = 'cancelled';
+    event.updatedAt = nowIso();
+    audit(state, 'calendar.cancel', 'calendarEvent', eventId, session.person.id, {
+      previousValue: prev,
+      newValue: 'cancelled',
+      reason: trimmed,
+    });
+    save(state);
+    return event;
   },
 };

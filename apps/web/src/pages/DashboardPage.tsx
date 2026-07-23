@@ -41,6 +41,12 @@ export function DashboardPage() {
           <Link className="btn" to="/app/assigned">View assigned</Link>
         </div>
 
+        <div className="panel">
+          <h2>Ministry calendar</h2>
+          <p className="muted">{state.calendarEvents.filter((e) => e.eventStatus !== 'cancelled').length} scheduled event(s)</p>
+          <Link className="btn secondary" to="/app/calendar">Open calendar</Link>
+        </div>
+
         {has(Permissions.newcomersViewAll) ? (
           <div className="panel">
             <h2>Active follow-up</h2>

@@ -93,4 +93,5 @@ export const HEAD_LEADER_PERMISSIONS: PermissionKey[] = [
   Permissions.peopleManage,
   Permissions.auditView,
   Permissions.workflowOverride,
+  Permissions.calendarConflictOverride,
 ];
