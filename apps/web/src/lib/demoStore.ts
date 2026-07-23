@@ -25,9 +25,11 @@ import {
   type UserAccount,
 } from '@ieec/shared';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v1';
+const STORAGE_KEY = 'ieec-ya-connect-demo-v3';
+const SEED_VERSION = 3;
 
 export interface DemoState {
+  seedVersion: number;
   organization: Organization;
   people: Person[];
   userAccounts: UserAccount[];
@@ -246,6 +248,7 @@ function createSeed(): DemoState {
   });
 
   return {
+    seedVersion: SEED_VERSION,
     organization: {
       id: orgId,
       name: 'IEEC YA',
@@ -289,7 +292,19 @@ function load(): DemoState {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
     return seed;
   }
-  return JSON.parse(raw) as DemoState;
+  try {
+    const parsed = JSON.parse(raw) as DemoState;
+    if (!parsed.seedVersion || parsed.seedVersion < SEED_VERSION) {
+      const seed = createSeed();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+      return seed;
+    }
+    return parsed;
+  } catch {
+    const seed = createSeed();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+    return seed;
+  }
 }
 
 function save(state: DemoState) {
@@ -325,9 +340,22 @@ function audit(
 
 export const demoStore = {
   reset() {
+    localStorage.removeItem('ieec-ya-connect-demo-v1');
+    localStorage.removeItem('ieec-ya-connect-demo-v2');
+    localStorage.removeItem(STORAGE_KEY);
     const seed = createSeed();
     save(seed);
     return seed;
+  },
+
+  ensureLatestSeed() {
+    // Migrates old demo keys and reseeds if needed
+    const legacy = localStorage.getItem('ieec-ya-connect-demo-v1') || localStorage.getItem('ieec-ya-connect-demo-v2');
+    if (legacy && !localStorage.getItem(STORAGE_KEY)) {
+      localStorage.removeItem('ieec-ya-connect-demo-v1');
+      localStorage.removeItem('ieec-ya-connect-demo-v2');
+    }
+    load();
   },
 
   getState(): DemoState {
@@ -650,16 +678,20 @@ export const demoStore = {
     return entry;
   },
 
-  updateJourneyStatus(journeyId: string, status: string, reason?: string) {
+  updateJourneyStatus(
+    journeyId: string,
+    status: string,
+    reason?: string,
+    action: 'inactive' | 'closed' | 'active_follow_up' | 'reopen' | string = status,
+  ) {
     const state = load();
     const session = this.getSession();
     const journey = state.journeys.find((j) => j.id === journeyId);
     if (!journey) throw new Error('Journey not found');
 
-    const requiresReason = status === 'inactive' || status === 'closed';
     const trimmedReason = reason?.trim() ?? '';
-    if (requiresReason && !trimmedReason) {
-      throw new Error('A reason is required to mark inactive or close a journey');
+    if (trimmedReason.length < 3) {
+      throw new Error('A reason of at least 3 characters is required');
     }
 
     const prev = journey.journeyStatus;
@@ -667,19 +699,37 @@ export const demoStore = {
     journey.updatedAt = nowIso();
     journey.updatedBy = session?.person.id ?? 'system';
     journey.lastStatusReason = trimmedReason;
+
     if (status === 'closed') {
       journey.completedAt = nowIso();
       journey.closureReason = trimmedReason;
       journey.isCurrentJourney = false;
     }
+
     if (status === 'inactive') {
-      // Keep journey current but record required reason
-      journey.closureReason = journey.closureReason ?? null;
+      journey.isCurrentJourney = true;
     }
+
+    if (status === 'active_follow_up') {
+      journey.isCurrentJourney = true;
+      journey.completedAt = null;
+    }
+
+    if (action === 'reopen') {
+      journey.isCurrentJourney = true;
+      journey.completedAt = null;
+      journey.closureReason = null;
+      for (const a of state.assignments.filter((x) => x.journeyId === journeyId && x.assignmentStatus === 'active')) {
+        a.assignmentStatus = 'ended';
+        a.endDate = nowIso();
+        a.updatedAt = nowIso();
+      }
+    }
+
     audit(state, 'journey.transition', 'newcomerJourney', journeyId, session?.person.id ?? null, {
       previousValue: prev,
       newValue: status,
-      reason: trimmedReason || undefined,
+      reason: trimmedReason,
     });
     save(state);
   },

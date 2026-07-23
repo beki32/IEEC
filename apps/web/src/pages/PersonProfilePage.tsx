@@ -1,8 +1,40 @@
 import { Permissions, type AttendanceStatus } from '@ieec/shared';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
+
+type JourneyAction = 'inactive' | 'closed' | 'active_follow_up' | 'reopen';
+
+const ACTION_COPY: Record<
+  JourneyAction,
+  { title: string; confirm: string; placeholder: string; nextStatus: string }
+> = {
+  inactive: {
+    title: 'Mark journey inactive',
+    confirm: 'Confirm inactive',
+    placeholder: 'e.g. Travel, family situation, temporary pause…',
+    nextStatus: 'inactive',
+  },
+  closed: {
+    title: 'Close journey',
+    confirm: 'Confirm close',
+    placeholder: 'e.g. Moved away, declined follow-up, transferred…',
+    nextStatus: 'closed',
+  },
+  active_follow_up: {
+    title: 'Mark journey active again',
+    confirm: 'Confirm active',
+    placeholder: 'e.g. Returned from travel, ready to continue…',
+    nextStatus: 'active_follow_up',
+  },
+  reopen: {
+    title: 'Reopen closed journey',
+    confirm: 'Confirm reopen',
+    placeholder: 'e.g. Person asked to restart follow-up…',
+    nextStatus: 'awaiting_assignment',
+  },
+};
 
 export function PersonProfilePage() {
   const { personId } = useParams();
@@ -10,7 +42,12 @@ export function PersonProfilePage() {
   const [, setTick] = useState(0);
   const state = demoStore.getState();
   const person = state.people.find((p) => p.id === personId);
-  const journey = state.journeys.find((j) => j.personId === personId && (j.isCurrentJourney || !j.completedAt));
+
+  // Latest journey for this person, including closed (needed for reopen)
+  const journey = [...state.journeys]
+    .filter((j) => j.personId === personId)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+
   const assignment = state.assignments.find(
     (a) => a.newcomerPersonId === personId && a.assignmentStatus === 'active' && a.assignedPersonId === me?.id,
   ) ?? state.assignments.find((a) => a.newcomerPersonId === personId && a.assignmentStatus === 'active');
@@ -24,9 +61,15 @@ export function PersonProfilePage() {
   const [bio, setBio] = useState('');
   const [attStatus, setAttStatus] = useState<AttendanceStatus>('attended');
   const [message, setMessage] = useState('');
-  const [journeyAction, setJourneyAction] = useState<'inactive' | 'closed' | null>(null);
+  const [journeyAction, setJourneyAction] = useState<JourneyAction | null>(null);
   const [journeyReason, setJourneyReason] = useState('');
   const [journeyError, setJourneyError] = useState('');
+
+  useEffect(() => {
+    // Force users off stale localStorage seeds that predate reason/reopen UI
+    demoStore.ensureLatestSeed();
+    refresh();
+  }, [refresh]);
 
   if (!person) {
     return <div className="main"><p>Person not found. <Link to="/app">Back</Link></p></div>;
@@ -35,6 +78,24 @@ export function PersonProfilePage() {
   const canOperateAssigned =
     assignment?.assignedPersonId === me?.id ||
     has(Permissions.newcomersViewAll);
+
+  const status = journey?.journeyStatus ?? '';
+  const canMarkInactive =
+    has(Permissions.journeyMarkInactive) &&
+    !!journey &&
+    !['inactive', 'closed', 'transitioned_to_member'].includes(status);
+  const canClose =
+    has(Permissions.journeyClose) &&
+    !!journey &&
+    !['closed', 'transitioned_to_member'].includes(status);
+  const canMarkActive =
+    has(Permissions.journeyMarkInactive) &&
+    !!journey &&
+    status === 'inactive';
+  const canReopen =
+    has(Permissions.journeyReopen) &&
+    !!journey &&
+    status === 'closed';
 
   function bump() {
     refresh();
@@ -83,7 +144,7 @@ export function PersonProfilePage() {
     bump();
   }
 
-  function startJourneyAction(action: 'inactive' | 'closed') {
+  function startJourneyAction(action: JourneyAction) {
     setJourneyAction(action);
     setJourneyReason('');
     setJourneyError('');
@@ -99,12 +160,9 @@ export function PersonProfilePage() {
       return;
     }
     try {
-      demoStore.updateJourneyStatus(journey.id, journeyAction, reason);
-      setMessage(
-        journeyAction === 'inactive'
-          ? `Journey marked inactive. Reason: ${reason}`
-          : `Journey closed. Reason: ${reason}`,
-      );
+      const copy = ACTION_COPY[journeyAction];
+      demoStore.updateJourneyStatus(journey.id, copy.nextStatus, reason, journeyAction);
+      setMessage(`${copy.title} saved. Reason: ${reason}`);
       setJourneyAction(null);
       setJourneyReason('');
       setJourneyError('');
@@ -118,6 +176,7 @@ export function PersonProfilePage() {
     <div className="grid">
       <section className="hero">
         <Link to="/app/assigned" className="muted">← Back</Link>
+        <p className="badge">Journey controls v3 · reason required</p>
         <h1>{person.firstName} {person.lastName}</h1>
         <p className="muted">
           Ministry status: <strong>{person.currentMinistryStatus}</strong>
@@ -135,68 +194,92 @@ export function PersonProfilePage() {
         </div>
         <div className="panel">
           <h2>Journey actions</h2>
-          <p className="muted">Inactive and close always ask for a required reason.</p>
+          <p className="muted">
+            Inactive, close, activate again, and reopen all require a reason (modal + audit).
+          </p>
           <div className="row">
-            {has(Permissions.membershipRecommendationsSubmit) && journey ? (
+            {has(Permissions.membershipRecommendationsSubmit) && journey && !['closed', 'transitioned_to_member'].includes(status) ? (
               <button type="button" className="secondary" onClick={() => { demoStore.submitMembershipRecommendation(journey.id, 'Ready for membership'); bump(); }}>
                 Recommend membership
               </button>
             ) : null}
-            {has(Permissions.journeyMarkInactive) && journey && journey.journeyStatus !== 'inactive' && journey.journeyStatus !== 'closed' ? (
+
+            {canMarkInactive ? (
               <button type="button" className="secondary" onClick={() => startJourneyAction('inactive')}>
                 Mark inactive
               </button>
             ) : null}
-            {has(Permissions.journeyClose) && journey && journey.journeyStatus !== 'closed' ? (
+
+            {canMarkActive ? (
+              <button type="button" onClick={() => startJourneyAction('active_follow_up')}>
+                Mark active again
+              </button>
+            ) : null}
+
+            {canClose ? (
               <button type="button" className="danger" onClick={() => startJourneyAction('closed')}>
                 Close journey
               </button>
             ) : null}
+
+            {canReopen ? (
+              <button type="button" onClick={() => startJourneyAction('reopen')}>
+                Reopen journey
+              </button>
+            ) : null}
           </div>
+
+          {!canMarkInactive && !canClose && !canMarkActive && !canReopen ? (
+            <p className="muted" style={{ marginTop: '0.75rem' }}>
+              No journey status actions available for this state/permission.
+              Try leader login and click <strong>Reset demo</strong> in the top bar if buttons are missing.
+            </p>
+          ) : null}
 
           {journey?.lastStatusReason ? (
             <p className="muted" style={{ marginTop: '0.75rem' }}>
               Last status reason: <strong>{journey.lastStatusReason}</strong>
             </p>
           ) : null}
-          {journey?.closureReason && journey.journeyStatus === 'closed' ? (
-            <p className="muted">Closure reason: {journey.closureReason}</p>
-          ) : null}
         </div>
       </div>
 
-      {journeyAction && journey ? (
-        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="journey-reason-title">
-          <form className="modal-panel grid" onSubmit={confirmJourneyAction}>
-            <h2 id="journey-reason-title">
-              {journeyAction === 'inactive' ? 'Mark journey inactive' : 'Close journey'}
-            </h2>
-            <p className="muted">
-              A reason is required and will be audited.
-              {journeyAction === 'closed' ? ' The Person record is kept.' : ''}
-            </p>
+      {journeyAction ? (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="journey-reason-title"
+          onClick={() => {
+            setJourneyAction(null);
+            setJourneyReason('');
+            setJourneyError('');
+          }}
+        >
+          <form
+            className="modal-panel grid"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={confirmJourneyAction}
+          >
+            <h2 id="journey-reason-title">{ACTION_COPY[journeyAction].title}</h2>
+            <p className="muted">A reason is required and will be audited. You cannot continue without one.</p>
             <label>
               Reason <span className="error">*</span>
               <textarea
                 required
                 autoFocus
+                minLength={3}
                 value={journeyReason}
                 onChange={(e) => {
                   setJourneyReason(e.target.value);
                   setJourneyError('');
                 }}
-                placeholder={
-                  journeyAction === 'inactive'
-                    ? 'e.g. Travel, family situation, temporary pause…'
-                    : 'e.g. Moved away, declined follow-up, transferred…'
-                }
+                placeholder={ACTION_COPY[journeyAction].placeholder}
               />
             </label>
             {journeyError ? <p className="error">{journeyError}</p> : null}
             <div className="row">
-              <button type="submit">
-                {journeyAction === 'inactive' ? 'Confirm inactive' : 'Confirm close'}
-              </button>
+              <button type="submit">{ACTION_COPY[journeyAction].confirm}</button>
               <button
                 type="button"
                 className="secondary"
@@ -213,7 +296,7 @@ export function PersonProfilePage() {
         </div>
       ) : null}
 
-      {canOperateAssigned && journey && assignment ? (
+      {canOperateAssigned && journey && assignment && !['closed', 'inactive'].includes(status) ? (
         <div className="grid two">
           <form className="panel grid" onSubmit={onReport}>
             <h2>Weekly report</h2>

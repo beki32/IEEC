@@ -37,6 +37,7 @@ function Shell() {
             onClick={() => {
               demoStore.reset();
               logout();
+              window.location.href = '/login';
             }}
           >
             Reset demo
