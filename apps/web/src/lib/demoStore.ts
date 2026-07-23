@@ -671,7 +671,7 @@ export const demoStore = {
     audit(state, 'journey.transition', 'newcomerJourney', journeyId, session?.person.id ?? null, {
       previousValue: prev,
       newValue: status,
-      reason: trimmedReason || null,
+      reason: trimmedReason || undefined,
     });
     save(state);
   },
