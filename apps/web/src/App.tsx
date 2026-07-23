@@ -1,5 +1,6 @@
 import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom';
 import { Permissions, type Team } from '@ieec/shared';
+import { useEffect, useState } from 'react';
 import { SessionProvider, useSession } from './lib/session';
 import { demoStore } from './lib/demoStore';
 import { ChatDockProvider, useChatDock } from './lib/chatDock';
@@ -33,6 +34,21 @@ function CmsShell() {
     useSession();
   const { openChat } = useChatDock();
   const navigate = useNavigate();
+  const [navOpen, setNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNavOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.body.classList.add('nav-locked');
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.classList.remove('nav-locked');
+    };
+  }, [navOpen]);
+
   if (!person) return <Navigate to="/login" replace />;
 
   const sharedMenus = visible(
@@ -41,6 +57,10 @@ function CmsShell() {
   );
   const adminMenus = visible(ADMIN_MENUS, has);
 
+  function closeNav() {
+    setNavOpen(false);
+  }
+
   function onTeamSelect(teamId: string) {
     setActiveTeam(teamId);
     refresh();
@@ -48,8 +68,16 @@ function CmsShell() {
   }
 
   return (
-    <div className="cms-shell">
-      <aside className="cms-sidebar">
+    <div className={`cms-shell ${navOpen ? 'nav-open' : ''}`}>
+      <button
+        type="button"
+        className="cms-nav-backdrop"
+        aria-label="Close menu"
+        tabIndex={navOpen ? 0 : -1}
+        onClick={closeNav}
+      />
+
+      <aside id="cms-sidebar" className="cms-sidebar">
         <div className="cms-brand-block">
           <div className="cms-brand-title">IEEC YA Connect</div>
           <div className="cms-brand-sub">{organization?.name}</div>
@@ -77,7 +105,13 @@ function CmsShell() {
                   {selected ? (
                     <div className="cms-team-submenu" role="group" aria-label={`${team.name} menu`}>
                       {menus.map((item) => (
-                        <NavLink key={item.to} to={item.to} end={item.end} className="cms-nav-link nested">
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          end={item.end}
+                          className="cms-nav-link nested"
+                          onClick={closeNav}
+                        >
                           {item.label}
                         </NavLink>
                       ))}
@@ -90,11 +124,18 @@ function CmsShell() {
 
           <div className="cms-section-label">Organization</div>
           {sharedMenus.map((item) => (
-            <NavLink key={item.to} to={item.to} className="cms-nav-link">
+            <NavLink key={item.to} to={item.to} className="cms-nav-link" onClick={closeNav}>
               {item.label}
             </NavLink>
           ))}
-          <button type="button" className="cms-nav-link cms-nav-btn" onClick={() => openChat()}>
+          <button
+            type="button"
+            className="cms-nav-link cms-nav-btn"
+            onClick={() => {
+              closeNav();
+              openChat();
+            }}
+          >
             Chat
           </button>
 
@@ -102,14 +143,16 @@ function CmsShell() {
             <>
               <div className="cms-section-label">Admin</div>
               {adminMenus.map((item) => (
-                <NavLink key={item.to} to={item.to} className="cms-nav-link">{item.label}</NavLink>
+                <NavLink key={item.to} to={item.to} className="cms-nav-link" onClick={closeNav}>
+                  {item.label}
+                </NavLink>
               ))}
             </>
           ) : null}
         </nav>
 
         <div className="cms-sidebar-foot">
-          <NavLink to="/app/account" className="cms-user-link">
+          <NavLink to="/app/account" className="cms-user-link" onClick={closeNav}>
             <Avatar
               name={`${person.firstName} ${person.lastName}`}
               photoUrl={person.photoUrl}
@@ -121,7 +164,7 @@ function CmsShell() {
             </span>
           </NavLink>
           <div className="cms-foot-actions">
-            <NavLink to="/register">Register</NavLink>
+            <NavLink to="/register" onClick={closeNav}>Register</NavLink>
             <button
               type="button"
               className="linkish"
@@ -149,9 +192,25 @@ function CmsShell() {
 
       <div className="cms-main">
         <header className="cms-topbar">
-          <div>
-            <div className="cms-context">{activeTeam ? activeTeam.name : 'No active team'}</div>
-            <div className="muted">Select a team in the sidebar to open its menu.</div>
+          <div className="cms-topbar-left">
+            <button
+              type="button"
+              className="cms-menu-btn"
+              aria-label={navOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={navOpen}
+              aria-controls="cms-sidebar"
+              onClick={() => setNavOpen((open) => !open)}
+            >
+              <span className={`cms-menu-icon ${navOpen ? 'open' : ''}`} aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </span>
+            </button>
+            <div>
+              <div className="cms-context">{activeTeam ? activeTeam.name : 'No active team'}</div>
+              <div className="muted cms-topbar-hint">Select a team in the sidebar to open its menu.</div>
+            </div>
           </div>
           <div className="cms-top-actions">
             <NotificationsBell />
