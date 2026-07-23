@@ -13,6 +13,9 @@ import {
   type AttendanceStatus,
   type AuditLog,
   type CalendarEvent,
+  type ChatChannel,
+  type ChatMembership,
+  type ChatMessage,
   type FollowUpAssignment,
   type FollowUpReport,
   type NewcomerAttendance,
@@ -26,8 +29,8 @@ import {
   type UserAccount,
 } from '@ieec/shared';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v4';
-const SEED_VERSION = 4;
+const STORAGE_KEY = 'ieec-ya-connect-demo-v5';
+const SEED_VERSION = 5;
 
 export interface DemoState {
   seedVersion: number;
@@ -43,6 +46,9 @@ export interface DemoState {
   attendance: NewcomerAttendance[];
   bioEntries: NewcomerBioEntry[];
   calendarEvents: CalendarEvent[];
+  chatChannels: ChatChannel[];
+  chatMemberships: ChatMembership[];
+  chatMessages: ChatMessage[];
   auditLogs: AuditLog[];
   sessionAuthUid: string | null;
 }
@@ -237,6 +243,66 @@ function createSeed(): DemoState {
     updatedAt: ts,
   };
 
+  const opsChannel: ChatChannel = {
+    id: 'chat_fu_ops',
+    organizationId: orgId,
+    name: 'Follow-Up Ops',
+    description: 'Team operational channel — membership is independent of team roles (ADR-004)',
+    channelType: 'team_operational',
+    relatedTeamId: teamId,
+    channelStatus: 'active',
+    createdByPersonId: leaderPersonId,
+    createdAt: ts,
+    updatedAt: ts,
+  };
+
+  const leadersOnlyChannel: ChatChannel = {
+    id: 'chat_fu_leaders',
+    organizationId: orgId,
+    name: 'Follow-Up Leaders',
+    description: 'Second channel on the same team — ministers are not auto-added',
+    channelType: 'team_operational',
+    relatedTeamId: teamId,
+    channelStatus: 'active',
+    createdByPersonId: leaderPersonId,
+    createdAt: ts,
+    updatedAt: ts,
+  };
+
+  const mkChatMember = (
+    mid: string,
+    channelId: string,
+    personId: string,
+    role: 'member' | 'moderator' = 'member',
+  ): ChatMembership => ({
+    id: mid,
+    organizationId: orgId,
+    channelId,
+    personId,
+    membershipRole: role,
+    membershipStatus: 'active',
+    addedByPersonId: leaderPersonId,
+    createdAt: ts,
+    updatedAt: ts,
+    removedAt: null,
+    removedByPersonId: null,
+  });
+
+  const seedMessages: ChatMessage[] = [
+    {
+      id: 'msg_welcome',
+      organizationId: orgId,
+      channelId: opsChannel.id,
+      senderPersonId: leaderPersonId,
+      body: 'Welcome to Follow-Up Ops. Chat membership ≠ team membership — guests here do not get queue access.',
+      messageStatus: 'active',
+      createdAt: ts,
+      updatedAt: ts,
+      deletedAt: null,
+      deletedByPersonId: null,
+    },
+  ];
+
   const mkAccount = (uid: string, personId: string, email: string): UserAccount => ({
     id: uid,
     organizationId: orgId,
@@ -305,6 +371,15 @@ function createSeed(): DemoState {
     attendance: [],
     bioEntries: [],
     calendarEvents: [saturdayEvent, welcomeEvent],
+    chatChannels: [opsChannel, leadersOnlyChannel],
+    chatMemberships: [
+      mkChatMember('cm_ops_leader', opsChannel.id, leaderPersonId, 'moderator'),
+      mkChatMember('cm_ops_assistant', opsChannel.id, assistantPersonId),
+      mkChatMember('cm_ops_minister', opsChannel.id, ministerPersonId),
+      mkChatMember('cm_leaders_leader', leadersOnlyChannel.id, leaderPersonId, 'moderator'),
+      mkChatMember('cm_leaders_assistant', leadersOnlyChannel.id, assistantPersonId),
+    ],
+    chatMessages: seedMessages,
     auditLogs: [],
     sessionAuthUid: null,
   };
@@ -367,6 +442,7 @@ export const demoStore = {
   reset() {
     localStorage.removeItem('ieec-ya-connect-demo-v1');
     localStorage.removeItem('ieec-ya-connect-demo-v2');
+    localStorage.removeItem('ieec-ya-connect-demo-v4');
     localStorage.removeItem(STORAGE_KEY);
     const seed = createSeed();
     save(seed);
@@ -375,10 +451,14 @@ export const demoStore = {
 
   ensureLatestSeed() {
     // Migrates old demo keys and reseeds if needed
-    const legacy = localStorage.getItem('ieec-ya-connect-demo-v1') || localStorage.getItem('ieec-ya-connect-demo-v2');
+    const legacy =
+      localStorage.getItem('ieec-ya-connect-demo-v1') ||
+      localStorage.getItem('ieec-ya-connect-demo-v2') ||
+      localStorage.getItem('ieec-ya-connect-demo-v4');
     if (legacy && !localStorage.getItem(STORAGE_KEY)) {
       localStorage.removeItem('ieec-ya-connect-demo-v1');
       localStorage.removeItem('ieec-ya-connect-demo-v2');
+      localStorage.removeItem('ieec-ya-connect-demo-v4');
     }
     load();
   },
@@ -962,5 +1042,260 @@ export const demoStore = {
     });
     save(state);
     return event;
+  },
+
+  listMyChatChannels() {
+    const state = load();
+    const session = this.getSession();
+    if (!session) return [];
+    const myChannelIds = new Set(
+      state.chatMemberships
+        .filter((m) => m.personId === session.person.id && m.membershipStatus === 'active')
+        .map((m) => m.channelId),
+    );
+    return state.chatChannels
+      .filter((c) => c.channelStatus !== 'archived' && myChannelIds.has(c.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  listChatChannelsForManage() {
+    const state = load();
+    return state.chatChannels
+      .filter((c) => c.channelStatus !== 'archived')
+      .sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  listChatMembers(channelId: string) {
+    const state = load();
+    return state.chatMemberships
+      .filter((m) => m.channelId === channelId && m.membershipStatus === 'active')
+      .map((m) => ({
+        membership: m,
+        person: state.people.find((p) => p.id === m.personId) ?? null,
+      }));
+  },
+
+  listChatMessages(channelId: string, includeDeleted = false) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const member = state.chatMemberships.find(
+      (m) => m.channelId === channelId && m.personId === session.person.id && m.membershipStatus === 'active',
+    );
+    if (!member) throw new Error('Not a member of this channel');
+    return state.chatMessages
+      .filter((m) => m.channelId === channelId && (includeDeleted || m.messageStatus !== 'deleted'))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  },
+
+  isChatMember(channelId: string, personId?: string) {
+    const state = load();
+    const session = this.getSession();
+    const pid = personId ?? session?.person.id;
+    if (!pid) return false;
+    return state.chatMemberships.some(
+      (m) => m.channelId === channelId && m.personId === pid && m.membershipStatus === 'active',
+    );
+  },
+
+  createChatChannel(input: {
+    name: string;
+    description?: string;
+    channelType?: string;
+    relatedTeamId?: string | null;
+    initialMemberPersonIds?: string[];
+  }) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const resolved = resolvePermissions({
+      personId: session.person.id,
+      organizationId: state.organization.id,
+      roleTemplates: state.roleTemplates,
+      roleAssignments: state.roleAssignments,
+      overrides: state.overrides,
+    });
+    if (!resolved.permissions.has(Permissions.chatCreate)) {
+      throw new Error('Missing follow_up.chat.create permission');
+    }
+    const name = input.name.trim();
+    if (name.length < 2) throw new Error('Channel name required');
+
+    const channel: ChatChannel = {
+      id: id('chat'),
+      organizationId: state.organization.id,
+      name,
+      description: input.description?.trim() || null,
+      channelType: input.channelType ?? 'team_operational',
+      relatedTeamId: input.relatedTeamId ?? 'team_follow_up',
+      channelStatus: 'active',
+      createdByPersonId: session.person.id,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    };
+    state.chatChannels.push(channel);
+
+    const memberIds = new Set([session.person.id, ...(input.initialMemberPersonIds ?? [])]);
+    for (const personId of memberIds) {
+      state.chatMemberships.push({
+        id: id('cm'),
+        organizationId: state.organization.id,
+        channelId: channel.id,
+        personId,
+        membershipRole: personId === session.person.id ? 'moderator' : 'member',
+        membershipStatus: 'active',
+        addedByPersonId: session.person.id,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+        removedAt: null,
+        removedByPersonId: null,
+      });
+    }
+
+    audit(state, 'chat.channel.create', 'chatChannel', channel.id, session.person.id, {
+      newValue: { name: channel.name, members: [...memberIds] },
+    });
+    save(state);
+    return channel;
+  },
+
+  addChatMember(channelId: string, personId: string) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const resolved = resolvePermissions({
+      personId: session.person.id,
+      organizationId: state.organization.id,
+      roleTemplates: state.roleTemplates,
+      roleAssignments: state.roleAssignments,
+      overrides: state.overrides,
+    });
+    if (!resolved.permissions.has(Permissions.chatManageMembers)) {
+      throw new Error('Missing follow_up.chat.manage_members permission');
+    }
+    const channel = state.chatChannels.find((c) => c.id === channelId);
+    if (!channel || channel.channelStatus === 'archived') throw new Error('Channel not found');
+    const person = state.people.find((p) => p.id === personId);
+    if (!person) throw new Error('Person not found');
+
+    const existing = state.chatMemberships.find((m) => m.channelId === channelId && m.personId === personId);
+    if (existing?.membershipStatus === 'active') {
+      throw new Error('Already a channel member');
+    }
+    if (existing) {
+      existing.membershipStatus = 'active';
+      existing.updatedAt = nowIso();
+      existing.removedAt = null;
+      existing.removedByPersonId = null;
+      existing.addedByPersonId = session.person.id;
+    } else {
+      state.chatMemberships.push({
+        id: id('cm'),
+        organizationId: state.organization.id,
+        channelId,
+        personId,
+        membershipRole: 'member',
+        membershipStatus: 'active',
+        addedByPersonId: session.person.id,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+        removedAt: null,
+        removedByPersonId: null,
+      });
+    }
+    audit(state, 'chat.member.add', 'chatMembership', channelId, session.person.id, {
+      newValue: { personId, note: 'Chat membership does not grant team permissions' },
+    });
+    save(state);
+  },
+
+  removeChatMember(channelId: string, personId: string) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const resolved = resolvePermissions({
+      personId: session.person.id,
+      organizationId: state.organization.id,
+      roleTemplates: state.roleTemplates,
+      roleAssignments: state.roleAssignments,
+      overrides: state.overrides,
+    });
+    if (!resolved.permissions.has(Permissions.chatManageMembers)) {
+      throw new Error('Missing follow_up.chat.manage_members permission');
+    }
+    const membership = state.chatMemberships.find(
+      (m) => m.channelId === channelId && m.personId === personId && m.membershipStatus === 'active',
+    );
+    if (!membership) throw new Error('Membership not found');
+    membership.membershipStatus = 'removed';
+    membership.removedAt = nowIso();
+    membership.removedByPersonId = session.person.id;
+    membership.updatedAt = nowIso();
+    audit(state, 'chat.member.remove', 'chatMembership', membership.id, session.person.id, {
+      previousValue: { personId, channelId },
+      reason: 'Removed from channel only — team membership unchanged',
+    });
+    save(state);
+  },
+
+  sendChatMessage(channelId: string, body: string) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const trimmed = body.trim();
+    if (!trimmed) throw new Error('Message required');
+    if (!this.isChatMember(channelId)) {
+      throw new Error('Not a member of this channel');
+    }
+    const channel = state.chatChannels.find((c) => c.id === channelId && c.channelStatus === 'active');
+    if (!channel) throw new Error('Channel not found');
+
+    const message: ChatMessage = {
+      id: id('msg'),
+      organizationId: state.organization.id,
+      channelId,
+      senderPersonId: session.person.id,
+      body: trimmed,
+      messageStatus: 'active',
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      deletedAt: null,
+      deletedByPersonId: null,
+    };
+    state.chatMessages.push(message);
+    audit(state, 'chat.message.send', 'chatMessage', message.id, session.person.id, {
+      newValue: { channelId },
+    });
+    save(state);
+    return message;
+  },
+
+  softDeleteChatMessage(messageId: string) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const message = state.chatMessages.find((m) => m.id === messageId);
+    if (!message || message.messageStatus === 'deleted') throw new Error('Message not found');
+    const resolved = resolvePermissions({
+      personId: session.person.id,
+      organizationId: state.organization.id,
+      roleTemplates: state.roleTemplates,
+      roleAssignments: state.roleAssignments,
+      overrides: state.overrides,
+    });
+    const canModerate = resolved.permissions.has(Permissions.chatManageMembers);
+    if (message.senderPersonId !== session.person.id && !canModerate) {
+      throw new Error('Cannot delete this message');
+    }
+    message.messageStatus = 'deleted';
+    message.deletedAt = nowIso();
+    message.deletedByPersonId = session.person.id;
+    message.updatedAt = nowIso();
+    audit(state, 'chat.message.delete', 'chatMessage', messageId, session.person.id, {
+      previousValue: { body: message.body },
+      reason: 'soft delete',
+    });
+    save(state);
+    return message;
   },
 };

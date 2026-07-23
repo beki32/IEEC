@@ -47,6 +47,14 @@ export function DashboardPage() {
           <Link className="btn secondary" to="/app/calendar">Open calendar</Link>
         </div>
 
+        <div className="panel">
+          <h2>Chat</h2>
+          <p className="muted">
+            {demoStore.listMyChatChannels().length} channel(s) · membership ≠ team role
+          </p>
+          <Link className="btn secondary" to="/app/chat">Open chat</Link>
+        </div>
+
         {has(Permissions.newcomersViewAll) ? (
           <div className="panel">
             <h2>Active follow-up</h2>

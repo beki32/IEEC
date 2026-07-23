@@ -222,6 +222,47 @@ export interface CalendarEvent {
   updatedAt: string;
 }
 
+/** Chat membership is independent of team membership (ADR-004). */
+export interface ChatChannel {
+  id: string;
+  organizationId: string;
+  name: string;
+  description: string | null;
+  channelType: 'team_operational' | 'case' | 'cross_team' | 'parent_coordination' | string;
+  relatedTeamId: string | null;
+  channelStatus: 'active' | 'archived' | string;
+  createdByPersonId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChatMembership {
+  id: string;
+  organizationId: string;
+  channelId: string;
+  personId: string;
+  membershipRole: 'member' | 'moderator' | string;
+  membershipStatus: 'active' | 'removed' | string;
+  addedByPersonId: string;
+  createdAt: string;
+  updatedAt: string;
+  removedAt: string | null;
+  removedByPersonId: string | null;
+}
+
+export interface ChatMessage {
+  id: string;
+  organizationId: string;
+  channelId: string;
+  senderPersonId: string;
+  body: string;
+  messageStatus: 'active' | 'deleted' | string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  deletedByPersonId: string | null;
+}
+
 export interface AuditLog {
   id: string;
   organizationId: string;

@@ -10,6 +10,7 @@ import { AssignedPage } from './pages/AssignedPage';
 import { PersonProfilePage } from './pages/PersonProfilePage';
 import { AdminRolesPage } from './pages/AdminRolesPage';
 import { CalendarPage } from './pages/CalendarPage';
+import { ChatPage } from './pages/ChatPage';
 
 function Shell() {
   const { person, organization, logout, has } = useSession();
@@ -31,6 +32,7 @@ function Shell() {
             <NavLink to="/app/queue">Queue</NavLink>
           )}
           <NavLink to="/app/calendar">Calendar</NavLink>
+          <NavLink to="/app/chat">Chat</NavLink>
           {has(Permissions.rolesManage) && <NavLink to="/app/admin/roles">RBAC</NavLink>}
           <NavLink to="/register">Public register</NavLink>
           <button
@@ -67,6 +69,7 @@ export default function App() {
           <Route path="queue" element={<QueuePage />} />
           <Route path="people/:personId" element={<PersonProfilePage />} />
           <Route path="calendar" element={<CalendarPage />} />
+          <Route path="chat" element={<ChatPage />} />
           <Route path="admin/roles" element={<AdminRolesPage />} />
         </Route>
       </Routes>
