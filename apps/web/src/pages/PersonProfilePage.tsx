@@ -135,6 +135,7 @@ export function PersonProfilePage() {
         </div>
         <div className="panel">
           <h2>Journey actions</h2>
+          <p className="muted">Inactive and close always ask for a required reason.</p>
           <div className="row">
             {has(Permissions.membershipRecommendationsSubmit) && journey ? (
               <button type="button" className="secondary" onClick={() => { demoStore.submitMembershipRecommendation(journey.id, 'Ready for membership'); bump(); }}>
@@ -153,56 +154,64 @@ export function PersonProfilePage() {
             ) : null}
           </div>
 
-          {journeyAction && journey ? (
-            <form className="grid" style={{ marginTop: '1rem' }} onSubmit={confirmJourneyAction}>
-              <p className="muted">
-                {journeyAction === 'inactive'
-                  ? 'Marking inactive requires a reason (audited).'
-                  : 'Closing a journey requires a reason (audited). Person record is kept.'}
-              </p>
-              <label>
-                Reason <span className="error">*</span>
-                <textarea
-                  required
-                  value={journeyReason}
-                  onChange={(e) => {
-                    setJourneyReason(e.target.value);
-                    setJourneyError('');
-                  }}
-                  placeholder={
-                    journeyAction === 'inactive'
-                      ? 'e.g. Travel, family situation, temporary pause…'
-                      : 'e.g. Moved away, declined follow-up, transferred…'
-                  }
-                />
-              </label>
-              {journeyError ? <p className="error">{journeyError}</p> : null}
-              <div className="row">
-                <button type="submit">
-                  {journeyAction === 'inactive' ? 'Confirm inactive' : 'Confirm close'}
-                </button>
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => {
-                    setJourneyAction(null);
-                    setJourneyReason('');
-                    setJourneyError('');
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : null}
-
-          {journey?.closureReason ? (
+          {journey?.lastStatusReason ? (
             <p className="muted" style={{ marginTop: '0.75rem' }}>
-              Closure reason: {journey.closureReason}
+              Last status reason: <strong>{journey.lastStatusReason}</strong>
             </p>
+          ) : null}
+          {journey?.closureReason && journey.journeyStatus === 'closed' ? (
+            <p className="muted">Closure reason: {journey.closureReason}</p>
           ) : null}
         </div>
       </div>
+
+      {journeyAction && journey ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="journey-reason-title">
+          <form className="modal-panel grid" onSubmit={confirmJourneyAction}>
+            <h2 id="journey-reason-title">
+              {journeyAction === 'inactive' ? 'Mark journey inactive' : 'Close journey'}
+            </h2>
+            <p className="muted">
+              A reason is required and will be audited.
+              {journeyAction === 'closed' ? ' The Person record is kept.' : ''}
+            </p>
+            <label>
+              Reason <span className="error">*</span>
+              <textarea
+                required
+                autoFocus
+                value={journeyReason}
+                onChange={(e) => {
+                  setJourneyReason(e.target.value);
+                  setJourneyError('');
+                }}
+                placeholder={
+                  journeyAction === 'inactive'
+                    ? 'e.g. Travel, family situation, temporary pause…'
+                    : 'e.g. Moved away, declined follow-up, transferred…'
+                }
+              />
+            </label>
+            {journeyError ? <p className="error">{journeyError}</p> : null}
+            <div className="row">
+              <button type="submit">
+                {journeyAction === 'inactive' ? 'Confirm inactive' : 'Confirm close'}
+              </button>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setJourneyAction(null);
+                  setJourneyReason('');
+                  setJourneyError('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
 
       {canOperateAssigned && journey && assignment ? (
         <div className="grid two">

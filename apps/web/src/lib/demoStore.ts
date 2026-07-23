@@ -139,6 +139,7 @@ function createSeed(): DemoState {
     startedAt: ts,
     completedAt: null,
     closureReason: null,
+    lastStatusReason: null,
     createdAt: ts,
     createdBy: 'system',
     updatedAt: ts,
@@ -159,6 +160,7 @@ function createSeed(): DemoState {
     startedAt: ts,
     completedAt: null,
     closureReason: null,
+    lastStatusReason: null,
     createdAt: ts,
     createdBy: 'system',
     updatedAt: ts,
@@ -440,6 +442,7 @@ export const demoStore = {
       startedAt: ts,
       completedAt: null,
       closureReason: null,
+    lastStatusReason: null,
       createdAt: ts,
       createdBy: 'public',
       updatedAt: ts,
@@ -663,10 +666,15 @@ export const demoStore = {
     journey.journeyStatus = status;
     journey.updatedAt = nowIso();
     journey.updatedBy = session?.person.id ?? 'system';
+    journey.lastStatusReason = trimmedReason;
     if (status === 'closed') {
       journey.completedAt = nowIso();
       journey.closureReason = trimmedReason;
       journey.isCurrentJourney = false;
+    }
+    if (status === 'inactive') {
+      // Keep journey current but record required reason
+      journey.closureReason = journey.closureReason ?? null;
     }
     audit(state, 'journey.transition', 'newcomerJourney', journeyId, session?.person.id ?? null, {
       previousValue: prev,

@@ -117,6 +117,8 @@ export interface NewcomerJourney {
   startedAt: string;
   completedAt: string | null;
   closureReason: string | null;
+  /** Last required reason for inactive/close (and similar gated transitions) */
+  lastStatusReason?: string | null;
   createdAt: string;
   createdBy: string;
   updatedAt: string;
