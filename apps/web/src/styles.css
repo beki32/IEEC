@@ -176,8 +176,11 @@ h1, h2, h3, .cms-brand-title, .cms-context {
   display: grid;
   place-items: center;
   text-decoration: none;
+  cursor: pointer;
+  padding: 0;
 }
-.cms-icon-btn:hover {
+.cms-icon-btn:hover,
+.cms-icon-btn.active {
   background: var(--bg-accent);
   text-decoration: none;
 }
@@ -195,6 +198,86 @@ h1, h2, h3, .cms-brand-title, .cms-context {
   font-weight: 800;
   display: grid;
   place-items: center;
+}
+
+.notif-popover-root {
+  position: relative;
+}
+
+.notif-popover {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  right: 0;
+  width: min(380px, calc(100vw - 1.5rem));
+  max-height: min(520px, 70vh);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(21, 32, 43, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 40;
+  animation: chat-pop 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+  transform-origin: top right;
+}
+
+.notif-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.notif-popover-list {
+  overflow: auto;
+  max-height: min(440px, 60vh);
+}
+
+.notif-empty {
+  padding: 1.25rem 1rem;
+  margin: 0;
+}
+
+.notif-popover-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem;
+  align-items: start;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+}
+.notif-popover-item.unread {
+  background: linear-gradient(90deg, rgba(11, 110, 79, 0.08), transparent);
+}
+.notif-popover-main {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  display: grid;
+  gap: 0.25rem;
+}
+.notif-popover-main p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.notif-popover-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.notif-dismiss {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
 }
 
 .cms-sidebar-foot {
@@ -321,6 +404,8 @@ button.chat-channel-row,
 button.chat-compose-new,
 button.cms-team-link,
 button.cms-nav-btn,
+button.cms-icon-btn,
+button.notif-popover-main,
 button.chat-fab,
 button.chat-icon-btn {
   /* calendar/chat/cms controls keep their own styles */
