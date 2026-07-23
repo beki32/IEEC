@@ -24,6 +24,9 @@ export function PersonProfilePage() {
   const [bio, setBio] = useState('');
   const [attStatus, setAttStatus] = useState<AttendanceStatus>('attended');
   const [message, setMessage] = useState('');
+  const [journeyAction, setJourneyAction] = useState<'inactive' | 'closed' | null>(null);
+  const [journeyReason, setJourneyReason] = useState('');
+  const [journeyError, setJourneyError] = useState('');
 
   if (!person) {
     return <div className="main"><p>Person not found. <Link to="/app">Back</Link></p></div>;
@@ -80,6 +83,37 @@ export function PersonProfilePage() {
     bump();
   }
 
+  function startJourneyAction(action: 'inactive' | 'closed') {
+    setJourneyAction(action);
+    setJourneyReason('');
+    setJourneyError('');
+    setMessage('');
+  }
+
+  function confirmJourneyAction(e: FormEvent) {
+    e.preventDefault();
+    if (!journey || !journeyAction) return;
+    const reason = journeyReason.trim();
+    if (!reason) {
+      setJourneyError('Reason is required.');
+      return;
+    }
+    try {
+      demoStore.updateJourneyStatus(journey.id, journeyAction, reason);
+      setMessage(
+        journeyAction === 'inactive'
+          ? `Journey marked inactive. Reason: ${reason}`
+          : `Journey closed. Reason: ${reason}`,
+      );
+      setJourneyAction(null);
+      setJourneyReason('');
+      setJourneyError('');
+      bump();
+    } catch (err) {
+      setJourneyError(err instanceof Error ? err.message : 'Could not update journey');
+    }
+  }
+
   return (
     <div className="grid">
       <section className="hero">
@@ -107,17 +141,66 @@ export function PersonProfilePage() {
                 Recommend membership
               </button>
             ) : null}
-            {has(Permissions.journeyMarkInactive) && journey ? (
-              <button type="button" className="secondary" onClick={() => { demoStore.updateJourneyStatus(journey.id, 'inactive', 'Paused participation'); bump(); }}>
+            {has(Permissions.journeyMarkInactive) && journey && journey.journeyStatus !== 'inactive' && journey.journeyStatus !== 'closed' ? (
+              <button type="button" className="secondary" onClick={() => startJourneyAction('inactive')}>
                 Mark inactive
               </button>
             ) : null}
-            {has(Permissions.journeyClose) && journey ? (
-              <button type="button" className="danger" onClick={() => { demoStore.updateJourneyStatus(journey.id, 'closed', 'Closed without membership'); bump(); }}>
+            {has(Permissions.journeyClose) && journey && journey.journeyStatus !== 'closed' ? (
+              <button type="button" className="danger" onClick={() => startJourneyAction('closed')}>
                 Close journey
               </button>
             ) : null}
           </div>
+
+          {journeyAction && journey ? (
+            <form className="grid" style={{ marginTop: '1rem' }} onSubmit={confirmJourneyAction}>
+              <p className="muted">
+                {journeyAction === 'inactive'
+                  ? 'Marking inactive requires a reason (audited).'
+                  : 'Closing a journey requires a reason (audited). Person record is kept.'}
+              </p>
+              <label>
+                Reason <span className="error">*</span>
+                <textarea
+                  required
+                  value={journeyReason}
+                  onChange={(e) => {
+                    setJourneyReason(e.target.value);
+                    setJourneyError('');
+                  }}
+                  placeholder={
+                    journeyAction === 'inactive'
+                      ? 'e.g. Travel, family situation, temporary pause…'
+                      : 'e.g. Moved away, declined follow-up, transferred…'
+                  }
+                />
+              </label>
+              {journeyError ? <p className="error">{journeyError}</p> : null}
+              <div className="row">
+                <button type="submit">
+                  {journeyAction === 'inactive' ? 'Confirm inactive' : 'Confirm close'}
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    setJourneyAction(null);
+                    setJourneyReason('');
+                    setJourneyError('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : null}
+
+          {journey?.closureReason ? (
+            <p className="muted" style={{ marginTop: '0.75rem' }}>
+              Closure reason: {journey.closureReason}
+            </p>
+          ) : null}
         </div>
       </div>
 

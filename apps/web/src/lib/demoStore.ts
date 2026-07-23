@@ -652,19 +652,26 @@ export const demoStore = {
     const session = this.getSession();
     const journey = state.journeys.find((j) => j.id === journeyId);
     if (!journey) throw new Error('Journey not found');
+
+    const requiresReason = status === 'inactive' || status === 'closed';
+    const trimmedReason = reason?.trim() ?? '';
+    if (requiresReason && !trimmedReason) {
+      throw new Error('A reason is required to mark inactive or close a journey');
+    }
+
     const prev = journey.journeyStatus;
     journey.journeyStatus = status;
     journey.updatedAt = nowIso();
     journey.updatedBy = session?.person.id ?? 'system';
     if (status === 'closed') {
       journey.completedAt = nowIso();
-      journey.closureReason = reason ?? null;
+      journey.closureReason = trimmedReason;
       journey.isCurrentJourney = false;
     }
     audit(state, 'journey.transition', 'newcomerJourney', journeyId, session?.person.id ?? null, {
       previousValue: prev,
       newValue: status,
-      reason,
+      reason: trimmedReason || null,
     });
     save(state);
   },
