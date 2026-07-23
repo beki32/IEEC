@@ -40,13 +40,22 @@ function Shell() {
             className="linkish"
             onClick={() => {
               demoStore.reset();
-              logout();
-              window.location.href = '/login';
+              void logout().then(() => {
+                window.location.href = '/login';
+              });
             }}
           >
             Reset demo
           </button>
-          <button type="button" className="linkish" onClick={logout}>Sign out</button>
+          <button
+            type="button"
+            className="linkish"
+            onClick={() => {
+              void logout();
+            }}
+          >
+            Sign out
+          </button>
         </nav>
       </header>
       <main className="main">

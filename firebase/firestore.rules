@@ -79,6 +79,28 @@ service cloud.firestore {
       allow write: if sameOrg(request.resource.data.organizationId);
     }
 
+    match /chatChannels/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /chatMemberships/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /chatMessages/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if sameOrg(request.resource.data.organizationId);
+      allow update: if sameOrg(resource.data.organizationId);
+      allow delete: if false;
+    }
+
+    match /organizations/{orgId} {
+      allow read: if sameOrg(orgId);
+      allow write: if false;
+    }
+
     match /auditLogs/{id} {
       allow read: if sameOrg(resource.data.organizationId);
       allow create: if sameOrg(request.resource.data.organizationId);

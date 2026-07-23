@@ -66,14 +66,28 @@ firebase/         Firestore rules + indexes
 docs/             Architecture + Follow-Up planning pack
 ```
 
-## Firebase (optional next step)
+## Firebase (Auth + Firestore)
 
-1. Copy `apps/web/.env.example` → `apps/web/.env.local`
-2. Set `VITE_USE_DEMO=false` and fill Firebase web config
-3. Deploy rules: `firebase deploy --only firestore` (project `ieec-ya-connect` if that is yours — confirm before prod)
-4. Replace demo store calls with Firestore repositories (same collection shapes as `docs/modules/follow-up-firestore-data-model.md`)
+Default remains **demo mode** (`VITE_USE_DEMO=true`). To run against emulators:
 
-Current UI implements the Follow-Up MVP flows against the **demo store** with the canonical permission keys and workflows from the baseline docs.
+```bash
+# terminal 1
+npm run emulators
+
+# terminal 2
+npm run seed:emulator
+
+# terminal 3 — copy env, then start web
+cp apps/web/.env.example apps/web/.env.local
+# ensure VITE_USE_DEMO=false and VITE_USE_FIREBASE_EMULATORS=true
+npm run dev:web
+```
+
+Sign in with the same demo emails and password `demo-password`.
+
+Confirm the Firebase project with a human before deploying rules or writing to production (`ieec-ya-connect` if that is yours).
+
+Firestore rules live in `firebase/firestore.rules` (includes calendar + chat collections). Client writes hydrate through the existing app store for emulator/dev; production should move to collection-scoped repositories and stricter permission-aware rules.
 
 ## Scripts
 
@@ -83,6 +97,8 @@ Current UI implements the Follow-Up MVP flows against the **demo store** with th
 | `npm run build:web` | Production web build |
 | `npm run dev:mobile` | Start Expo |
 | `npm run typecheck` | Typecheck shared + web |
+| `npm run emulators` | Auth + Firestore emulators |
+| `npm run seed:emulator` | Seed emulator Auth/Firestore demo data |
 
 ## Coding authority
 

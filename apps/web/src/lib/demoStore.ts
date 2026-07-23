@@ -30,7 +30,8 @@ import {
 } from '@ieec/shared';
 
 const STORAGE_KEY = 'ieec-ya-connect-demo-v5';
-const SEED_VERSION = 5;
+export const DEMO_SEED_VERSION = 5;
+const SEED_VERSION = DEMO_SEED_VERSION;
 
 export interface DemoState {
   seedVersion: number;
@@ -386,6 +387,9 @@ function createSeed(): DemoState {
 }
 
 function load(): DemoState {
+  if (runtimeState) {
+    return runtimeState;
+  }
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     const seed = createSeed();
@@ -408,7 +412,29 @@ function load(): DemoState {
 }
 
 function save(state: DemoState) {
+  if (runtimeState) {
+    runtimeState = state;
+    if (persistFirebase) {
+      void import('./firebase').then(async ({ getFirestoreDb }) => {
+        const db = getFirestoreDb();
+        if (!db) return;
+        const { persistDemoStateToFirestore } = await import('./firestoreSync');
+        await persistDemoStateToFirestore(db, state);
+      }).catch((err) => {
+        console.warn('Firestore persist failed', err);
+      });
+    }
+    return;
+  }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+/** In-memory + optional Firestore write-through (Firebase / emulator mode). */
+let runtimeState: DemoState | null = null;
+let persistFirebase = false;
+
+export function buildDemoSeed(): DemoState {
+  return createSeed();
 }
 
 function audit(
@@ -440,6 +466,8 @@ function audit(
 
 export const demoStore = {
   reset() {
+    runtimeState = null;
+    persistFirebase = false;
     localStorage.removeItem('ieec-ya-connect-demo-v1');
     localStorage.removeItem('ieec-ya-connect-demo-v2');
     localStorage.removeItem('ieec-ya-connect-demo-v4');
@@ -449,8 +477,24 @@ export const demoStore = {
     return seed;
   },
 
+  /** Adopt Firestore-hydrated state for the signed-in Firebase session. */
+  adoptFirebaseState(state: DemoState) {
+    persistFirebase = true;
+    runtimeState = state;
+  },
+
+  clearFirebaseRuntime() {
+    runtimeState = null;
+    persistFirebase = false;
+  },
+
+  isFirebaseRuntime() {
+    return persistFirebase;
+  },
+
   ensureLatestSeed() {
     // Migrates old demo keys and reseeds if needed
+    if (runtimeState) return;
     const legacy =
       localStorage.getItem('ieec-ya-connect-demo-v1') ||
       localStorage.getItem('ieec-ya-connect-demo-v2') ||
@@ -483,6 +527,9 @@ export const demoStore = {
     const state = load();
     state.sessionAuthUid = null;
     save(state);
+    if (persistFirebase) {
+      this.clearFirebaseRuntime();
+    }
   },
 
   getSession() {
