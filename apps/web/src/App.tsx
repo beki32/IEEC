@@ -2,7 +2,9 @@ import { NavLink, Navigate, Outlet, Route, Routes, useNavigate } from 'react-rou
 import { Permissions, type Team } from '@ieec/shared';
 import { SessionProvider, useSession } from './lib/session';
 import { demoStore } from './lib/demoStore';
+import { ChatDockProvider, useChatDock } from './lib/chatDock';
 import { ADMIN_MENUS, SHARED_MENUS, TEAM_MODULE_MENUS, type MenuItem } from './lib/teamMenus';
+import { ChatDock } from './components/ChatDock';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -22,6 +24,7 @@ function visible(items: MenuItem[], has: (p: string) => boolean) {
 function CmsShell() {
   const { person, organization, logout, has, myTeams, activeTeam, setActiveTeam, unreadCount, refresh } =
     useSession();
+  const { openChat } = useChatDock();
   const navigate = useNavigate();
   if (!person) return <Navigate to="/login" replace />;
 
@@ -29,7 +32,10 @@ function CmsShell() {
     TEAM_MODULE_MENUS[activeTeam?.moduleKey ?? 'generic'] ?? TEAM_MODULE_MENUS.generic,
     has,
   );
-  const sharedMenus = visible(SHARED_MENUS, has);
+  const sharedMenus = visible(
+    SHARED_MENUS.filter((item) => item.to !== '/app/chat'),
+    has,
+  );
   const adminMenus = visible(ADMIN_MENUS, has);
 
   function onTeamChange(teamId: string) {
@@ -83,6 +89,10 @@ function CmsShell() {
               ) : null}
             </NavLink>
           ))}
+          <button type="button" className="cms-nav-btn" onClick={() => openChat()}>
+            Chat
+            <span className="muted" style={{ fontSize: '0.75rem', fontWeight: 600 }}>popup</span>
+          </button>
 
           {adminMenus.length ? (
             <>
@@ -134,6 +144,9 @@ function CmsShell() {
             </div>
           </div>
           <div className="row">
+            <button type="button" className="notif-bell linkish" onClick={() => openChat()}>
+              Open chat
+            </button>
             <NavLink className="notif-bell" to="/app/notifications">
               Notifications
               {unreadCount > 0 ? <span className="nav-count">{unreadCount}</span> : null}
@@ -147,6 +160,8 @@ function CmsShell() {
           <Outlet />
         </main>
       </div>
+
+      <ChatDock />
     </div>
   );
 }
@@ -154,22 +169,24 @@ function CmsShell() {
 export default function App() {
   return (
     <SessionProvider>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/app" element={<CmsShell />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="assigned" element={<AssignedPage />} />
-          <Route path="queue" element={<QueuePage />} />
-          <Route path="people/:personId" element={<PersonProfilePage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="chat" element={<ChatPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="modules/:moduleKey" element={<ModulePlaceholderPage />} />
-          <Route path="admin/roles" element={<AdminRolesPage />} />
-        </Route>
-      </Routes>
+      <ChatDockProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/app" element={<CmsShell />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="assigned" element={<AssignedPage />} />
+            <Route path="queue" element={<QueuePage />} />
+            <Route path="people/:personId" element={<PersonProfilePage />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="chat" element={<ChatPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="modules/:moduleKey" element={<ModulePlaceholderPage />} />
+            <Route path="admin/roles" element={<AdminRolesPage />} />
+          </Route>
+        </Routes>
+      </ChatDockProvider>
     </SessionProvider>
   );
 }

@@ -1,7 +1,17 @@
 import { Permissions } from '@ieec/shared';
 import { Link } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
+import { useChatDock } from '../lib/chatDock';
 import { useSession } from '../lib/session';
+
+function ChatOpenButton() {
+  const { openChat } = useChatDock();
+  return (
+    <button type="button" className="btn secondary" onClick={() => openChat()}>
+      Open chat popup
+    </button>
+  );
+}
 
 export function DashboardPage() {
   const { person, permissions, has, activeTeam, myTeams, unreadCount } = useSession();
@@ -74,9 +84,9 @@ export function DashboardPage() {
         <div className="panel">
           <h2>Chat</h2>
           <p className="muted">
-            {demoStore.listMyChatChannels().length} channel(s) · membership ≠ team role
+            {demoStore.listMyChatChannels().length} channel(s) · opens as a popup
           </p>
-          <Link className="btn secondary" to="/app/chat">Open chat</Link>
+          <ChatOpenButton />
         </div>
 
         {isFollowUp && has(Permissions.newcomersViewAll) ? (
