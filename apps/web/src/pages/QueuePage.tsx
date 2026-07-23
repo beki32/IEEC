@@ -1,5 +1,5 @@
 import { Permissions } from '@ieec/shared';
-import { useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
@@ -9,39 +9,91 @@ export function QueuePage() {
   const [, setTick] = useState(0);
   const state = demoStore.getState();
 
+  const [assignJourneyId, setAssignJourneyId] = useState<string | null>(null);
+  const [selectedAssigneeId, setSelectedAssigneeId] = useState('');
+  const [assignError, setAssignError] = useState('');
+
   if (!has(Permissions.newcomersViewUnassigned) && !has(Permissions.newcomersViewAll)) {
     return <Navigate to="/app" replace />;
   }
 
-  const ministers = useMemo(
-    () => state.people.filter((p) => state.roleAssignments.some((ra) => ra.personId === p.id && ra.roleTemplateId === 'role_fu_minister')),
-    [state.people, state.roleAssignments],
-  );
+  // People who can receive Follow-Up assignments: ministers + leaders/assistants on FU roles
+  const assignees = useMemo(() => {
+    const assignableRoleIds = new Set(['role_fu_minister', 'role_fu_leader', 'role_fu_assistant']);
+    return state.people
+      .filter((p) =>
+        p.recordStatus === 'active' &&
+        state.roleAssignments.some(
+          (ra) => ra.personId === p.id && ra.active && assignableRoleIds.has(ra.roleTemplateId),
+        ),
+      )
+      .map((p) => {
+        const role = state.roleTemplates.find((t) =>
+          state.roleAssignments.some(
+            (ra) => ra.personId === p.id && ra.active && ra.roleTemplateId === t.id && assignableRoleIds.has(t.id),
+          ),
+        );
+        return { person: p, roleName: role?.name ?? 'Team member' };
+      })
+      .sort((a, b) => a.person.firstName.localeCompare(b.person.firstName));
+  }, [state.people, state.roleAssignments, state.roleTemplates]);
 
   const rows = state.journeys
-    .filter((j) => j.isCurrentJourney || ['awaiting_assignment', 'duplicate_review_required', 'assigned', 'active_follow_up', 'membership_approval_in_progress'].includes(j.journeyStatus))
+    .filter((j) =>
+      j.isCurrentJourney ||
+      ['awaiting_assignment', 'duplicate_review_required', 'assigned', 'active_follow_up', 'membership_approval_in_progress', 'inactive'].includes(j.journeyStatus),
+    )
     .map((j) => {
       const person = state.people.find((p) => p.id === j.personId);
       const assignment = state.assignments.find((a) => a.journeyId === j.id && a.assignmentStatus === 'active');
       return { journey: j, person, assignment };
     })
-    .filter((r) => r.person);
+    .filter((r) => r.person && r.person.currentMinistryStatus === 'newcomer');
 
-  function assign(journeyId: string) {
-    const ministerId = ministers[0]?.id;
-    if (!ministerId) {
-      alert('No Follow-Up minister seeded');
-      return;
-    }
-    const existing = demoStore.getState().assignments.some(
+  const assignJourney = assignJourneyId
+    ? state.journeys.find((j) => j.id === assignJourneyId)
+    : null;
+  const assignPerson = assignJourney
+    ? state.people.find((p) => p.id === assignJourney.personId)
+    : null;
+  const existingPrimary = assignJourneyId
+    ? state.assignments.find(
+      (a) => a.journeyId === assignJourneyId && a.assignmentStatus === 'active' && a.assignmentType === 'primary',
+    )
+    : null;
+
+  function openAssign(journeyId: string) {
+    const current = state.assignments.find(
       (a) => a.journeyId === journeyId && a.assignmentStatus === 'active' && a.assignmentType === 'primary',
     );
-    if (existing && !confirm('This journey already has an active primary assignment. Reassign and keep history?')) {
+    setAssignJourneyId(journeyId);
+    setSelectedAssigneeId(current?.assignedPersonId || assignees[0]?.person.id || '');
+    setAssignError('');
+  }
+
+  function confirmAssign(e: FormEvent) {
+    e.preventDefault();
+    if (!assignJourneyId) return;
+    if (!selectedAssigneeId) {
+      setAssignError('Select a team member to assign.');
       return;
     }
-    demoStore.assignNewcomer(journeyId, ministerId, 'primary');
-    refresh();
-    setTick((t) => t + 1);
+    if (existingPrimary && existingPrimary.assignedPersonId !== selectedAssigneeId) {
+      const ok = window.confirm(
+        'This journey already has an active primary assignee. Reassign and keep history?',
+      );
+      if (!ok) return;
+    }
+    try {
+      demoStore.assignNewcomer(assignJourneyId, selectedAssigneeId, 'primary');
+      setAssignJourneyId(null);
+      setSelectedAssigneeId('');
+      setAssignError('');
+      refresh();
+      setTick((t) => t + 1);
+    } catch (err) {
+      setAssignError(err instanceof Error ? err.message : 'Assignment failed');
+    }
   }
 
   function resolveDup(journeyId: string) {
@@ -50,13 +102,25 @@ export function QueuePage() {
     setTick((t) => t + 1);
   }
 
+  function bump() {
+    refresh();
+    setTick((t) => t + 1);
+  }
+
   return (
     <div className="grid">
       <section className="hero">
         <h1>Follow-Up queue</h1>
-        <p className="muted">Assign newcomers, resolve duplicates, and open profiles.</p>
+        <p className="muted">Assign newcomers by choosing a team member from the list.</p>
       </section>
       <div className="panel">
+        {assignees.length === 0 ? (
+          <p className="error">No assignable Follow-Up team members found. Click Reset demo, then try again.</p>
+        ) : (
+          <p className="muted" style={{ marginBottom: '0.75rem' }}>
+            {assignees.length} assignable team member(s) available.
+          </p>
+        )}
         <table className="table">
           <thead>
             <tr>
@@ -67,44 +131,99 @@ export function QueuePage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ journey, person, assignment }) => (
-              <tr key={journey.id}>
-                <td>
-                  <strong>{person!.firstName} {person!.lastName}</strong>
-                  <div className="muted">{person!.email.address}</div>
-                </td>
-                <td>
-                  <span className={`badge ${journey.journeyStatus.includes('duplicate') ? 'warn' : ''}`}>
-                    {journey.journeyStatus}
-                  </span>
-                </td>
-                <td>
-                  {assignment
-                    ? state.people.find((p) => p.id === assignment.assignedPersonId)?.firstName ?? '—'
-                    : 'Unassigned'}
-                </td>
-                <td className="row">
-                  <Link to={`/app/people/${person!.id}`}>Open</Link>
-                  {journey.journeyStatus === 'duplicate_review_required' && has(Permissions.duplicateReview) ? (
-                    <button type="button" className="secondary" onClick={() => resolveDup(journey.id)}>Mark not duplicate</button>
-                  ) : null}
-                  {(journey.journeyStatus === 'awaiting_assignment' || journey.journeyStatus === 'assigned') &&
-                  has(Permissions.assignmentsCreate) ? (
-                    <button type="button" onClick={() => assign(journey.id)}>
-                      {assignment ? 'Reassign' : 'Assign'} to minister
-                    </button>
-                  ) : null}
-                  {journey.journeyStatus === 'membership_approval_in_progress' && has(Permissions.membershipReviewStart) ? (
-                    <button type="button" onClick={() => { demoStore.approveMembership(journey.id); refresh(); setTick((t) => t + 1); }}>
-                      Approve member
-                    </button>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
+            {rows.map(({ journey, person, assignment }) => {
+              const assignee = assignment
+                ? state.people.find((p) => p.id === assignment.assignedPersonId)
+                : null;
+              const canAssign =
+                has(Permissions.assignmentsCreate) &&
+                ['awaiting_assignment', 'assigned', 'active_follow_up', 'inactive'].includes(journey.journeyStatus);
+              return (
+                <tr key={journey.id}>
+                  <td>
+                    <strong>{person!.firstName} {person!.lastName}</strong>
+                    <div className="muted">{person!.email.address}</div>
+                  </td>
+                  <td>
+                    <span className={`badge ${journey.journeyStatus.includes('duplicate') ? 'warn' : ''}`}>
+                      {journey.journeyStatus}
+                    </span>
+                  </td>
+                  <td>
+                    {assignee ? `${assignee.firstName} ${assignee.lastName}` : 'Unassigned'}
+                  </td>
+                  <td className="row">
+                    <Link to={`/app/people/${person!.id}`}>Open</Link>
+                    {journey.journeyStatus === 'duplicate_review_required' && has(Permissions.duplicateReview) ? (
+                      <button type="button" className="secondary" onClick={() => resolveDup(journey.id)}>Mark not duplicate</button>
+                    ) : null}
+                    {canAssign ? (
+                      <button type="button" onClick={() => openAssign(journey.id)}>
+                        {assignment ? 'Reassign…' : 'Assign…'}
+                      </button>
+                    ) : null}
+                    {journey.journeyStatus === 'membership_approval_in_progress' && has(Permissions.membershipReviewStart) ? (
+                      <button type="button" onClick={() => { demoStore.approveMembership(journey.id); bump(); }}>
+                        Approve member
+                      </button>
+                    ) : null}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
+
+      {assignJourneyId && assignPerson ? (
+        <div
+          className="modal-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="assign-title"
+          onClick={() => setAssignJourneyId(null)}
+        >
+          <form
+            className="modal-panel grid"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={confirmAssign}
+          >
+            <h2 id="assign-title">
+              {existingPrimary ? 'Reassign' : 'Assign'} {assignPerson.firstName} {assignPerson.lastName}
+            </h2>
+            <p className="muted">Choose a Follow-Up team member. Prior assignment history is kept on reassign.</p>
+            <label>
+              Assign to <span className="error">*</span>
+              <select
+                required
+                value={selectedAssigneeId}
+                onChange={(e) => {
+                  setSelectedAssigneeId(e.target.value);
+                  setAssignError('');
+                }}
+              >
+                <option value="" disabled>
+                  Select a name…
+                </option>
+                {assignees.map(({ person, roleName }) => (
+                  <option key={person.id} value={person.id}>
+                    {person.firstName} {person.lastName} — {roleName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {assignError ? <p className="error">{assignError}</p> : null}
+            <div className="row">
+              <button type="submit" disabled={!selectedAssigneeId || assignees.length === 0}>
+                Confirm assignment
+              </button>
+              <button type="button" className="secondary" onClick={() => setAssignJourneyId(null)}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
