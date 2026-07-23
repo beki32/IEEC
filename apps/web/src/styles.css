@@ -76,65 +76,51 @@ h1, h2, h3, .cms-brand-title, .cms-context {
   font-weight: 700;
 }
 
-.cms-team-list {
+.cms-team-nav {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.15rem;
 }
 
-.cms-team-item {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
+.cms-team-link {
   width: 100%;
-  text-align: left;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.92);
-  padding: 0.7rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: rgba(245, 247, 250, 0.9);
+  font: inherit;
+  font-weight: 700;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+  text-align: left;
 }
-
-.cms-team-item:hover {
+.cms-team-link:hover,
+.cms-team-link.active {
   background: rgba(255, 255, 255, 0.1);
-  transform: translateX(2px);
+  color: #fff;
 }
-
-.cms-team-item.active {
-  background: rgba(20, 145, 106, 0.95);
-  border-color: transparent;
-  box-shadow: 0 8px 18px rgba(11, 110, 79, 0.35);
+.cms-team-chevron {
+  opacity: 0.7;
+  font-size: 0.8rem;
 }
-
-.cms-team-mark {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9px;
+.cms-team-submenu {
   display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  font-size: 0.7rem;
-  font-weight: 800;
-  flex-shrink: 0;
+  gap: 0.15rem;
+  padding: 0.15rem 0 0.45rem 0.65rem;
+  margin: 0 0 0.25rem 0.55rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.16);
+  animation: rise 0.2s ease both;
 }
-
-.cms-team-mark.inline {
-  display: inline-grid;
-  margin-right: 0.4rem;
-  background: rgba(11, 110, 79, 0.12);
-  color: var(--brand);
-  vertical-align: middle;
-}
-
-.cms-team-copy {
-  display: grid;
-  line-height: 1.2;
-}
-
-.cms-team-copy small {
-  opacity: 0.75;
-  text-transform: capitalize;
+.cms-nav-link.nested {
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 0.45rem 0.7rem;
 }
 
 .cms-side-nav {
@@ -173,13 +159,42 @@ h1, h2, h3, .cms-brand-title, .cms-context {
   text-align: left;
 }
 
-.cms-pill {
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
+.cms-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.cms-icon-btn {
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 999px;
-  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+.cms-icon-btn:hover {
+  background: var(--bg-accent);
+  text-decoration: none;
+}
+.cms-icon-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
 }
 
 .cms-sidebar-foot {
@@ -304,7 +319,7 @@ button.cal-cell,
 button.cal-day-item,
 button.chat-channel-row,
 button.chat-compose-new,
-button.cms-team-item,
+button.cms-team-link,
 button.cms-nav-btn,
 button.chat-fab,
 button.chat-icon-btn {

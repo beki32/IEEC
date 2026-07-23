@@ -21,19 +21,8 @@ function visible(items: MenuItem[], has: (p: string) => boolean) {
   return items.filter((item) => !item.anyOf || item.anyOf.some((p) => has(p)));
 }
 
-function teamMark(moduleKey: string) {
-  switch (moduleKey) {
-    case 'follow_up':
-      return 'FU';
-    case 'bible_study':
-      return 'BS';
-    case 'media':
-      return 'MD';
-    case 'worship':
-      return 'WP';
-    default:
-      return 'TM';
-  }
+function teamMenusFor(team: Team, has: (p: string) => boolean) {
+  return visible(TEAM_MODULE_MENUS[team.moduleKey] ?? TEAM_MODULE_MENUS.generic, has);
 }
 
 function CmsShell() {
@@ -43,17 +32,13 @@ function CmsShell() {
   const navigate = useNavigate();
   if (!person) return <Navigate to="/login" replace />;
 
-  const moduleMenus = visible(
-    TEAM_MODULE_MENUS[activeTeam?.moduleKey ?? 'generic'] ?? TEAM_MODULE_MENUS.generic,
-    has,
-  );
   const sharedMenus = visible(
-    SHARED_MENUS.filter((item) => item.to !== '/app/chat'),
+    SHARED_MENUS.filter((item) => item.to !== '/app/chat' && item.to !== '/app/notifications'),
     has,
   );
   const adminMenus = visible(ADMIN_MENUS, has);
 
-  function onTeamChange(teamId: string) {
+  function onTeamSelect(teamId: string) {
     setActiveTeam(teamId);
     refresh();
     navigate('/app');
@@ -67,54 +52,47 @@ function CmsShell() {
           <div className="cms-brand-sub">{organization?.name}</div>
         </div>
 
-        <div className="cms-block">
-          <div className="cms-section-label">Your teams</div>
-          <div className="cms-team-list" role="listbox" aria-label="Select team">
-            {myTeams.length === 0 ? (
-              <div className="cms-empty">No team memberships</div>
-            ) : null}
+        <nav className="cms-side-nav">
+          <div className="cms-section-label">Teams</div>
+          {myTeams.length === 0 ? <div className="cms-empty">No team memberships</div> : null}
+
+          <ul className="cms-team-nav">
             {myTeams.map((team: Team) => {
-              const active = activeTeam?.id === team.id;
+              const selected = activeTeam?.id === team.id;
+              const menus = teamMenusFor(team, has);
               return (
-                <button
-                  key={team.id}
-                  type="button"
-                  role="option"
-                  aria-selected={active}
-                  className={`cms-team-item ${active ? 'active' : ''}`}
-                  onClick={() => onTeamChange(team.id)}
-                >
-                  <span className="cms-team-mark" aria-hidden="true">{teamMark(team.moduleKey)}</span>
-                  <span className="cms-team-copy">
-                    <strong>{team.name}</strong>
-                    <small>{team.moduleKey.replace('_', ' ')}</small>
-                  </span>
-                </button>
+                <li key={team.id} className={`cms-team-nav-item ${selected ? 'selected' : ''}`}>
+                  <button
+                    type="button"
+                    className={`cms-team-link ${selected ? 'active' : ''}`}
+                    aria-expanded={selected}
+                    onClick={() => onTeamSelect(team.id)}
+                  >
+                    <span>{team.name}</span>
+                    <span className="cms-team-chevron" aria-hidden="true">{selected ? '▾' : '▸'}</span>
+                  </button>
+                  {selected ? (
+                    <div className="cms-team-submenu" role="group" aria-label={`${team.name} menu`}>
+                      {menus.map((item) => (
+                        <NavLink key={item.to} to={item.to} end={item.end} className="cms-nav-link nested">
+                          {item.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  ) : null}
+                </li>
               );
             })}
-          </div>
-        </div>
-
-        <nav className="cms-side-nav">
-          <div className="cms-section-label">{activeTeam?.name ?? 'Team'} menu</div>
-          {moduleMenus.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className="cms-nav-link">
-              {item.label}
-            </NavLink>
-          ))}
+          </ul>
 
           <div className="cms-section-label">Organization</div>
           {sharedMenus.map((item) => (
             <NavLink key={item.to} to={item.to} className="cms-nav-link">
-              <span>{item.label}</span>
-              {item.to === '/app/notifications' && unreadCount > 0 ? (
-                <span className="nav-count">{unreadCount}</span>
-              ) : null}
+              {item.label}
             </NavLink>
           ))}
           <button type="button" className="cms-nav-link cms-nav-btn" onClick={() => openChat()}>
-            <span>Chat</span>
-            <span className="cms-pill">popup</span>
+            Chat
           </button>
 
           {adminMenus.length ? (
@@ -161,18 +139,21 @@ function CmsShell() {
       <div className="cms-main">
         <header className="cms-topbar">
           <div>
-            <div className="cms-context">
-              <span className="cms-team-mark inline">{teamMark(activeTeam?.moduleKey ?? 'generic')}</span>
-              {activeTeam ? activeTeam.name : 'No active team'}
-            </div>
-            <div className="muted">Click a team in the sidebar to switch modules.</div>
+            <div className="cms-context">{activeTeam ? activeTeam.name : 'No active team'}</div>
+            <div className="muted">Select a team in the sidebar to open its menu.</div>
           </div>
-          <div className="row">
-            <button type="button" className="secondary" onClick={() => openChat()}>
-              Chat
-            </button>
-            <NavLink className="btn secondary" to="/app/notifications">
-              Alerts{unreadCount > 0 ? ` (${unreadCount})` : ''}
+          <div className="cms-top-actions">
+            <NavLink
+              to="/app/notifications"
+              className="cms-icon-btn"
+              aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+              title="Notifications"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
+                <path d="M9.5 17a2.5 2.5 0 0 0 5 0" />
+              </svg>
+              {unreadCount > 0 ? <span className="cms-icon-badge">{unreadCount > 9 ? '9+' : unreadCount}</span> : null}
             </NavLink>
             {has(Permissions.rolesManage) ? (
               <NavLink className="btn secondary" to="/app/admin/roles">RBAC</NavLink>

@@ -1,20 +1,10 @@
 import { Permissions } from '@ieec/shared';
 import { Link } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
-import { useChatDock } from '../lib/chatDock';
 import { useSession } from '../lib/session';
 
-function ChatOpenButton() {
-  const { openChat } = useChatDock();
-  return (
-    <button type="button" className="secondary" onClick={() => openChat()}>
-      Open chat popup
-    </button>
-  );
-}
-
 export function DashboardPage() {
-  const { person, permissions, has, activeTeam, myTeams, unreadCount } = useSession();
+  const { person, permissions, has, activeTeam, myTeams } = useSession();
   const state = demoStore.getState();
 
   const unassigned = state.journeys.filter((j) =>
@@ -34,18 +24,9 @@ export function DashboardPage() {
         <p className="badge">{activeTeam ? `${activeTeam.name} workspace` : 'Workspace'}</p>
         <h1>Welcome, {person?.firstName}</h1>
         <p className="muted">
-          You are on {myTeams.length} team(s). Pick a team from the sidebar list to change module menus.
+          You are on {myTeams.length} team(s). Select a team in the sidebar to open its menu.
           Permissions loaded: {permissions.size}.
         </p>
-        {myTeams.length > 1 ? (
-          <div className="row" style={{ marginTop: '0.75rem' }}>
-            {myTeams.map((team) => (
-              <span key={team.id} className={`badge ${activeTeam?.id === team.id ? 'ok' : ''}`}>
-                {team.name}
-              </span>
-            ))}
-          </div>
-        ) : null}
       </section>
 
       <div className="grid two">
@@ -67,7 +48,7 @@ export function DashboardPage() {
           <div className="panel">
             <h2>{activeTeam?.name ?? 'Team'} home</h2>
             <p className="muted">
-              Team modules change when you click another team in the sidebar.
+              Use the sidebar team menu for this module’s pages.
             </p>
             {activeTeam?.moduleKey === 'bible_study' ? (
               <Link className="btn" to="/app/modules/bible-study">Open Bible Study</Link>
@@ -79,23 +60,9 @@ export function DashboardPage() {
         )}
 
         <div className="panel">
-          <h2>Notifications</h2>
-          <p className="muted">{unreadCount} unread</p>
-          <Link className="btn secondary" to="/app/notifications">Open inbox</Link>
-        </div>
-
-        <div className="panel">
           <h2>Ministry calendar</h2>
           <p className="muted">{state.calendarEvents.filter((e) => e.eventStatus !== 'cancelled').length} scheduled event(s)</p>
           <Link className="btn secondary" to="/app/calendar">Open calendar</Link>
-        </div>
-
-        <div className="panel">
-          <h2>Chat</h2>
-          <p className="muted">
-            {demoStore.listMyChatChannels().length} channel(s) · opens as a popup
-          </p>
-          <ChatOpenButton />
         </div>
 
         {isFollowUp && has(Permissions.newcomersViewAll) ? (
