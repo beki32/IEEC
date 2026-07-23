@@ -5,6 +5,7 @@ import { demoStore } from './lib/demoStore';
 import { ChatDockProvider, useChatDock } from './lib/chatDock';
 import { ADMIN_MENUS, SHARED_MENUS, TEAM_MODULE_MENUS, type MenuItem } from './lib/teamMenus';
 import { ChatDock } from './components/ChatDock';
+import { NotificationsBell } from './components/NotificationsBell';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -26,7 +27,7 @@ function teamMenusFor(team: Team, has: (p: string) => boolean) {
 }
 
 function CmsShell() {
-  const { person, organization, logout, has, myTeams, activeTeam, setActiveTeam, unreadCount, refresh } =
+  const { person, organization, logout, has, myTeams, activeTeam, setActiveTeam, refresh } =
     useSession();
   const { openChat } = useChatDock();
   const navigate = useNavigate();
@@ -143,18 +144,7 @@ function CmsShell() {
             <div className="muted">Select a team in the sidebar to open its menu.</div>
           </div>
           <div className="cms-top-actions">
-            <NavLink
-              to="/app/notifications"
-              className="cms-icon-btn"
-              aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-              title="Notifications"
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
-                <path d="M9.5 17a2.5 2.5 0 0 0 5 0" />
-              </svg>
-              {unreadCount > 0 ? <span className="cms-icon-badge">{unreadCount > 9 ? '9+' : unreadCount}</span> : null}
-            </NavLink>
+            <NotificationsBell />
             {has(Permissions.rolesManage) ? (
               <NavLink className="btn secondary" to="/app/admin/roles">RBAC</NavLink>
             ) : null}
