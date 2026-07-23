@@ -1,4 +1,17 @@
 node_modules/
+dist/
 .firebase/
 *.log
 .DS_Store
+.env
+.env.local
+.env.*.local
+apps/web/dist/
+apps/mobile/.expo/
+apps/mobile/dist/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+.turbo/
+coverage/

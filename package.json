@@ -1,0 +1,20 @@
+{
+  "name": "ieec-ya-connect",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @ieec/web",
+    "build:web": "npm run build -w @ieec/web",
+    "dev:mobile": "npm run start -w @ieec/mobile",
+    "build:shared": "npm run build -w @ieec/shared",
+    "typecheck": "npm run typecheck -w @ieec/shared && npm run typecheck -w @ieec/web",
+    "seed:demo": "node scripts/seed-demo.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

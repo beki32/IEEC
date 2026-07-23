@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userAccount() {
+      return get(/databases/$(database)/documents/userAccounts/$(request.auth.uid)).data;
+    }
+
+    function sameOrg(orgId) {
+      return signedIn() && userAccount().organizationId == orgId
+        && userAccount().accountStatus == 'active';
+    }
+
+    // Public registration intake only — no reads of people from public clients.
+    match /publicRegistrations/{id} {
+      allow create: if true
+        && request.resource.data.keys().hasAll(['organizationId', 'firstName', 'lastName', 'email', 'phone'])
+        && !request.resource.data.keys().hasAny(['currentMinistryStatus', 'hasUserAccount', 'roleTemplateId']);
+      allow read, update, delete: if false;
+    }
+
+    match /people/{personId} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /userAccounts/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || sameOrg(resource.data.organizationId));
+      allow write: if false; // trusted admin / Cloud Functions only
+    }
+
+    match /roleTemplates/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /roleAssignments/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /permissionOverrides/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /newcomerJourneys/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /followUpAssignments/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /followUpReports/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /newcomerAttendance/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if sameOrg(request.resource.data.organizationId);
+      allow update: if sameOrg(resource.data.organizationId);
+      allow delete: if false;
+    }
+
+    match /newcomerBioEntries/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /calendarEvents/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow write: if sameOrg(request.resource.data.organizationId);
+    }
+
+    match /auditLogs/{id} {
+      allow read: if sameOrg(resource.data.organizationId);
+      allow create: if sameOrg(request.resource.data.organizationId);
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
