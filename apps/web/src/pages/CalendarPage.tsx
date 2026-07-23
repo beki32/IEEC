@@ -308,10 +308,10 @@ export function CalendarPage() {
               const isSelected = sameDay(date, selectedDay);
               const isToday = sameDay(date, today);
               return (
-                <button
+                <div
                   key={date.toISOString()}
-                  type="button"
                   role="gridcell"
+                  tabIndex={0}
                   className={[
                     'cal-cell',
                     inMonth ? 'in-month' : 'out-month',
@@ -322,11 +322,35 @@ export function CalendarPage() {
                     setSelectedDay(startOfDay(date));
                     setSelectedOccurrenceKey(dayOccs[0]?.key ?? null);
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedDay(startOfDay(date));
+                      setSelectedOccurrenceKey(dayOccs[0]?.key ?? null);
+                    }
+                  }}
                   onDoubleClick={() => {
                     if (canCreate) openCreateForDay(date);
                   }}
                 >
-                  <div className="cal-cell-day">{date.getDate()}</div>
+                  <div className="cal-cell-top">
+                    <div className="cal-cell-day">{date.getDate()}</div>
+                    {canCreate ? (
+                      <button
+                        type="button"
+                        className="cal-cell-add"
+                        aria-label={`Add event on ${date.toLocaleDateString()}`}
+                        title="Add event"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDay(startOfDay(date));
+                          openCreateForDay(date);
+                        }}
+                      >
+                        +
+                      </button>
+                    ) : null}
+                  </div>
                   <div className="cal-cell-events">
                     {dayOccs.slice(0, 3).map((o) => (
                       <span
@@ -341,17 +365,28 @@ export function CalendarPage() {
                       <span className="cal-more">+{dayOccs.length - 3} more</span>
                     ) : null}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
-          <p className="muted cal-hint">Double-click a day to create an event{canCreate ? '' : ' (needs create permission)'}.</p>
+          <p className="muted cal-hint">
+            {canCreate
+              ? 'Click + on a day, or use Add event in the side panel, to create from the calendar.'
+              : 'You need calendar create permission to add events.'}
+          </p>
         </div>
 
         <div className="panel cal-side">
-          <h2>{selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</h2>
+          <div className="cal-side-header">
+            <h2>{selectedDay.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</h2>
+            {canCreate ? (
+              <button type="button" onClick={() => openCreateForDay(selectedDay)}>
+                Add event
+              </button>
+            ) : null}
+          </div>
           {dayOccurrences.length === 0 ? (
-            <p className="muted">No events this day.</p>
+            <p className="muted">No events this day.{canCreate ? ' Use Add event to create one.' : ''}</p>
           ) : (
             <ul className="cal-day-list">
               {dayOccurrences.map((o) => (
