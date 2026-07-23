@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev:web": "npm run dev -w @ieec/web",
+    "build": "npm run build:web",
     "build:web": "npm run build -w @ieec/web",
     "dev:mobile": "npm run start -w @ieec/mobile",
     "build:shared": "npm run build -w @ieec/shared",

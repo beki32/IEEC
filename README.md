@@ -89,12 +89,31 @@ Confirm the Firebase project with a human before deploying rules or writing to p
 
 Firestore rules live in `firebase/firestore.rules` (includes calendar + chat collections). Client writes hydrate through the existing app store for emulator/dev; production should move to collection-scoped repositories and stricter permission-aware rules.
 
+## Deploy web (Vercel)
+
+This is an npm workspaces monorepo. Deploy **`apps/web`** only.
+
+**Recommended project settings** (or rely on `apps/web/vercel.json`):
+
+| Setting | Value |
+| --- | --- |
+| Framework | Vite |
+| Root Directory | `apps/web` |
+| Include files outside Root Directory | **On** |
+| Install Command | `cd ../.. && npm install` |
+| Build Command | `cd ../.. && npm run build:web` |
+| Output Directory | `dist` |
+
+If Root Directory is left empty (repo root), use root `vercel.json` (`build:web` → `apps/web/dist`).
+
+You currently have two linked projects (`ieec` and `ieec-web`). Keep **one** to avoid duplicate/conflicting deploys — prefer `ieec-web` with Root Directory `apps/web`.
+
 ## Scripts
 
 | Command | Purpose |
 | --- | --- |
 | `npm run dev:web` | Start Vite web app |
-| `npm run build:web` | Production web build |
+| `npm run build` / `build:web` | Production web build |
 | `npm run dev:mobile` | Start Expo |
 | `npm run typecheck` | Typecheck shared + web |
 | `npm run emulators` | Auth + Firestore emulators |
