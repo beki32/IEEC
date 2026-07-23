@@ -340,6 +340,86 @@ async function main() {
     deletedByPersonId: null,
   });
 
+  set('ministries', MINISTRY_ID, {
+    name: 'Young Adult',
+    status: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  });
+  set('teams', TEAM_ID, {
+    ministryId: MINISTRY_ID,
+    name: 'Follow-Up',
+    description: 'Newcomer shepherding',
+    moduleKey: 'follow_up',
+    teamStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  });
+  set('teams', 'team_bible_study', {
+    ministryId: MINISTRY_ID,
+    name: 'Bible Study',
+    description: 'Groups and classes',
+    moduleKey: 'bible_study',
+    teamStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  });
+  set('teams', 'team_media', {
+    ministryId: MINISTRY_ID,
+    name: 'Media',
+    description: 'Production and communications',
+    moduleKey: 'media',
+    teamStatus: 'active',
+    createdAt: ts,
+    updatedAt: ts,
+  });
+
+  const mkTm = (teamId, personId, titleLabel = null) => ({
+    teamId,
+    personId,
+    membershipStatus: 'active',
+    titleLabel,
+    createdAt: ts,
+    updatedAt: ts,
+  });
+  set('teamMemberships', 'tm_leader_fu', mkTm(TEAM_ID, leaderPersonId, 'Follow-Up Leader'));
+  set('teamMemberships', 'tm_leader_bs', mkTm('team_bible_study', leaderPersonId, 'Facilitator'));
+  set('teamMemberships', 'tm_leader_media', mkTm('team_media', leaderPersonId, 'Coordinator'));
+  set('teamMemberships', 'tm_assistant_fu', mkTm(TEAM_ID, assistantPersonId, 'Assistant Leader'));
+  set('teamMemberships', 'tm_minister_fu', mkTm(TEAM_ID, ministerPersonId, 'Minister'));
+  set('teamMemberships', 'tm_minister_bs', mkTm('team_bible_study', ministerPersonId, 'Host'));
+
+  set('notifications', 'notif_assign_seed', {
+    recipientPersonId: ministerPersonId,
+    type: 'assignment.created',
+    title: 'New Follow-Up assignment',
+    body: 'You were assigned to Hanna Tesfaye.',
+    linkPath: `/app/people/${newcomer2Id}`,
+    relatedEntityType: 'followUpAssignment',
+    relatedEntityId: 'assign_2',
+    teamId: TEAM_ID,
+    channel: 'in_app',
+    status: 'sent',
+    createdAt: ts,
+    readAt: null,
+    dismissedAt: null,
+  });
+  set('notifications', 'notif_queue_seed', {
+    recipientPersonId: leaderPersonId,
+    type: 'registration.queued',
+    title: 'Newcomer in queue',
+    body: 'Daniel Bekele is awaiting assignment.',
+    linkPath: '/app/queue',
+    relatedEntityType: 'newcomerJourney',
+    relatedEntityId: 'journey_1',
+    teamId: TEAM_ID,
+    channel: 'in_app',
+    status: 'sent',
+    createdAt: ts,
+    readAt: null,
+    dismissedAt: null,
+  });
+
   await batch.commit();
   console.log('Seeded Auth + Firestore emulators for project', PROJECT_ID);
   console.log('Accounts (password: demo-password):');
