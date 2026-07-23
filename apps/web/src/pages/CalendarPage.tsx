@@ -4,7 +4,27 @@ import { Link } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
 
+const CONFLICT_POLICY_HELP = {
+  hard_block: 'Hard block — overlapping events are rejected unless someone has override permission (protects Saturday program).',
+  warning: 'Warning — overlap is allowed, but leaders see a warning.',
+  informational: 'Info only — overlap is noted; no block.',
+} as const;
+
+function conflictPolicyLabel(policy: string) {
+  switch (policy) {
+    case 'hard_block':
+      return 'Hard block';
+    case 'warning':
+      return 'Warning';
+    case 'informational':
+      return 'Info only';
+    default:
+      return policy;
+  }
+}
+
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 const DAY_NAME_TO_INDEX: Record<string, number> = {
   sunday: 0,
   monday: 1,
@@ -239,6 +259,11 @@ export function CalendarPage() {
         <p className="muted">
           Month view of the shared calendar (ADR-003). Weekly Saturday programs expand across the month.
         </p>
+        <p className="muted">
+          <strong>Conflict policy</strong> controls what happens if two events overlap:
+          Hard block stops the booking (used for Saturday program), Warning allows it with a notice,
+          Info only just notes the overlap.
+        </p>
         {message ? <p className="success">{message}</p> : null}
         {error ? <p className="error">{error}</p> : null}
       </section>
@@ -343,7 +368,7 @@ export function CalendarPage() {
                       {o.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     <span className={`badge ${o.event.conflictPolicy === 'hard_block' ? 'warn' : 'ok'}`}>
-                      {o.event.conflictPolicy}
+                      {conflictPolicyLabel(o.event.conflictPolicy)}
                     </span>
                   </button>
                 </li>
@@ -402,8 +427,8 @@ export function CalendarPage() {
                   {event.recurrence.enabled ? <div className="badge">Weekly Sat</div> : null}
                 </td>
                 <td>
-                  <div>{event.eventPriority}</div>
-                  <div className="muted">{event.conflictPolicy}</div>
+                  <div>{event.eventPriority === 'organization_reserved' ? 'Reserved program' : event.eventPriority}</div>
+                  <div className="muted">{conflictPolicyLabel(event.conflictPolicy)}</div>
                 </td>
                 <td>
                   <span className={`badge ${event.eventStatus === 'cancelled' ? 'warn' : 'ok'}`}>
@@ -452,11 +477,14 @@ export function CalendarPage() {
                 value={form.conflictPolicy}
                 onChange={(e) => setForm({ ...form, conflictPolicy: e.target.value as typeof form.conflictPolicy })}
               >
-                <option value="hard_block">hard_block</option>
-                <option value="warning">warning</option>
-                <option value="informational">informational</option>
+                <option value="hard_block">Hard block (reject overlaps)</option>
+                <option value="warning">Warning (allow with warning)</option>
+                <option value="informational">Info only (note overlap)</option>
               </select>
             </label>
+            <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
+              {CONFLICT_POLICY_HELP[form.conflictPolicy]}
+            </p>
             <label>
               Priority
               <select
