@@ -7,7 +7,7 @@ import { useSession } from '../lib/session';
 function ChatOpenButton() {
   const { openChat } = useChatDock();
   return (
-    <button type="button" className="btn btn-outline-secondary" onClick={() => openChat()}>
+    <button type="button" className="secondary" onClick={() => openChat()}>
       Open chat popup
     </button>
   );
@@ -32,13 +32,13 @@ export function DashboardPage() {
     <div className="grid">
       <section className="hero">
         <p className="badge">{activeTeam ? `${activeTeam.name} workspace` : 'Workspace'}</p>
-        <h1 className="mb-2">Welcome, {person?.firstName}</h1>
-        <p className="muted mb-0">
+        <h1>Welcome, {person?.firstName}</h1>
+        <p className="muted">
           You are on {myTeams.length} team(s). Pick a team from the sidebar list to change module menus.
           Permissions loaded: {permissions.size}.
         </p>
         {myTeams.length > 1 ? (
-          <div className="d-flex flex-wrap gap-2 mt-3">
+          <div className="row" style={{ marginTop: '0.75rem' }}>
             {myTeams.map((team) => (
               <span key={team.id} className={`badge ${activeTeam?.id === team.id ? 'ok' : ''}`}>
                 {team.name}
@@ -53,7 +53,7 @@ export function DashboardPage() {
           <div className="panel">
             <h2>Unassigned / review queue</h2>
             <p className="muted">{unassigned.length} journeys need attention</p>
-            <Link className="btn btn-success" to="/app/queue">Open queue</Link>
+            <Link className="btn" to="/app/queue">Open queue</Link>
           </div>
         ) : null}
 
@@ -61,7 +61,7 @@ export function DashboardPage() {
           <div className="panel">
             <h2>My assigned newcomers</h2>
             <p className="muted">{myAssignments.length} active assignment(s)</p>
-            <Link className="btn btn-success" to="/app/assigned">View assigned</Link>
+            <Link className="btn" to="/app/assigned">View assigned</Link>
           </div>
         ) : (
           <div className="panel">
@@ -70,10 +70,10 @@ export function DashboardPage() {
               Team modules change when you click another team in the sidebar.
             </p>
             {activeTeam?.moduleKey === 'bible_study' ? (
-              <Link className="btn btn-success" to="/app/modules/bible-study">Open Bible Study</Link>
+              <Link className="btn" to="/app/modules/bible-study">Open Bible Study</Link>
             ) : null}
             {activeTeam?.moduleKey === 'media' ? (
-              <Link className="btn btn-success" to="/app/modules/media">Open Media desk</Link>
+              <Link className="btn" to="/app/modules/media">Open Media desk</Link>
             ) : null}
           </div>
         )}
@@ -81,13 +81,13 @@ export function DashboardPage() {
         <div className="panel">
           <h2>Notifications</h2>
           <p className="muted">{unreadCount} unread</p>
-          <Link className="btn btn-outline-secondary" to="/app/notifications">Open inbox</Link>
+          <Link className="btn secondary" to="/app/notifications">Open inbox</Link>
         </div>
 
         <div className="panel">
           <h2>Ministry calendar</h2>
           <p className="muted">{state.calendarEvents.filter((e) => e.eventStatus !== 'cancelled').length} scheduled event(s)</p>
-          <Link className="btn btn-outline-secondary" to="/app/calendar">Open calendar</Link>
+          <Link className="btn secondary" to="/app/calendar">Open calendar</Link>
         </div>
 
         <div className="panel">
@@ -102,7 +102,7 @@ export function DashboardPage() {
           <div className="panel">
             <h2>Active follow-up</h2>
             <p className="muted">{activeJourneys.length} journeys in progress</p>
-            <Link className="btn btn-outline-secondary" to="/app/queue">Leader view</Link>
+            <Link className="btn secondary" to="/app/queue">Leader view</Link>
           </div>
         ) : null}
 
@@ -110,7 +110,7 @@ export function DashboardPage() {
           <div className="panel">
             <h2>Roles & permissions</h2>
             <p className="muted">Live templates, assignments, overrides</p>
-            <Link className="btn btn-outline-secondary" to="/app/admin/roles">Manage RBAC</Link>
+            <Link className="btn secondary" to="/app/admin/roles">Manage RBAC</Link>
           </div>
         ) : null}
       </div>
