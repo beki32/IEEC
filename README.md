@@ -101,13 +101,15 @@ This is an npm workspaces monorepo. Deploy **`apps/web`** only.
 | Framework | Vite |
 | Root Directory | `apps/web` |
 | Include files outside Root Directory | **On** |
-| Install Command | `cd ../.. && npm install` |
+| Install Command | `cd ../.. && npm install --workspace=@ieec/web --workspace=@ieec/shared` |
 | Build Command | `cd ../.. && npm run build:web` |
 | Output Directory | `dist` |
 
 If Root Directory is left empty (repo root), use root `vercel.json` (`build:web` → `apps/web/dist`).
 
 You currently have two linked projects (`ieec` and `ieec-web`). Keep **one** to avoid duplicate/conflicting deploys — prefer `ieec-web` with Root Directory `apps/web`.
+
+If a Vercel dashboard Install Command override still says `cd ../.. && npm install`, change it to the scoped command above (full root install also pulls Expo/mobile tooling and is very slow).
 
 ## Scripts
 
