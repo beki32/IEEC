@@ -1,9 +1,8 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
 import {
   getDemoInstagramFeed,
-  INSTAGRAM_EMBED_URL,
   INSTAGRAM_HANDLE,
   INSTAGRAM_PROFILE_URL,
 } from '../lib/instagram';
@@ -29,15 +28,66 @@ function formatWhen(iso: string) {
   }
 }
 
+function formatDay(iso: string) {
+  try {
+    return new Intl.DateTimeFormat(undefined, { day: '2-digit' }).format(new Date(iso));
+  } catch {
+    return '';
+  }
+}
+
+function formatMonth(iso: string) {
+  try {
+    return new Intl.DateTimeFormat(undefined, { month: 'short' }).format(new Date(iso));
+  } catch {
+    return '';
+  }
+}
+
+function Reveal({ children, className = '' }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.16, rootMargin: '0px 0px -8% 0px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className={`landing-reveal ${visible ? 'is-visible' : ''} ${className}`.trim()}>
+      {children}
+    </div>
+  );
+}
+
 export function LandingPage() {
   const [params, setParams] = useSearchParams();
   const [navOpen, setNavOpen] = useState(false);
+  const [navSolid, setNavSolid] = useState(false);
   const [tick, setTick] = useState(0);
   const registered = params.get('registered') === '1';
 
   useEffect(() => {
     demoStore.ensureLatestSeed();
     setTick((t) => t + 1);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setNavSolid(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -53,6 +103,8 @@ export function LandingPage() {
   const announcements = demoStore.listAnnouncements();
   const events = demoStore.listUpcomingPublicEvents(5);
   const sermons = demoStore.listSermons();
+  const featured = sermons[0] ?? null;
+  const moreSermons = sermons.slice(1);
   const igPosts = useMemo(() => getDemoInstagramFeed(), []);
 
   const [prayerName, setPrayerName] = useState('');
@@ -95,7 +147,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className={`landing ${navOpen ? 'nav-open' : ''}`}>
+    <div className={`landing ${navOpen ? 'nav-open' : ''} ${navSolid ? 'nav-solid' : ''}`}>
       <header className="landing-nav">
         <a className="landing-brand" href="#top">
           IEEC YA
@@ -114,7 +166,6 @@ export function LandingPage() {
           </span>
         </button>
         <nav className="landing-nav-links" aria-label="Landing">
-          <a href="#announcements" onClick={() => setNavOpen(false)}>Announcements</a>
           <a href="#events" onClick={() => setNavOpen(false)}>Events</a>
           <a href="#watch" onClick={() => setNavOpen(false)}>Watch</a>
           <a href="#prayer" onClick={() => setNavOpen(false)}>Prayer</a>
@@ -147,113 +198,151 @@ export function LandingPage() {
           aria-label="Young adults gathered in warm evening light"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1800&q=80')",
+              "url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=2000&q=80')",
           }}
         />
         <div className="landing-hero-veil" />
         <div className="landing-hero-copy">
           <p className="landing-brand-mark">IEEC YA</p>
-          <h1>Belong here. Grow here.</h1>
+          <h1>A place to belong and grow in Christ.</h1>
           <p className="landing-hero-support">
-            {CHURCH_ABOUT.tagline}
+            Young adults of International Evangelical Ethiopian Church — worship, friendship, and Follow-Up care.
           </p>
           <div className="landing-hero-actions">
-            <Link className="btn" to="/register">
+            <Link className="btn landing-btn-primary" to="/register">
               Join as a newcomer
             </Link>
-            <a className="btn secondary" href="#events">
-              Upcoming events
+            <a className="btn landing-btn-ghost" href="#events">
+              See upcoming events
             </a>
           </div>
         </div>
       </section>
 
       <section className="landing-section" id="announcements">
-        <div className="landing-section-inner">
+        <Reveal className="landing-section-inner">
+          <p className="landing-kicker">Community</p>
           <h2>Announcements</h2>
-          <p className="muted">What the community needs to know right now.</p>
+          <p className="landing-lead">What the community needs to know right now.</p>
           <ul className="landing-announce-list">
             {announcements.map((a) => (
               <li key={a.id}>
-                <div className="landing-announce-meta">
-                  {a.pinned ? <span className="badge ok">Pinned</span> : null}
-                  <time dateTime={a.publishedAt}>{formatWhen(a.publishedAt)}</time>
+                <time dateTime={a.publishedAt}>{formatWhen(a.publishedAt)}</time>
+                <div>
+                  <h3>
+                    {a.pinned ? <span className="landing-pin" aria-label="Pinned">●</span> : null}
+                    {a.title}
+                  </h3>
+                  <p>{a.body}</p>
                 </div>
-                <h3>{a.title}</h3>
-                <p>{a.body}</p>
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </section>
 
-      <section className="landing-section alt" id="events">
-        <div className="landing-section-inner">
+      <section className="landing-section tone-mist" id="events">
+        <Reveal className="landing-section-inner">
+          <p className="landing-kicker">Gather</p>
           <h2>Upcoming events</h2>
-          <p className="muted">Gatherings on the ministry calendar.</p>
+          <p className="landing-lead">Come as you are — there is a seat for you.</p>
           {events.length === 0 ? (
             <p className="muted">No upcoming events listed yet. Check back soon.</p>
           ) : (
             <ul className="landing-event-list">
               {events.map((ev) => (
                 <li key={ev.id}>
-                  <time dateTime={ev.startAt}>{formatWhen(ev.startAt)}</time>
+                  <div className="landing-event-date" aria-hidden="true">
+                    <span className="landing-event-month">{formatMonth(ev.startAt)}</span>
+                    <span className="landing-event-day">{formatDay(ev.startAt)}</span>
+                  </div>
                   <div>
+                    <time dateTime={ev.startAt}>{formatWhen(ev.startAt)}</time>
                     <strong>{ev.title}</strong>
-                    {ev.description ? <p className="muted">{ev.description}</p> : null}
+                    {ev.description ? <p>{ev.description}</p> : null}
                   </div>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Reveal>
       </section>
 
       <section className="landing-section" id="watch">
-        <div className="landing-section-inner">
+        <Reveal className="landing-section-inner">
+          <p className="landing-kicker">Listen</p>
           <h2>Sermons & devotionals</h2>
-          <p className="muted">Watch a recent word or a short midweek devotion.</p>
-          <div className="landing-watch-grid">
-            {sermons.map((item) => {
-              const embed = youtubeEmbedUrl(item.mediaUrl);
-              return (
-                <article key={item.id} className="landing-watch-item">
-                  <div className="landing-watch-meta">
-                    <span className="badge">{item.kind}</span>
-                    <span className="muted">{item.speaker}</span>
-                  </div>
-                  <h3>{item.title}</h3>
-                  <p className="muted">{item.summary}</p>
-                  {embed ? (
-                    <div className="landing-video">
-                      <iframe
-                        src={embed}
-                        title={item.title}
-                        loading="lazy"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    </div>
-                  ) : (
-                    <a href={item.mediaUrl} target="_blank" rel="noreferrer">
-                      Open media
-                    </a>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-        </div>
+          <p className="landing-lead">A recent word, and a short devotion for the week.</p>
+
+          {featured ? (
+            <article className="landing-watch-feature">
+              <div className="landing-watch-copy">
+                <p className="landing-kind">{featured.kind} · {featured.speaker}</p>
+                <h3>{featured.title}</h3>
+                <p>{featured.summary}</p>
+              </div>
+              {youtubeEmbedUrl(featured.mediaUrl) ? (
+                <div className="landing-video">
+                  <iframe
+                    src={youtubeEmbedUrl(featured.mediaUrl)!}
+                    title={featured.title}
+                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : null}
+            </article>
+          ) : null}
+
+          {moreSermons.length ? (
+            <ul className="landing-watch-more">
+              {moreSermons.map((item) => {
+                const embed = youtubeEmbedUrl(item.mediaUrl);
+                return (
+                  <li key={item.id}>
+                    <p className="landing-kind">{item.kind} · {item.speaker}</p>
+                    <h3>{item.title}</h3>
+                    <p>{item.summary}</p>
+                    {embed ? (
+                      <div className="landing-video compact">
+                        <iframe
+                          src={embed}
+                          title={item.title}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
+                    ) : (
+                      <a href={item.mediaUrl} target="_blank" rel="noreferrer">
+                        Open media
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </Reveal>
       </section>
 
-      <section className="landing-section alt" id="prayer">
-        <div className="landing-section-inner landing-prayer">
-          <div>
-            <h2>Prayer requests</h2>
-            <p className="muted">
-              Share what is on your heart. Private requests stay with the prayer team.
-            </p>
-          </div>
+      <section className="landing-section landing-prayer-section" id="prayer">
+        <div
+          className="landing-prayer-photo"
+          role="img"
+          aria-label="Quiet hands in prayer"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1507692049790-de15454be3ee?auto=format&fit=crop&w=1400&q=80')",
+          }}
+        />
+        <Reveal className="landing-prayer-panel">
+          <p className="landing-kicker light">Pray</p>
+          <h2>Share a prayer request</h2>
+          <p className="landing-lead light">
+            Tell us what is on your heart. Private requests stay with the prayer team.
+          </p>
           <form className="landing-prayer-form" onSubmit={onPrayerSubmit} noValidate>
             <label>
               Your name <span className="error">*</span>
@@ -265,7 +354,7 @@ export function LandingPage() {
               {prayerErrors.name ? <span className="field-error">{prayerErrors.name}</span> : null}
             </label>
             <label>
-              Email <span className="muted">(optional)</span>
+              Email <span className="landing-optional">(optional)</span>
               <input
                 type="email"
                 value={prayerEmail}
@@ -295,69 +384,81 @@ export function LandingPage() {
               Keep this request private to the prayer team
             </label>
             {prayerOk ? <p className="success">{prayerOk}</p> : null}
-            <button type="submit">Submit request</button>
+            <button type="submit" className="landing-btn-primary">Submit request</button>
           </form>
-        </div>
+        </Reveal>
       </section>
 
       <section className="landing-section" id="about">
-        <div className="landing-section-inner">
-          <h2>About {CHURCH_ABOUT.name}</h2>
-          <p className="landing-about-story">{CHURCH_ABOUT.story}</p>
+        <Reveal className="landing-section-inner landing-about">
+          <div>
+            <p className="landing-kicker">Our story</p>
+            <h2>{CHURCH_ABOUT.name}</h2>
+            <p className="landing-about-story">{CHURCH_ABOUT.story}</p>
+          </div>
+          <div
+            className="landing-about-media"
+            role="img"
+            aria-label="Community worship gathering"
+            style={{
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1400&q=80')",
+            }}
+          />
+        </Reveal>
+      </section>
 
-          <h3 className="landing-subhead">Beliefs</h3>
+      <section className="landing-section tone-forest" id="beliefs">
+        <Reveal className="landing-section-inner">
+          <p className="landing-kicker light">Believe</p>
+          <h2>What we hold</h2>
+          <p className="landing-lead light">Simple convictions that shape how we live together.</p>
           <ul className="landing-belief-list">
             {CHURCH_ABOUT.beliefs.map((b) => (
               <li key={b.title}>
                 <strong>{b.title}</strong>
-                <p className="muted">{b.body}</p>
+                <p>{b.body}</p>
               </li>
             ))}
           </ul>
+        </Reveal>
+      </section>
 
-          <h3 className="landing-subhead">Ministries</h3>
+      <section className="landing-section" id="ministries">
+        <Reveal className="landing-section-inner">
+          <p className="landing-kicker">Serve</p>
+          <h2>Ministries</h2>
+          <p className="landing-lead">Ways people find belonging and purpose at IEEC YA.</p>
           <ul className="landing-ministry-list">
             {CHURCH_ABOUT.ministries.map((m) => (
               <li key={m.name}>
                 <strong>{m.name}</strong>
-                <p className="muted">{m.body}</p>
+                <p>{m.body}</p>
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </section>
 
-      <section className="landing-section alt" id="instagram">
-        <div className="landing-section-inner">
+      <section className="landing-section tone-mist" id="instagram">
+        <Reveal className="landing-section-inner">
           <div className="landing-ig-head">
             <div>
-              <h2>On Instagram</h2>
-              <p className="muted">
-                Follow @{INSTAGRAM_HANDLE} for gatherings, devotionals, and community life.
+              <p className="landing-kicker">Connect</p>
+              <h2>@{INSTAGRAM_HANDLE}</h2>
+              <p className="landing-lead">
+                Gatherings, devotionals, and everyday community life on Instagram.
               </p>
             </div>
             <a
-              className="btn"
+              className="btn landing-btn-primary"
               href={INSTAGRAM_PROFILE_URL}
               target="_blank"
               rel="noreferrer"
             >
-              Open Instagram
+              Follow on Instagram
             </a>
           </div>
-
-          <div className="landing-ig-embed-wrap">
-            <iframe
-              title={`Instagram @${INSTAGRAM_HANDLE}`}
-              src={INSTAGRAM_EMBED_URL}
-              loading="lazy"
-              className="landing-ig-embed"
-            />
-          </div>
-
-          <p className="muted landing-ig-fallback-label">
-            Recent highlights (demo feed until Instagram Graph API is connected)
-          </p>
           <ul className="landing-ig-grid">
             {igPosts.map((post) => (
               <li key={post.id}>
@@ -368,13 +469,13 @@ export function LandingPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="landing-foot">
         <div className="landing-section-inner landing-foot-inner">
           <div>
-            <strong>IEEC YA Connect</strong>
+            <p className="landing-foot-brand">IEEC YA</p>
             <p className="muted">Young Adult ministry · International Evangelical Ethiopian Church</p>
           </div>
           <div className="landing-foot-links">
