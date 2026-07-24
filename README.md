@@ -20,7 +20,8 @@ npm install
 npm run dev:web
 ```
 
-Open http://localhost:5173
+Open http://localhost:5173 — public **landing page** (announcements, events, sermons, prayer, about, Instagram).  
+Newcomer registration: http://localhost:5173/register · Staff: http://localhost:5173/login
 
 ### Demo accounts
 

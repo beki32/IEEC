@@ -96,6 +96,9 @@ export async function hydrateDemoStateFromFirestore(
     chatMemberships: chatMemberships as unknown as DemoState['chatMemberships'],
     chatMessages: chatMessages as unknown as DemoState['chatMessages'],
     notifications: notifications as unknown as DemoState['notifications'],
+    announcements: [],
+    sermons: [],
+    prayerRequests: [],
     auditLogs: auditLogs as unknown as DemoState['auditLogs'],
     sessionAuthUid: null,
   };

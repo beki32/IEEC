@@ -32,9 +32,14 @@ import {
   type TeamMembership,
   type UserAccount,
 } from '@ieec/shared';
+import type {
+  ChurchAnnouncement,
+  PrayerRequest,
+  SermonOrDevotional,
+} from './publicContent';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v7';
-export const DEMO_SEED_VERSION = 7;
+const STORAGE_KEY = 'ieec-ya-connect-demo-v8';
+export const DEMO_SEED_VERSION = 8;
 const SEED_VERSION = DEMO_SEED_VERSION;
 const ACTIVE_TEAM_KEY = 'ieec-ya-connect-active-team';
 
@@ -59,6 +64,9 @@ export interface DemoState {
   chatMemberships: ChatMembership[];
   chatMessages: ChatMessage[];
   notifications: AppNotification[];
+  announcements: ChurchAnnouncement[];
+  sermons: SermonOrDevotional[];
+  prayerRequests: PrayerRequest[];
   auditLogs: AuditLog[];
   sessionAuthUid: string | null;
 }
@@ -484,6 +492,42 @@ function createSeed(): DemoState {
     attendance: [],
     bioEntries: [],
     calendarEvents: [saturdayEvent, welcomeEvent],
+    announcements: [
+      {
+        id: 'ann_1',
+        title: 'Welcome dinner after Saturday program',
+        body: 'New faces are invited to stay 30 minutes after the main gathering for food and introductions.',
+        publishedAt: ts,
+        pinned: true,
+      },
+      {
+        id: 'ann_2',
+        title: 'Volunteer signup for city outreach',
+        body: 'Media and Follow-Up teams need helpers this month. Ask a leader if you want to serve.',
+        publishedAt: new Date(Date.now() - 3 * 86400000).toISOString(),
+      },
+    ],
+    sermons: [
+      {
+        id: 'sermon_1',
+        title: 'Walking with the Shepherd',
+        speaker: 'Pastor Guest',
+        kind: 'sermon',
+        mediaUrl: 'https://www.youtube.com/watch?v=XqZsoesa55w',
+        publishedAt: new Date(Date.now() - 4 * 86400000).toISOString(),
+        summary: 'A word on belonging to Jesus and belonging to one another.',
+      },
+      {
+        id: 'dev_1',
+        title: 'Morning mercy',
+        speaker: 'YA Devotional Team',
+        kind: 'devotional',
+        mediaUrl: 'https://www.youtube.com/watch?v=lFcSrYw-ARY',
+        publishedAt: new Date(Date.now() - 1 * 86400000).toISOString(),
+        summary: 'A short weekday devotion for busy schedules.',
+      },
+    ],
+    prayerRequests: [],
     chatChannels: [opsChannel, leadersOnlyChannel],
     chatMemberships: [
       mkChatMember('cm_ops_leader', opsChannel.id, leaderPersonId, 'moderator'),
@@ -682,6 +726,7 @@ export const demoStore = {
     localStorage.removeItem('ieec-ya-connect-demo-v4');
     localStorage.removeItem('ieec-ya-connect-demo-v5');
     localStorage.removeItem('ieec-ya-connect-demo-v6');
+    localStorage.removeItem('ieec-ya-connect-demo-v7');
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(ACTIVE_TEAM_KEY);
     const seed = createSeed();
@@ -712,13 +757,15 @@ export const demoStore = {
       localStorage.getItem('ieec-ya-connect-demo-v2') ||
       localStorage.getItem('ieec-ya-connect-demo-v4') ||
       localStorage.getItem('ieec-ya-connect-demo-v5') ||
-      localStorage.getItem('ieec-ya-connect-demo-v6');
+      localStorage.getItem('ieec-ya-connect-demo-v6') ||
+      localStorage.getItem('ieec-ya-connect-demo-v7');
     if (legacy && !localStorage.getItem(STORAGE_KEY)) {
       localStorage.removeItem('ieec-ya-connect-demo-v1');
       localStorage.removeItem('ieec-ya-connect-demo-v2');
       localStorage.removeItem('ieec-ya-connect-demo-v4');
       localStorage.removeItem('ieec-ya-connect-demo-v5');
       localStorage.removeItem('ieec-ya-connect-demo-v6');
+      localStorage.removeItem('ieec-ya-connect-demo-v7');
     }
     load();
   },
@@ -864,6 +911,79 @@ export const demoStore = {
     return n;
   },
 
+  isEmailRegistered(email: string) {
+    const state = load();
+    const nEmail = normalizeEmail(email);
+    if (!nEmail) return false;
+    return state.people.some(
+      (p) =>
+        p.organizationId === state.organization.id &&
+        p.recordStatus === 'active' &&
+        p.email.normalized === nEmail,
+    );
+  },
+
+  listAnnouncements() {
+    const state = load();
+    return [...(state.announcements ?? [])].sort((a, b) => {
+      if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+      return b.publishedAt.localeCompare(a.publishedAt);
+    });
+  },
+
+  listSermons() {
+    const state = load();
+    return [...(state.sermons ?? [])].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  },
+
+  listUpcomingPublicEvents(limit = 6) {
+    const now = Date.now();
+    return this.listCalendarEvents(false)
+      .filter((e) => {
+        const start = new Date(e.startAt).getTime();
+        return Number.isFinite(start) && start >= now - 2 * 3600000;
+      })
+      .slice(0, limit);
+  },
+
+  submitPrayerRequest(input: {
+    name: string;
+    email?: string | null;
+    request: string;
+    isPrivate?: boolean;
+  }) {
+    const state = load();
+    if (!state.prayerRequests) state.prayerRequests = [];
+    const row: PrayerRequest = {
+      id: id('prayer'),
+      name: input.name.trim(),
+      email: input.email?.trim() ? input.email.trim() : null,
+      request: input.request.trim(),
+      isPrivate: !!input.isPrivate,
+      createdAt: nowIso(),
+      status: 'received',
+    };
+    state.prayerRequests.unshift(row);
+    audit(state, 'prayer.request.create', 'prayerRequest', row.id, null, {
+      newValue: { name: row.name, isPrivate: row.isPrivate },
+    });
+    const followUpTeamId = state.teams.find((t) => t.moduleKey === 'follow_up')?.id ?? 'team_follow_up';
+    const leaders = state.roleAssignments
+      .filter((ra) => ra.active && ra.roleTemplateId === 'role_fu_leader')
+      .map((ra) => ra.personId);
+    notifyMany(state, leaders, {
+      type: 'prayer.received',
+      title: 'New prayer request',
+      body: `${row.name} submitted a prayer request.`,
+      linkPath: '/app',
+      relatedEntityType: 'prayerRequest',
+      relatedEntityId: row.id,
+      teamId: followUpTeamId,
+    });
+    save(state);
+    return row;
+  },
+
   registerNewcomer(input: {
     firstName: string;
     lastName: string;
@@ -871,18 +991,44 @@ export const demoStore = {
     phone: string;
     sex: string;
     contactMethod: string;
-  }) {
+    photoUrl?: string | null;
+  }):
+    | { ok: true; person: Person; journey: NewcomerJourney; duplicateCandidateIds: string[] }
+    | { ok: false; error: 'already_registered' | 'validation'; message: string } {
     const state = load();
     const nFirst = normalizeName(input.firstName);
     const nLast = normalizeName(input.lastName);
     const nEmail = normalizeEmail(input.email);
     const nPhone = normalizePhone(input.phone);
 
+    if (!input.firstName.trim() || !input.lastName.trim()) {
+      return { ok: false, error: 'validation', message: 'First and last name are required.' };
+    }
+    if (!nEmail) {
+      return { ok: false, error: 'validation', message: 'A valid email is required.' };
+    }
+    if (!nPhone) {
+      return { ok: false, error: 'validation', message: 'A valid phone number is required.' };
+    }
+
+    const emailMatch = state.people.find(
+      (p) =>
+        p.organizationId === state.organization.id &&
+        p.recordStatus === 'active' &&
+        p.email.normalized === nEmail,
+    );
+    if (emailMatch) {
+      return {
+        ok: false,
+        error: 'already_registered',
+        message: 'This email is already registered. Please sign in or contact a leader for help.',
+      };
+    }
+
     const duplicates = state.people.filter(
       (p) =>
         p.organizationId === state.organization.id &&
         ((p.normalizedFirstName === nFirst && p.normalizedLastName === nLast) ||
-          (nEmail && p.email.normalized === nEmail) ||
           (nPhone && p.phone.normalized === nPhone)),
     );
 
@@ -890,6 +1036,7 @@ export const demoStore = {
     const journeyId = id('journey');
     const ts = nowIso();
     const status = duplicates.length ? 'duplicate_review_required' : 'awaiting_assignment';
+    const photoUrl = input.photoUrl?.trim() ? input.photoUrl : null;
 
     const person: Person = {
       id: personId,
@@ -900,14 +1047,14 @@ export const demoStore = {
       normalizedLastName: nLast,
       sex: input.sex,
       phone: { display: input.phone, normalized: nPhone },
-      email: { address: input.email, normalized: nEmail, verified: false },
+      email: { address: input.email.trim(), normalized: nEmail, verified: false },
       contactPreference: {
         method: input.contactMethod,
         preferredTime: null,
         customTimeNote: null,
       },
-      photoFileId: null,
-      photoUrl: null,
+      photoFileId: photoUrl ? 'local_photo' : null,
+      photoUrl,
       currentMinistryStatus: 'newcomer',
       recordStatus: 'active',
       hasUserAccount: false,
@@ -981,7 +1128,12 @@ export const demoStore = {
     });
 
     save(state);
-    return { person, journey, duplicateCandidateIds: duplicates.map((d) => d.id) };
+    return {
+      ok: true as const,
+      person,
+      journey,
+      duplicateCandidateIds: duplicates.map((d) => d.id),
+    };
   },
 
   resolveDuplicate(journeyId: string, action: 'create_new' | 'link_existing', existingPersonId?: string) {

@@ -77,7 +77,9 @@ export function LoginPage() {
           ))}
         </div>
         <p className="muted" style={{ marginTop: '1rem' }}>
-          Or <Link to="/register">register a newcomer</Link> without an account.
+          <Link to="/">Home</Link>
+          {' · '}
+          <Link to="/register">Register as a newcomer</Link>
         </p>
       </div>
     </div>

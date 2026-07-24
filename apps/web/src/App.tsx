@@ -8,6 +8,7 @@ import { ADMIN_MENUS, SHARED_MENUS, TEAM_MODULE_MENUS, type MenuItem } from './l
 import { Avatar } from './components/Avatar';
 import { ChatDock } from './components/ChatDock';
 import { NotificationsBell } from './components/NotificationsBell';
+import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -164,6 +165,7 @@ function CmsShell() {
             </span>
           </NavLink>
           <div className="cms-foot-actions">
+            <NavLink to="/" onClick={closeNav}>Home</NavLink>
             <NavLink to="/register" onClick={closeNav}>Register</NavLink>
             <button
               type="button"
@@ -237,7 +239,7 @@ export default function App() {
     <SessionProvider>
       <ChatDockProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/app" element={<CmsShell />}>
