@@ -1749,18 +1749,40 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .landing-prayer-form {
   display: grid;
-  gap: 0.85rem;
-  margin-top: 0.5rem;
+  gap: 1rem;
+  margin-top: 0.75rem;
 }
 
 .landing-prayer-form label {
   color: rgba(244, 250, 247, 0.92);
+  gap: 0.4rem;
+  font-size: 0.88rem;
 }
 
 .landing-prayer-form input,
 .landing-prayer-form textarea {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: transparent;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0.8rem 0.95rem;
+  color: var(--landing-ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.landing-prayer-form input:focus,
+.landing-prayer-form textarea:focus {
+  outline: none;
+  border-color: rgba(159, 224, 196, 0.9);
+  box-shadow: 0 0 0 3px rgba(159, 224, 196, 0.25);
+}
+
+.landing-prayer-form .field-error {
+  color: #ffc9c2;
+}
+
+.landing-prayer-form .landing-btn-primary {
+  justify-self: start;
+  margin-top: 0.25rem;
 }
 
 .landing-optional {
@@ -1774,9 +1796,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   gap: 0.55rem;
   font-weight: 600;
   color: rgba(244, 250, 247, 0.9);
+  padding: 0.35rem 0;
 }
 
-.landing-check input { width: auto; }
+.landing-check input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #9fe0c4;
+}
 
 .landing-about {
   display: grid;
@@ -1906,56 +1933,396 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   align-items: center;
 }
 
-.register-page {
+.register-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(11, 110, 79, 0.1), transparent 40%),
-    var(--bg);
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.95fr) 1.15fr;
+  background: #f4f8f5;
 }
 
-.register-top {
+.register-aside {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  padding: 1.5rem 1.75rem 2rem;
+  background-size: cover;
+  background-position: center;
+  color: #f7faf8;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1.5rem;
+}
+
+.register-aside-brand {
+  font-family: "Sora", "Figtree", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-decoration: none;
+}
+
+.register-aside-brand:hover { text-decoration: none; opacity: 0.9; }
+
+.register-aside-copy {
+  align-self: end;
+  max-width: 22rem;
+  animation: landing-hero-copy 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.register-aside-kicker {
+  font-family: "Sora", "Figtree", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(244, 250, 247, 0.7);
+  margin: 0 0 0.75rem;
+}
+
+.register-aside-copy h1 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: -0.04em;
+  color: #fff;
+  margin: 0 0 0.75rem;
+  max-width: 10ch;
+}
+
+.register-aside-copy p {
+  margin: 0;
+  color: rgba(244, 250, 247, 0.84);
+  line-height: 1.55;
+}
+
+.register-aside-foot {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(244, 250, 247, 0.55);
+}
+
+.register-content {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.register-content-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.5rem;
 }
+
+.register-back,
+.register-staff {
+  font-weight: 600;
+  color: var(--landing-forest, #0b6e4f);
+  text-decoration: none;
+}
+
+.register-staff { color: var(--muted); }
 
 .register-main {
-  width: min(760px, calc(100% - 2rem));
-  margin: 0 auto 3rem;
+  width: min(560px, calc(100% - 2.5rem));
+  margin: 0.25rem auto 3rem;
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
+  animation: rise 0.45s ease both;
 }
 
-.register-intro h1 {
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
+.register-progress {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.register-steps {
-  display: flex;
-  gap: 1rem;
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0 0;
-  flex-wrap: wrap;
-}
-
-.register-steps li {
+.register-progress-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-weight: 700;
+  font-size: 0.9rem;
+  color: #8a9a92;
+}
+
+.register-progress-step span {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #c5d2cb;
+  font-size: 0.8rem;
+}
+
+.register-progress-step.active { color: #0a3d2e; }
+.register-progress-step.active span {
+  border-color: #0b6e4f;
+  background: #0b6e4f;
+  color: #fff;
+}
+.register-progress-step.done span {
+  border-color: #067647;
+  background: #067647;
+  color: #fff;
+}
+
+.register-progress-line {
+  height: 2px;
+  background: linear-gradient(90deg, #0b6e4f, #c5d2cb);
+  border-radius: 999px;
+}
+
+.register-form {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.register-form-head h2 {
+  font-size: clamp(1.55rem, 3vw, 2rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 0.35rem;
+}
+
+.register-form-head p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.register-optional-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+.register-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.register-fields label,
+.register-choice {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.register-span-2 { grid-column: 1 / -1; }
+
+.register-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #24362d;
+}
+
+.register-fields input,
+.register-fields select {
+  width: 100%;
+  border: 1px solid #d5dfd9;
+  border-radius: 12px;
+  padding: 0.8rem 0.95rem;
+  font: inherit;
+  background: #fff;
+  color: var(--ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.register-fields input::placeholder {
+  color: #9aa8a0;
+}
+
+.register-fields input:focus,
+.register-fields select:focus {
+  outline: none;
+  border-color: #0b6e4f;
+  box-shadow: 0 0 0 3px rgba(11, 110, 79, 0.15);
+}
+
+.register-fields label.has-error input,
+.register-choice.has-error .register-choice-row {
+  border-color: #b42318;
+}
+
+.register-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.register-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid #d5dfd9;
+  background: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #24362d;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.register-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.register-chip.selected {
+  border-color: #0b6e4f;
+  background: rgba(11, 110, 79, 0.1);
+  color: #0a3d2e;
+}
+
+.register-alert {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: #fef3f2;
+  color: #b42318;
+  font-weight: 600;
+  border: 1px solid #fecdca;
+}
+
+.register-actions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.register-actions.rowish {
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: center;
+}
+
+.register-submit {
+  justify-self: start;
+  background: #0b6e4f !important;
+  color: #fff !important;
+  border: 0;
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  font: inherit;
+  cursor: pointer;
+}
+
+.register-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.register-secondary {
+  background: transparent !important;
+  color: #0a3d2e !important;
+  border: 1px solid #c5d2cb !important;
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  font-weight: 700;
+  font: inherit;
+  cursor: pointer;
+}
+
+.register-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.register-photo-drop {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.25rem;
+  border-radius: 18px;
+  border: 1.5px dashed #b7c8be;
+  background:
+    radial-gradient(circle at top right, rgba(11, 110, 79, 0.08), transparent 45%),
+    #fff;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.register-photo-drop.drag,
+.register-photo-drop.has-photo {
+  border-style: solid;
+  border-color: #0b6e4f;
+}
+
+.register-photo-copy strong {
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 0.2rem;
+}
+
+.register-photo-copy p {
+  margin: 0 0 0.85rem;
   color: var(--muted);
   font-size: 0.9rem;
 }
 
-.register-steps li.active { color: var(--brand); }
-.register-steps li.done { color: var(--ok); }
-
-.register-form-error {
-  grid-column: 1 / -1;
+.register-photo-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
 }
 
-.register-actions {
-  grid-column: 1 / -1;
-  margin-top: 0.25rem;
+.login-fields {
+  grid-template-columns: 1fr;
+}
+
+.login-quick {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #d5dfd9;
+}
+
+.login-quick-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.login-quick-btn {
+  display: grid !important;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  background: #fff !important;
+  color: #24362d !important;
+  border: 1px solid #d5dfd9 !important;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.login-quick-btn strong {
+  font-size: 0.95rem;
+}
+
+.login-quick-btn span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.login-quick-btn:hover {
+  border-color: #0b6e4f !important;
+  background: rgba(11, 110, 79, 0.06) !important;
 }
 
 @media (max-width: 900px) {
@@ -1992,12 +2359,26 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   .landing-prayer-section { min-height: 0; }
   .landing-ig-grid { grid-template-columns: repeat(2, 1fr); }
   .landing-about-media { min-height: 260px; }
+
+  .register-shell { grid-template-columns: 1fr; }
+  .register-aside {
+    position: relative;
+    height: auto;
+    min-height: 240px;
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+  .register-aside-copy h1 { max-width: none; }
+  .register-aside-foot { display: none; }
+  .register-fields { grid-template-columns: 1fr; }
+  .register-actions.rowish { grid-template-columns: 1fr; }
+  .register-photo-drop { grid-template-columns: 1fr; justify-items: start; }
 }
 
 @media (max-width: 640px) {
   .landing-section { padding: 3rem 1rem; }
   .landing-brand-mark { font-size: clamp(2.8rem, 16vw, 4rem); }
   .landing-hero-copy h1 { max-width: none; }
+  .register-main { width: min(100%, calc(100% - 1.5rem)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

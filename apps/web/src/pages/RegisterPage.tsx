@@ -40,6 +40,7 @@ export function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     demoStore.ensureLatestSeed();
@@ -119,133 +120,209 @@ export function RegisterPage() {
   }
 
   const fullName = `${form.firstName || 'New'} ${form.lastName || 'friend'}`.trim();
+  const stepIndex = step === 'details' ? 1 : 2;
 
   return (
-    <div className="register-page">
-      <header className="register-top">
-        <Link to="/" className="landing-brand">
+    <div className="register-shell">
+      <aside
+        className="register-aside"
+        style={{
+          backgroundImage:
+            "linear-gradient(160deg, rgba(8,32,24,0.78), rgba(10,61,46,0.88)), url('https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1400&q=80')",
+        }}
+      >
+        <Link to="/" className="register-aside-brand">
           IEEC YA
         </Link>
-        <Link to="/login" className="muted">
-          Staff sign in
-        </Link>
-      </header>
-
-      <main className="register-main">
-        <section className="register-intro">
-          <p className="badge">Newcomer registration</p>
-          <h1>Welcome — we&apos;re glad you&apos;re here</h1>
-          <p className="muted">
-            No account required. After you register, a Follow-Up minister will walk with you.
+        <div className="register-aside-copy">
+          <p className="register-aside-kicker">Newcomer registration</p>
+          <h1>You are welcome here.</h1>
+          <p>
+            Share a few details and we&apos;ll connect you with a Follow-Up minister who will walk with you.
           </p>
-          <ol className="register-steps" aria-label="Registration steps">
-            <li className={step === 'details' ? 'active' : 'done'}>1. Your details</li>
-            <li className={step === 'photo' ? 'active' : ''}>2. Photo (optional)</li>
-          </ol>
-        </section>
+        </div>
+        <p className="register-aside-foot">International Evangelical Ethiopian Church · Young Adults</p>
+      </aside>
 
-        {step === 'details' ? (
-          <form className="panel register-form grid two" onSubmit={onContinue} noValidate>
-            <label>
-              First name <span className="error">*</span>
-              <input
-                value={form.firstName}
-                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                autoComplete="given-name"
-              />
-              {errors.firstName ? <span className="field-error">{errors.firstName}</span> : null}
-            </label>
-            <label>
-              Last name <span className="error">*</span>
-              <input
-                value={form.lastName}
-                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                autoComplete="family-name"
-              />
-              {errors.lastName ? <span className="field-error">{errors.lastName}</span> : null}
-            </label>
-            <label>
-              Email <span className="error">*</span>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => {
-                  setForm({ ...form, email: e.target.value });
-                  if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
-                }}
-                autoComplete="email"
-              />
-              {errors.email ? <span className="field-error">{errors.email}</span> : null}
-            </label>
-            <label>
-              Phone <span className="error">*</span>
-              <input
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                autoComplete="tel"
-                inputMode="tel"
-              />
-              {errors.phone ? <span className="field-error">{errors.phone}</span> : null}
-            </label>
-            <label>
-              Sex <span className="error">*</span>
-              <select
-                value={form.sex}
-                onChange={(e) => setForm({ ...form, sex: e.target.value })}
-              >
-                <option value="female">Female</option>
-                <option value="male">Male</option>
-                <option value="unspecified">Prefer not to say</option>
-              </select>
-              {errors.sex ? <span className="field-error">{errors.sex}</span> : null}
-            </label>
-            <label>
-              Preferred contact <span className="error">*</span>
-              <select
-                value={form.contactMethod}
-                onChange={(e) => setForm({ ...form, contactMethod: e.target.value })}
-              >
-                <option value="text">Text</option>
-                <option value="call">Call</option>
-                <option value="email">Email</option>
-              </select>
-              {errors.contactMethod ? (
-                <span className="field-error">{errors.contactMethod}</span>
-              ) : null}
-            </label>
+      <div className="register-content">
+        <header className="register-content-top">
+          <Link to="/" className="register-back">
+            ← Home
+          </Link>
+          <Link to="/login" className="register-staff">
+            Staff sign in
+          </Link>
+        </header>
 
-            {formError ? <p className="error register-form-error">{formError}</p> : null}
-
-            <div className="row register-actions">
-              <button type="submit">Continue</button>
-              <Link to="/">Back to home</Link>
+        <main className="register-main">
+          <div className="register-progress" aria-label={`Step ${stepIndex} of 2`}>
+            <div className={`register-progress-step ${stepIndex >= 1 ? 'active' : ''} ${stepIndex > 1 ? 'done' : ''}`}>
+              <span>1</span>
+              Details
             </div>
-          </form>
-        ) : (
-          <form className="panel register-form grid" onSubmit={onSubmitRegistration}>
-            <div className="account-photo-block">
-              <Avatar name={fullName} photoUrl={photoUrl} size="lg" />
-              <div className="account-photo-actions">
-                <strong>Profile photo (optional)</strong>
-                <p className="muted">
-                  Add a photo so your Follow-Up minister can recognize you. JPG, PNG, or WebP · max 2 MB.
-                </p>
-                <div className="row">
-                  <button type="button" onClick={() => fileRef.current?.click()}>
-                    {photoUrl ? 'Change photo' : 'Add photo'}
-                  </button>
-                  {photoUrl ? (
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={() => {
-                        setPhotoUrl(null);
-                        if (fileRef.current) fileRef.current.value = '';
-                      }}
-                    >
-                      Remove
-                    </button>
+            <div className="register-progress-line" aria-hidden="true" />
+            <div className={`register-progress-step ${stepIndex >= 2 ? 'active' : ''}`}>
+              <span>2</span>
+              Photo
+            </div>
+          </div>
+
+          {step === 'details' ? (
+            <form className="register-form" onSubmit={onContinue} noValidate>
+              <div className="register-form-head">
+                <h2>Your details</h2>
+                <p>Required fields help us welcome you well.</p>
+              </div>
+
+              <div className="register-fields">
+                <label className={errors.firstName ? 'has-error' : ''}>
+                  <span className="register-label">First name</span>
+                  <input
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                    autoComplete="given-name"
+                    placeholder="First name"
+                  />
+                  {errors.firstName ? <span className="field-error">{errors.firstName}</span> : null}
+                </label>
+                <label className={errors.lastName ? 'has-error' : ''}>
+                  <span className="register-label">Last name</span>
+                  <input
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                    autoComplete="family-name"
+                    placeholder="Last name"
+                  />
+                  {errors.lastName ? <span className="field-error">{errors.lastName}</span> : null}
+                </label>
+                <label className={`register-span-2 ${errors.email ? 'has-error' : ''}`}>
+                  <span className="register-label">Email</span>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => {
+                      setForm({ ...form, email: e.target.value });
+                      if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                  />
+                  {errors.email ? <span className="field-error">{errors.email}</span> : null}
+                </label>
+                <label className={`register-span-2 ${errors.phone ? 'has-error' : ''}`}>
+                  <span className="register-label">Phone</span>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    autoComplete="tel"
+                    inputMode="tel"
+                    placeholder="(202) 555-0100"
+                  />
+                  {errors.phone ? <span className="field-error">{errors.phone}</span> : null}
+                </label>
+
+                <fieldset className={`register-choice ${errors.sex ? 'has-error' : ''}`}>
+                  <legend className="register-label">Sex</legend>
+                  <div className="register-choice-row" role="radiogroup" aria-label="Sex">
+                    {[
+                      { value: 'female', label: 'Female' },
+                      { value: 'male', label: 'Male' },
+                      { value: 'unspecified', label: 'Prefer not to say' },
+                    ].map((opt) => (
+                      <label key={opt.value} className={`register-chip ${form.sex === opt.value ? 'selected' : ''}`}>
+                        <input
+                          type="radio"
+                          name="sex"
+                          value={opt.value}
+                          checked={form.sex === opt.value}
+                          onChange={() => setForm({ ...form, sex: opt.value })}
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.sex ? <span className="field-error">{errors.sex}</span> : null}
+                </fieldset>
+
+                <fieldset className={`register-choice ${errors.contactMethod ? 'has-error' : ''}`}>
+                  <legend className="register-label">Preferred contact</legend>
+                  <div className="register-choice-row" role="radiogroup" aria-label="Preferred contact">
+                    {[
+                      { value: 'text', label: 'Text' },
+                      { value: 'call', label: 'Call' },
+                      { value: 'email', label: 'Email' },
+                    ].map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={`register-chip ${form.contactMethod === opt.value ? 'selected' : ''}`}
+                      >
+                        <input
+                          type="radio"
+                          name="contactMethod"
+                          value={opt.value}
+                          checked={form.contactMethod === opt.value}
+                          onChange={() => setForm({ ...form, contactMethod: opt.value })}
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.contactMethod ? (
+                    <span className="field-error">{errors.contactMethod}</span>
                   ) : null}
+                </fieldset>
+              </div>
+
+              {formError ? <p className="register-alert">{formError}</p> : null}
+
+              <div className="register-actions">
+                <button type="submit" className="register-submit">
+                  Continue to photo
+                </button>
+                <p className="register-note">Next step is optional — you can skip the photo.</p>
+              </div>
+            </form>
+          ) : (
+            <form className="register-form" onSubmit={onSubmitRegistration}>
+              <div className="register-form-head">
+                <h2>Add a photo <span className="register-optional-tag">optional</span></h2>
+                <p>Helps your Follow-Up minister recognize you when you meet.</p>
+              </div>
+
+              <div
+                className={`register-photo-drop ${dragOver ? 'drag' : ''} ${photoUrl ? 'has-photo' : ''}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOver(true);
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  void onPhotoSelected(e.dataTransfer.files?.[0] ?? null);
+                }}
+              >
+                <Avatar name={fullName} photoUrl={photoUrl} size="lg" />
+                <div className="register-photo-copy">
+                  <strong>{photoUrl ? 'Looking good' : 'Drop a photo here'}</strong>
+                  <p>JPG, PNG, or WebP · max 2 MB</p>
+                  <div className="register-photo-btns">
+                    <button type="button" className="register-submit" onClick={() => fileRef.current?.click()}>
+                      {photoUrl ? 'Change photo' : 'Choose photo'}
+                    </button>
+                    {photoUrl ? (
+                      <button
+                        type="button"
+                        className="register-secondary"
+                        onClick={() => {
+                          setPhotoUrl(null);
+                          if (fileRef.current) fileRef.current.value = '';
+                        }}
+                      >
+                        Remove
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
                 <input
                   ref={fileRef}
@@ -255,21 +332,21 @@ export function RegisterPage() {
                   onChange={(e) => void onPhotoSelected(e.target.files?.[0] ?? null)}
                 />
               </div>
-            </div>
 
-            {formError ? <p className="error">{formError}</p> : null}
+              {formError ? <p className="register-alert">{formError}</p> : null}
 
-            <div className="row register-actions">
-              <button type="submit" disabled={busy}>
-                {busy ? 'Submitting…' : photoUrl ? 'Finish registration' : 'Skip photo & finish'}
-              </button>
-              <button type="button" className="secondary" onClick={() => setStep('details')}>
-                Back
-              </button>
-            </div>
-          </form>
-        )}
-      </main>
+              <div className="register-actions rowish">
+                <button type="submit" className="register-submit" disabled={busy}>
+                  {busy ? 'Submitting…' : photoUrl ? 'Finish registration' : 'Skip photo & finish'}
+                </button>
+                <button type="button" className="register-secondary" onClick={() => setStep('details')}>
+                  Back to details
+                </button>
+              </div>
+            </form>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
