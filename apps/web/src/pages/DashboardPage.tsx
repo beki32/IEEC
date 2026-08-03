@@ -59,6 +59,14 @@ export function DashboardPage() {
           </div>
         )}
 
+        {isFollowUp ? (
+          <div className="panel">
+            <h2>Notes & tasks</h2>
+            <p className="muted">Meeting notes and a shared checklist for Follow-Up.</p>
+            <Link className="btn secondary" to="/app/notes-tasks">Open notes & tasks</Link>
+          </div>
+        ) : null}
+
         <div className="panel">
           <h2>Ministry calendar</h2>
           <p className="muted">{state.calendarEvents.filter((e) => e.eventStatus !== 'cancelled').length} scheduled event(s)</p>

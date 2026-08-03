@@ -20,6 +20,7 @@ export const TEAM_MODULE_MENUS: Record<string, MenuItem[]> = {
       label: 'Queue',
       anyOf: [Permissions.newcomersViewUnassigned, Permissions.newcomersViewAll],
     },
+    { to: '/app/notes-tasks', label: 'Notes & tasks' },
   ],
   bible_study: [
     { to: '/app', label: 'Team home', end: true },

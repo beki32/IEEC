@@ -2,6 +2,7 @@ import { Permissions } from '@ieec/shared';
 import { FormEvent, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
+import { matchesPersonSearch, TableSearch } from '../components/TableSearch';
 import { demoStore } from '../lib/demoStore';
 import { useSession } from '../lib/session';
 
@@ -13,6 +14,7 @@ export function QueuePage() {
   const [assignJourneyId, setAssignJourneyId] = useState<string | null>(null);
   const [selectedAssigneeId, setSelectedAssigneeId] = useState('');
   const [assignError, setAssignError] = useState('');
+  const [query, setQuery] = useState('');
 
   if (!has(Permissions.newcomersViewUnassigned) && !has(Permissions.newcomersViewAll)) {
     return <Navigate to="/app" replace />;
@@ -39,17 +41,40 @@ export function QueuePage() {
       .sort((a, b) => a.person.firstName.localeCompare(b.person.firstName));
   }, [state.people, state.roleAssignments, state.roleTemplates]);
 
-  const rows = state.journeys
-    .filter((j) =>
-      j.isCurrentJourney ||
-      ['awaiting_assignment', 'duplicate_review_required', 'assigned', 'active_follow_up', 'membership_approval_in_progress', 'inactive'].includes(j.journeyStatus),
-    )
-    .map((j) => {
-      const person = state.people.find((p) => p.id === j.personId);
-      const assignment = state.assignments.find((a) => a.journeyId === j.id && a.assignmentStatus === 'active');
-      return { journey: j, person, assignment };
-    })
-    .filter((r) => r.person && r.person.currentMinistryStatus === 'newcomer');
+  const rows = useMemo(
+    () =>
+      state.journeys
+        .filter((j) =>
+          j.isCurrentJourney ||
+          ['awaiting_assignment', 'duplicate_review_required', 'assigned', 'active_follow_up', 'membership_approval_in_progress', 'inactive'].includes(j.journeyStatus),
+        )
+        .map((j) => {
+          const person = state.people.find((p) => p.id === j.personId);
+          const assignment = state.assignments.find((a) => a.journeyId === j.id && a.assignmentStatus === 'active');
+          return { journey: j, person, assignment };
+        })
+        .filter((r) => r.person && r.person.currentMinistryStatus === 'newcomer'),
+    [state.journeys, state.people, state.assignments],
+  );
+
+  const filteredRows = useMemo(
+    () =>
+      rows.filter(({ person, assignment, journey }) => {
+        const assignee = assignment
+          ? state.people.find((p) => p.id === assignment.assignedPersonId)
+          : null;
+        return matchesPersonSearch(query, [
+          person?.firstName,
+          person?.lastName,
+          person ? `${person.firstName} ${person.lastName}` : null,
+          person?.email.address,
+          assignee?.firstName,
+          assignee?.lastName,
+          journey.journeyStatus,
+        ]);
+      }),
+    [rows, query, state.people],
+  );
 
   const assignJourney = assignJourneyId
     ? state.journeys.find((j) => j.id === assignJourneyId)
@@ -122,78 +147,90 @@ export function QueuePage() {
             {assignees.length} assignable team member(s) available.
           </p>
         )}
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Person</th>
-              <th>Status</th>
-              <th>Assignee</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(({ journey, person, assignment }) => {
-              const assignee = assignment
-                ? state.people.find((p) => p.id === assignment.assignedPersonId)
-                : null;
-              const canAssign =
-                has(Permissions.assignmentsCreate) &&
-                ['awaiting_assignment', 'assigned', 'active_follow_up', 'inactive'].includes(journey.journeyStatus);
-              return (
-                <tr key={journey.id}>
-                  <td>
-                    <div className="person-cell">
-                      <Avatar
-                        name={`${person!.firstName} ${person!.lastName}`}
-                        photoUrl={person!.photoUrl}
-                        size="sm"
-                      />
-                      <div>
-                        <strong>{person!.firstName} {person!.lastName}</strong>
-                        <div className="muted">{person!.email.address}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`badge ${journey.journeyStatus.includes('duplicate') ? 'warn' : ''}`}>
-                      {journey.journeyStatus}
-                    </span>
-                  </td>
-                  <td>
-                    {assignee ? (
+        <TableSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Search people, email, assignee, status…"
+          resultCount={filteredRows.length}
+          totalCount={rows.length}
+        />
+        {rows.length > 0 && filteredRows.length === 0 ? (
+          <p className="muted">No people match “{query.trim()}”.</p>
+        ) : null}
+        {filteredRows.length > 0 ? (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Status</th>
+                <th>Assignee</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.map(({ journey, person, assignment }) => {
+                const assignee = assignment
+                  ? state.people.find((p) => p.id === assignment.assignedPersonId)
+                  : null;
+                const canAssign =
+                  has(Permissions.assignmentsCreate) &&
+                  ['awaiting_assignment', 'assigned', 'active_follow_up', 'inactive'].includes(journey.journeyStatus);
+                return (
+                  <tr key={journey.id}>
+                    <td>
                       <div className="person-cell">
                         <Avatar
-                          name={`${assignee.firstName} ${assignee.lastName}`}
-                          photoUrl={assignee.photoUrl}
+                          name={`${person!.firstName} ${person!.lastName}`}
+                          photoUrl={person!.photoUrl}
                           size="sm"
                         />
-                        <span>{assignee.firstName} {assignee.lastName}</span>
+                        <div>
+                          <strong>{person!.firstName} {person!.lastName}</strong>
+                          <div className="muted">{person!.email.address}</div>
+                        </div>
                       </div>
-                    ) : (
-                      'Unassigned'
-                    )}
-                  </td>
-                  <td className="row">
-                    <Link to={`/app/people/${person!.id}`}>Open</Link>
-                    {journey.journeyStatus === 'duplicate_review_required' && has(Permissions.duplicateReview) ? (
-                      <button type="button" className="secondary" onClick={() => resolveDup(journey.id)}>Mark not duplicate</button>
-                    ) : null}
-                    {canAssign ? (
-                      <button type="button" onClick={() => openAssign(journey.id)}>
-                        {assignment ? 'Reassign…' : 'Assign…'}
-                      </button>
-                    ) : null}
-                    {journey.journeyStatus === 'membership_approval_in_progress' && has(Permissions.membershipReviewStart) ? (
-                      <button type="button" onClick={() => { demoStore.approveMembership(journey.id); bump(); }}>
-                        Approve member
-                      </button>
-                    ) : null}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td>
+                      <span className={`badge ${journey.journeyStatus.includes('duplicate') ? 'warn' : ''}`}>
+                        {journey.journeyStatus}
+                      </span>
+                    </td>
+                    <td>
+                      {assignee ? (
+                        <div className="person-cell">
+                          <Avatar
+                            name={`${assignee.firstName} ${assignee.lastName}`}
+                            photoUrl={assignee.photoUrl}
+                            size="sm"
+                          />
+                          <span>{assignee.firstName} {assignee.lastName}</span>
+                        </div>
+                      ) : (
+                        'Unassigned'
+                      )}
+                    </td>
+                    <td className="row">
+                      <Link to={`/app/people/${person!.id}`}>Open</Link>
+                      {journey.journeyStatus === 'duplicate_review_required' && has(Permissions.duplicateReview) ? (
+                        <button type="button" className="secondary" onClick={() => resolveDup(journey.id)}>Mark not duplicate</button>
+                      ) : null}
+                      {canAssign ? (
+                        <button type="button" onClick={() => openAssign(journey.id)}>
+                          {assignment ? 'Reassign…' : 'Assign…'}
+                        </button>
+                      ) : null}
+                      {journey.journeyStatus === 'membership_approval_in_progress' && has(Permissions.membershipReviewStart) ? (
+                        <button type="button" onClick={() => { demoStore.approveMembership(journey.id); bump(); }}>
+                          Approve member
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : null}
       </div>
 
       {assignJourneyId && assignPerson ? (

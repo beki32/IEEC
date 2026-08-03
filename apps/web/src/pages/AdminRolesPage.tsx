@@ -1,13 +1,42 @@
 import { Permissions } from '@ieec/shared';
+import { useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { matchesPersonSearch, TableSearch } from '../components/TableSearch';
 import { demoStore } from '../lib/demoStore';
+import { formatRelativeTime } from '../lib/formatTime';
 import { useSession } from '../lib/session';
 
 export function AdminRolesPage() {
   const { has } = useSession();
-  if (!has(Permissions.rolesManage)) return <Navigate to="/app" replace />;
-
+  const [query, setQuery] = useState('');
   const state = demoStore.getState();
+
+  const assignmentRows = useMemo(
+    () =>
+      state.roleAssignments.map((a) => {
+        const person = state.people.find((p) => p.id === a.personId);
+        const role = state.roleTemplates.find((t) => t.id === a.roleTemplateId);
+        return { assignment: a, person, role };
+      }),
+    [state.roleAssignments, state.people, state.roleTemplates],
+  );
+
+  const filteredAssignments = useMemo(
+    () =>
+      assignmentRows.filter(({ person, role, assignment }) =>
+        matchesPersonSearch(query, [
+          person?.firstName,
+          person?.lastName,
+          person ? `${person.firstName} ${person.lastName}` : null,
+          person?.email.address,
+          role?.name,
+          assignment.teamId,
+        ]),
+      ),
+    [assignmentRows, query],
+  );
+
+  if (!has(Permissions.rolesManage)) return <Navigate to="/app" replace />;
 
   return (
     <div className="grid">
@@ -41,30 +70,37 @@ export function AdminRolesPage() {
 
       <div className="panel">
         <h2>Assignments</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Person</th>
-              <th>Role</th>
-              <th>Scope</th>
-              <th>Active</th>
-            </tr>
-          </thead>
-          <tbody>
-            {state.roleAssignments.map((a) => {
-              const person = state.people.find((p) => p.id === a.personId);
-              const role = state.roleTemplates.find((t) => t.id === a.roleTemplateId);
-              return (
-                <tr key={a.id}>
-                  <td>{person ? `${person.firstName} ${person.lastName}` : a.personId}</td>
+        <TableSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Search people or roles…"
+          resultCount={filteredAssignments.length}
+          totalCount={assignmentRows.length}
+        />
+        {filteredAssignments.length === 0 ? (
+          <p className="muted">No assignments match “{query.trim()}”.</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Role</th>
+                <th>Scope</th>
+                <th>Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAssignments.map(({ assignment, person, role }) => (
+                <tr key={assignment.id}>
+                  <td>{person ? `${person.firstName} ${person.lastName}` : assignment.personId}</td>
                   <td>{role?.name}</td>
-                  <td>{a.scopeType} / {a.teamId}</td>
-                  <td>{a.active ? 'yes' : 'no'}</td>
+                  <td>{assignment.scopeType} / {assignment.teamId}</td>
+                  <td>{assignment.active ? 'yes' : 'no'}</td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="panel">
@@ -80,7 +116,9 @@ export function AdminRolesPage() {
           <tbody>
             {state.auditLogs.slice(0, 12).map((log) => (
               <tr key={log.id}>
-                <td className="muted">{new Date(log.createdAt).toLocaleString()}</td>
+                <td className="muted" title={new Date(log.createdAt).toLocaleString()}>
+                  {formatRelativeTime(log.createdAt)}
+                </td>
                 <td>{log.action}</td>
                 <td>{log.entityType}:{log.entityId}</td>
               </tr>

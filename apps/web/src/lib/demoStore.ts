@@ -38,10 +38,38 @@ import type {
   SermonOrDevotional,
 } from './publicContent';
 
-const STORAGE_KEY = 'ieec-ya-connect-demo-v8';
-export const DEMO_SEED_VERSION = 8;
+const STORAGE_KEY = 'ieec-ya-connect-demo-v9';
+export const DEMO_SEED_VERSION = 9;
 const SEED_VERSION = DEMO_SEED_VERSION;
 const ACTIVE_TEAM_KEY = 'ieec-ya-connect-active-team';
+
+export interface MeetingNote {
+  id: string;
+  organizationId: string;
+  teamId: string;
+  title: string;
+  body: string;
+  meetingAt: string;
+  createdByPersonId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamTask {
+  id: string;
+  organizationId: string;
+  teamId: string;
+  title: string;
+  notes: string | null;
+  completed: boolean;
+  assigneePersonId: string | null;
+  dueAt: string | null;
+  createdByPersonId: string;
+  completedAt: string | null;
+  completedByPersonId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface DemoState {
   seedVersion: number;
@@ -67,6 +95,8 @@ export interface DemoState {
   announcements: ChurchAnnouncement[];
   sermons: SermonOrDevotional[];
   prayerRequests: PrayerRequest[];
+  meetingNotes: MeetingNote[];
+  teamTasks: TeamTask[];
   auditLogs: AuditLog[];
   sessionAuthUid: string | null;
 }
@@ -528,6 +558,51 @@ function createSeed(): DemoState {
       },
     ],
     prayerRequests: [],
+    meetingNotes: [
+      {
+        id: 'note_seed_1',
+        organizationId: orgId,
+        teamId: teamFollowUp.id,
+        title: 'Saturday greeter huddle',
+        body: 'Welcome window opens at 5:30. Confirm two greeters at the door and one near the newcomer table.',
+        meetingAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+        createdByPersonId: leaderPersonId,
+        createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+        updatedAt: new Date(Date.now() - 2 * 86400000).toISOString(),
+      },
+    ],
+    teamTasks: [
+      {
+        id: 'task_seed_1',
+        organizationId: orgId,
+        teamId: teamFollowUp.id,
+        title: 'Call Daniel Bekele this week',
+        notes: null,
+        completed: false,
+        assigneePersonId: ministerPersonId,
+        dueAt: null,
+        createdByPersonId: leaderPersonId,
+        completedAt: null,
+        completedByPersonId: null,
+        createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
+        updatedAt: new Date(Date.now() - 3 * 3600000).toISOString(),
+      },
+      {
+        id: 'task_seed_2',
+        organizationId: orgId,
+        teamId: teamFollowUp.id,
+        title: 'Print welcome cards for Saturday',
+        notes: null,
+        completed: true,
+        assigneePersonId: assistantPersonId,
+        dueAt: null,
+        createdByPersonId: leaderPersonId,
+        completedAt: new Date(Date.now() - 3600000).toISOString(),
+        completedByPersonId: assistantPersonId,
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        updatedAt: new Date(Date.now() - 3600000).toISOString(),
+      },
+    ],
     chatChannels: [opsChannel, leadersOnlyChannel],
     chatMemberships: [
       mkChatMember('cm_ops_leader', opsChannel.id, leaderPersonId, 'moderator'),
@@ -551,7 +626,7 @@ function createSeed(): DemoState {
         teamId: teamFollowUp.id,
         channel: 'in_app',
         status: 'sent',
-        createdAt: ts,
+        createdAt: new Date(Date.now() - 12 * 60000).toISOString(),
         readAt: null,
         dismissedAt: null,
       },
@@ -568,7 +643,7 @@ function createSeed(): DemoState {
         teamId: teamFollowUp.id,
         channel: 'in_app',
         status: 'sent',
-        createdAt: ts,
+        createdAt: new Date(Date.now() - 45 * 60000).toISOString(),
         readAt: null,
         dismissedAt: null,
       },
@@ -585,7 +660,7 @@ function createSeed(): DemoState {
         teamId: teamFollowUp.id,
         channel: 'in_app',
         status: 'sent',
-        createdAt: ts,
+        createdAt: new Date(Date.now() - 3 * 3600000).toISOString(),
         readAt: null,
         dismissedAt: null,
       },
@@ -727,6 +802,7 @@ export const demoStore = {
     localStorage.removeItem('ieec-ya-connect-demo-v5');
     localStorage.removeItem('ieec-ya-connect-demo-v6');
     localStorage.removeItem('ieec-ya-connect-demo-v7');
+    localStorage.removeItem('ieec-ya-connect-demo-v8');
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(ACTIVE_TEAM_KEY);
     const seed = createSeed();
@@ -758,7 +834,8 @@ export const demoStore = {
       localStorage.getItem('ieec-ya-connect-demo-v4') ||
       localStorage.getItem('ieec-ya-connect-demo-v5') ||
       localStorage.getItem('ieec-ya-connect-demo-v6') ||
-      localStorage.getItem('ieec-ya-connect-demo-v7');
+      localStorage.getItem('ieec-ya-connect-demo-v7') ||
+      localStorage.getItem('ieec-ya-connect-demo-v8');
     if (legacy && !localStorage.getItem(STORAGE_KEY)) {
       localStorage.removeItem('ieec-ya-connect-demo-v1');
       localStorage.removeItem('ieec-ya-connect-demo-v2');
@@ -766,6 +843,7 @@ export const demoStore = {
       localStorage.removeItem('ieec-ya-connect-demo-v5');
       localStorage.removeItem('ieec-ya-connect-demo-v6');
       localStorage.removeItem('ieec-ya-connect-demo-v7');
+      localStorage.removeItem('ieec-ya-connect-demo-v8');
     }
     load();
   },
@@ -909,6 +987,105 @@ export const demoStore = {
     n.dismissedAt = nowIso();
     save(state);
     return n;
+  },
+
+  listMeetingNotes(teamId: string) {
+    const state = load();
+    return [...(state.meetingNotes ?? [])]
+      .filter((n) => n.teamId === teamId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+
+  addMeetingNote(input: { teamId: string; title: string; body: string; meetingAt?: string }) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const title = input.title.trim();
+    const body = input.body.trim();
+    if (title.length < 3) throw new Error('Title must be at least 3 characters');
+    if (body.length < 3) throw new Error('Notes must be at least 3 characters');
+    if (!state.meetingNotes) state.meetingNotes = [];
+    const row: MeetingNote = {
+      id: id('note'),
+      organizationId: state.organization.id,
+      teamId: input.teamId,
+      title,
+      body,
+      meetingAt: input.meetingAt ?? nowIso(),
+      createdByPersonId: session.person.id,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    };
+    state.meetingNotes.unshift(row);
+    audit(state, 'meetingNote.create', 'meetingNote', row.id, session.person.id);
+    save(state);
+    return row;
+  },
+
+  listTeamTasks(teamId: string) {
+    const state = load();
+    return [...(state.teamTasks ?? [])]
+      .filter((t) => t.teamId === teamId)
+      .sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        return b.createdAt.localeCompare(a.createdAt);
+      });
+  },
+
+  addTeamTask(input: { teamId: string; title: string; assigneePersonId?: string | null }) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const title = input.title.trim();
+    if (title.length < 2) throw new Error('Task must be at least 2 characters');
+    if (!state.teamTasks) state.teamTasks = [];
+    const row: TeamTask = {
+      id: id('task'),
+      organizationId: state.organization.id,
+      teamId: input.teamId,
+      title,
+      notes: null,
+      completed: false,
+      assigneePersonId: input.assigneePersonId ?? null,
+      dueAt: null,
+      createdByPersonId: session.person.id,
+      completedAt: null,
+      completedByPersonId: null,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    };
+    state.teamTasks.unshift(row);
+    audit(state, 'teamTask.create', 'teamTask', row.id, session.person.id);
+    save(state);
+    return row;
+  },
+
+  toggleTeamTask(taskId: string) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const task = (state.teamTasks ?? []).find((t) => t.id === taskId);
+    if (!task) throw new Error('Task not found');
+    task.completed = !task.completed;
+    task.completedAt = task.completed ? nowIso() : null;
+    task.completedByPersonId = task.completed ? session.person.id : null;
+    task.updatedAt = nowIso();
+    audit(state, 'teamTask.toggle', 'teamTask', task.id, session.person.id, {
+      newValue: { completed: task.completed },
+    });
+    save(state);
+    return task;
+  },
+
+  deleteTeamTask(taskId: string) {
+    const state = load();
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const before = state.teamTasks?.length ?? 0;
+    state.teamTasks = (state.teamTasks ?? []).filter((t) => t.id !== taskId);
+    if ((state.teamTasks?.length ?? 0) === before) throw new Error('Task not found');
+    audit(state, 'teamTask.delete', 'teamTask', taskId, session.person.id);
+    save(state);
   },
 
   isEmailRegistered(email: string) {

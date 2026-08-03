@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
 import { useChatDock } from '../lib/chatDock';
+import { formatRelativeTime } from '../lib/formatTime';
 import { useSession } from '../lib/session';
 
 export function NotificationsBell({ startOpen = false }: { startOpen?: boolean } = {}) {
@@ -30,6 +31,11 @@ export function NotificationsBell({ startOpen = false }: { startOpen?: boolean }
     openFromRoute();
     window.addEventListener('ieec-open-notifications', openFromRoute);
     return () => window.removeEventListener('ieec-open-notifications', openFromRoute);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick((t) => t + 1), 60000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -116,7 +122,9 @@ export function NotificationsBell({ startOpen = false }: { startOpen?: boolean }
                     {n.status !== 'read' ? <span className="badge ok">new</span> : null}
                   </div>
                   <p>{n.body}</p>
-                  <span className="muted">{new Date(n.createdAt).toLocaleString()}</span>
+                  <span className="muted" title={new Date(n.createdAt).toLocaleString()}>
+                    {formatRelativeTime(n.createdAt)}
+                  </span>
                 </button>
                 <button
                   type="button"

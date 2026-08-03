@@ -19,6 +19,7 @@ import { AccountPage } from './pages/AccountPage';
 import { AdminRolesPage } from './pages/AdminRolesPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { ChatPage } from './pages/ChatPage';
+import { FollowUpNotesPage } from './pages/FollowUpNotesPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { ModulePlaceholderPage } from './pages/ModulePlaceholderPage';
 
@@ -246,6 +247,7 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="assigned" element={<AssignedPage />} />
             <Route path="queue" element={<QueuePage />} />
+            <Route path="notes-tasks" element={<FollowUpNotesPage />} />
             <Route path="people/:personId" element={<PersonProfilePage />} />
             <Route path="account" element={<AccountPage />} />
             <Route path="calendar" element={<CalendarPage />} />

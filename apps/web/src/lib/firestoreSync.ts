@@ -99,6 +99,8 @@ export async function hydrateDemoStateFromFirestore(
     announcements: [],
     sermons: [],
     prayerRequests: [],
+    meetingNotes: [],
+    teamTasks: [],
     auditLogs: auditLogs as unknown as DemoState['auditLogs'],
     sessionAuthUid: null,
   };
