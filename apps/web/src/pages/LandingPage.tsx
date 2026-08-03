@@ -481,6 +481,7 @@ export function LandingPage() {
           <div className="landing-foot-links">
             <Link to="/register">Newcomer registration</Link>
             <Link to="/login">Staff sign in</Link>
+            <a href="/presentations/ieec-ya-connect-progress.html">Progress briefing</a>
             <a href={INSTAGRAM_PROFILE_URL} target="_blank" rel="noreferrer">
               Instagram
             </a>
