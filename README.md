@@ -116,7 +116,7 @@ If a Vercel dashboard Install Command override still says `cd ../.. && npm insta
 Progress & Follow-Up workflow slides (served with the web app):
 
 - Local: http://localhost:5173/presentations/ieec-ya-connect-progress.html  
-- Production: `https://<your-vercel-domain>/presentations/ieec-ya-connect-progress.html`  
+- Production: https://ieec-web.vercel.app/presentations/ieec-ya-connect-progress.html  
 - Also linked from the landing page footer as **Progress briefing**
 
 Source: `apps/web/public/presentations/` (mirrored under `docs/presentations/`).
