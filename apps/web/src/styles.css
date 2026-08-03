@@ -2525,4 +2525,165 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   .task-add-form { grid-template-columns: 1fr; }
 }
 
+/* Stakeholder briefing (/briefing) */
+.briefing-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1000px 500px at 10% -10%, rgba(61, 191, 138, 0.2), transparent 55%),
+    radial-gradient(800px 420px at 100% 0%, rgba(232, 160, 106, 0.14), transparent 50%),
+    linear-gradient(160deg, #0f241c 0%, #132a21 45%, #0c1b15 100%);
+  color: #f3f7f4;
+  padding: 1.25rem 1.35rem 1.5rem;
+}
+
+.briefing-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.briefing-back {
+  color: #9fe0c4;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.briefing-back:hover { text-decoration: underline; }
+
+.briefing-counter {
+  margin: 0;
+  color: rgba(243, 247, 244, 0.65);
+  font-weight: 600;
+}
+
+.briefing-slide {
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.5rem 0 1.5rem;
+}
+
+.briefing-eyebrow {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e8a06a;
+  font-weight: 700;
+}
+
+.briefing-slide h1 {
+  font-family: "Sora", "Figtree", sans-serif;
+  font-size: clamp(1.7rem, 4vw, 2.7rem);
+  line-height: 1.12;
+  margin: 0 0 0.85rem;
+  color: #f3f7f4;
+}
+
+.briefing-lead {
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  color: #f3f7f4;
+  max-width: 42ch;
+  margin: 0 0 1.25rem;
+}
+
+.briefing-body { color: rgba(243, 247, 244, 0.78); }
+
+.briefing-note {
+  margin: 1.25rem 0 0;
+  color: rgba(243, 247, 244, 0.55);
+}
+
+.briefing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.briefing-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.briefing-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+}
+
+.briefing-card h3 {
+  margin: 0 0 0.45rem;
+  font-family: "Sora", "Figtree", sans-serif;
+  font-size: 1.1rem;
+  color: #f3f7f4;
+}
+
+.briefing-card p,
+.briefing-card li {
+  margin: 0;
+  font-size: 0.98rem;
+  color: rgba(243, 247, 244, 0.78);
+}
+
+.briefing-card ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.briefing-card li { margin: 0.3rem 0; }
+
+.briefing-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.briefing-steps li {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.98rem;
+  color: rgba(243, 247, 244, 0.78);
+}
+
+.briefing-steps strong { color: #f3f7f4; }
+
+.briefing-flow {
+  margin: 1rem 0 0;
+  color: #9fe0c4;
+  font-weight: 600;
+}
+
+.briefing-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.briefing-hint { margin: 0; }
+
+.briefing-page .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 800px) {
+  .briefing-grid,
+  .briefing-grid-3 { grid-template-columns: 1fr; }
+}
+
 
