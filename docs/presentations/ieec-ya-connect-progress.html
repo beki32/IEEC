@@ -221,7 +221,7 @@
       <p class="eyebrow">IEEC Young Adult Ministry</p>
       <p class="brand-mark">YA Connect</p>
       <h1>Progress &amp; workflow so far</h1>
-      <p class="lead">Follow-Up first: one platform for newcomers, ministers, and leaders — web now, mobile next, one shared backend.</p>
+      <p class="lead">Follow-Up first: one platform for newcomers, ministers, and leaders — <strong style="color:var(--ink)">mobile primary</strong> (iOS &amp; Android), web alongside, one shared backend.</p>
       <p class="tiny" style="margin-top:1.5rem">Stakeholder briefing · Built with Cursor Cloud Agents + GitHub</p>
     </section>
 
@@ -264,7 +264,9 @@
         <span class="arrow">→</span>
         <span class="chip">Merge</span>
         <span class="arrow">→</span>
-        <span class="chip">Web deploys (Vercel)</span>
+        <span class="chip">Mobile build (EAS)</span>
+        <span class="arrow">→</span>
+        <span class="chip">Web update (optional)</span>
       </div>
       <div class="grid-2" style="margin-top:1.75rem">
         <div class="card">
@@ -273,7 +275,7 @@
         </div>
         <div class="card">
           <h3>One codebase</h3>
-          <p>GitHub monorepo holds web, mobile starter, shared rules, Firebase config, and docs.</p>
+          <p>GitHub monorepo: <strong style="color:var(--ink)">Expo mobile first</strong>, plus web, shared rules, Firebase, and docs.</p>
         </div>
       </div>
     </section>
@@ -281,22 +283,22 @@
     <!-- 4 -->
     <section class="slide">
       <p class="eyebrow">Architecture</p>
-      <h2>One repo, three layers</h2>
+      <h2>One repo — mobile at the center</h2>
       <div class="grid-3">
         <div class="card">
+          <h3>apps/mobile ★</h3>
+          <p><strong style="color:var(--ink)">Primary product.</strong> Expo (React Native) for iOS &amp; Android — where ministers and leaders work day to day.</p>
+        </div>
+        <div class="card">
           <h3>apps/web</h3>
-          <p>Public site + staff Follow-Up CMS (React). Live path via Vercel for now.</p>
+          <p>Public landing, newcomer registration, and admin/CMS support. Companion to mobile, not the main app.</p>
         </div>
         <div class="card">
-          <h3>apps/mobile</h3>
-          <p>Expo (React Native) starter for iOS &amp; Android. Same product, native shells.</p>
-        </div>
-        <div class="card">
-          <h3>packages/shared + Firebase</h3>
-          <p>Shared types &amp; RBAC. Auth + Firestore as the production backend target.</p>
+          <h3>shared + Firebase</h3>
+          <p>Shared types &amp; RBAC. Auth + Firestore so mobile and web stay on one source of truth.</p>
         </div>
       </div>
-      <p class="tiny" style="margin-top:1.5rem">Data changes sync across platforms once they share Firebase. App UI updates still ship per client.</p>
+      <p class="tiny" style="margin-top:1.5rem">Same Firebase data on every device. Feature work prioritizes mobile; web follows for public and admin surfaces.</p>
     </section>
 
     <!-- 5 -->
@@ -378,18 +380,18 @@
     <!-- 8 -->
     <section class="slide">
       <p class="eyebrow">Platforms</p>
-      <h2>Web vs mobile today</h2>
+      <h2>Mobile primary — honest status</h2>
       <div class="grid-2">
         <div class="card">
-          <h3>Web — primary</h3>
-          <p>Most Follow-Up product work lives here. Deployed for demos via Vercel (temporary hosting choice).</p>
+          <h3 class="status-next">Mobile — primary target</h3>
+          <p>iOS + Android via Expo is the main product for Follow-Up staff. Scaffold exists; full Follow-Up screens (from Figma) are the next build focus, then TestFlight → App Store / Play.</p>
         </div>
         <div class="card">
-          <h3>Mobile — scaffolded</h3>
-          <p>Expo app exists for iOS + Android. Not full Follow-Up parity yet. Store release comes after feature parity + TestFlight.</p>
+          <h3>Web — companion</h3>
+          <p>Public site + registration + CMS patterns already prototyped here. Useful for demos and public entry; not the long-term daily driver for ministers.</p>
         </div>
       </div>
-      <p class="tiny" style="margin-top:1.5rem">One change request can cover all platforms when both clients are built — shared logic first, then each UI.</p>
+      <p class="tiny" style="margin-top:1.5rem">Prioritize mobile UI/flows. Reuse shared logic and lessons from the web prototype so we do not rebuild from zero.</p>
     </section>
 
     <!-- 9 -->
@@ -427,20 +429,20 @@
       <h2>Recommended next phases</h2>
       <div class="grid-2">
         <div class="card">
-          <h3>1 · Production web</h3>
-          <p>Confirm Firebase → staff accounts → turn off demo for live use.</p>
+          <h3>1 · Mobile Follow-Up</h3>
+          <p>Build primary Follow-Up experience in Expo from Figma (queue, assign, reports, notifications).</p>
         </div>
         <div class="card">
-          <h3>2 · Complete Follow-Up</h3>
-          <p>Invite ministers from the app; harden permissions and Firestore writes.</p>
+          <h3>2 · Firebase production</h3>
+          <p>Confirm project → rules → staff accounts → mobile + web on live data.</p>
         </div>
         <div class="card">
-          <h3>3 · Mobile parity</h3>
-          <p>Build Follow-Up screens from Figma into Expo (iOS + Android together).</p>
+          <h3>3 · TestFlight / internal</h3>
+          <p>EAS iOS + Android builds for leaders and ministers to use in real Follow-Up.</p>
         </div>
         <div class="card">
-          <h3>4 · Stores</h3>
-          <p>TestFlight → App Store / Play. Privacy page, screenshots, reviewer demo login.</p>
+          <h3>4 · Stores + web polish</h3>
+          <p>App Store / Play listing; keep web for public registration and light admin.</p>
         </div>
       </div>
     </section>
@@ -476,11 +478,11 @@
       <p class="eyebrow">Summary</p>
       <h2>Where we are</h2>
       <ul class="checklist">
-        <li><span class="status-done">Done:</span> Monorepo, public landing + registration, Follow-Up CMS core, RBAC demo, Vercel web path, Firebase scaffolding, mobile starter</li>
-        <li><span class="status-next">Next:</span> Live Firebase, invite flow, mobile feature build, TestFlight</li>
+        <li><span class="status-done">Done:</span> Monorepo, mobile scaffold (Expo), web prototype for public + Follow-Up patterns, RBAC demo, Firebase scaffolding</li>
+        <li><span class="status-next">Next:</span> Mobile Follow-Up as primary product, live Firebase, TestFlight → stores; web remains companion</li>
         <li>You stay in the product conversation — not in the code — unless you want to</li>
       </ul>
-      <p class="lead" style="margin-top:2rem">Follow-Up first. One system. Web leading. Mobile and stores when the product is ready.</p>
+      <p class="lead" style="margin-top:2rem">Follow-Up first. One system. <strong style="color:var(--ink)">Mobile primary.</strong> Web for public entry and support.</p>
     </section>
 
   </div>
