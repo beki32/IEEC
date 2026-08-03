@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IEEC YA Connect — Progress & Workflow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f241c;
+      --bg-2: #163528;
+      --ink: #f3f7f4;
+      --muted: #b7c7be;
+      --brand: #3dbf8a;
+      --accent: #e8a06a;
+      --card: rgba(255, 255, 255, 0.06);
+      --line: rgba(255, 255, 255, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Source Sans 3", system-ui, sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(61, 191, 138, 0.22), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(232, 160, 106, 0.16), transparent 50%),
+        linear-gradient(160deg, #0f241c 0%, #132a21 45%, #0c1b15 100%);
+    }
+
+    .deck {
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      height: 100%;
+      padding: clamp(2rem, 5vw, 4rem);
+      flex-direction: column;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      animation: in 320ms ease;
+    }
+
+    .slide.active { display: flex; }
+
+    @keyframes in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .eyebrow {
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+    }
+
+    h1, h2 {
+      font-family: Fraunces, Georgia, serif;
+      font-weight: 700;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+    }
+
+    h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+    h2 { font-size: clamp(1.8rem, 4.2vw, 3rem); }
+
+    p, li {
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .lead {
+      font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+      max-width: 40ch;
+      color: var(--ink);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    @media (max-width: 800px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1.1rem 1.25rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .card h3 {
+      margin: 0 0 0.4rem;
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.25rem;
+      color: var(--ink);
+    }
+
+    .card p, .card li { font-size: 1rem; margin: 0; }
+
+    ul { padding-left: 1.2rem; margin: 0.4rem 0 0; }
+    li { margin: 0.35rem 0; }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .chip {
+      background: rgba(61, 191, 138, 0.14);
+      border: 1px solid rgba(61, 191, 138, 0.35);
+      color: #d8ffee;
+      padding: 0.55rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .arrow {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .status-done { color: var(--brand); font-weight: 700; }
+    .status-next { color: var(--accent); font-weight: 700; }
+
+    .footer-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      background: rgba(8, 18, 14, 0.72);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      font-size: 0.9rem;
+      color: var(--muted);
+      z-index: 10;
+    }
+
+    .footer-bar button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0.45rem 0.95rem;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .footer-bar button:hover {
+      border-color: var(--brand);
+      color: #fff;
+    }
+
+    .brand-mark {
+      font-family: Fraunces, Georgia, serif;
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      color: var(--brand);
+      margin: 0 0 0.5rem;
+    }
+
+    .tiny { font-size: 0.95rem; color: var(--muted); }
+
+    .checklist li::marker { color: var(--brand); }
+
+    @media print {
+      body { background: #fff; color: #111; }
+      .slide {
+        display: flex !important;
+        page-break-after: always;
+        height: auto;
+        min-height: 100vh;
+        color: #111;
+      }
+      .slide p, .slide li { color: #333; }
+      .footer-bar { display: none; }
+      .card { border-color: #ddd; background: #f7f7f7; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+
+    <!-- 1 -->
+    <section class="slide active">
+      <p class="eyebrow">IEEC Young Adult Ministry</p>
+      <p class="brand-mark">YA Connect</p>
+      <h1>Progress &amp; workflow so far</h1>
+      <p class="lead">Follow-Up first: one platform for newcomers, ministers, and leaders — web now, mobile next, one shared backend.</p>
+      <p class="tiny" style="margin-top:1.5rem">Stakeholder briefing · Built with Cursor Cloud Agents + GitHub</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="slide">
+      <p class="eyebrow">Why this exists</p>
+      <h2>The problem we are solving</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Before</h3>
+          <ul>
+            <li>Newcomer follow-up scattered across chats and sheets</li>
+            <li>Hard to see who is assigned and what is overdue</li>
+            <li>Roles and permissions unclear</li>
+            <li>Web, phone, and data not connected</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Goal</h3>
+          <ul>
+            <li>One people-centered Follow-Up system</li>
+            <li>Clear queue → assign → report loop</li>
+            <li>Role-based access for leaders &amp; ministers</li>
+            <li>Same data on web, iOS, and Android</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section class="slide">
+      <p class="eyebrow">How we work</p>
+      <h2>Delivery workflow</h2>
+      <div class="flow">
+        <span class="chip">You describe need</span>
+        <span class="arrow">→</span>
+        <span class="chip">Agent builds in GitHub</span>
+        <span class="arrow">→</span>
+        <span class="chip">Pull request review</span>
+        <span class="arrow">→</span>
+        <span class="chip">Merge</span>
+        <span class="arrow">→</span>
+        <span class="chip">Web deploys (Vercel)</span>
+      </div>
+      <div class="grid-2" style="margin-top:1.75rem">
+        <div class="card">
+          <h3>You do not need to code</h3>
+          <p>Request changes in plain language. Review the result. Approve merge when ready.</p>
+        </div>
+        <div class="card">
+          <h3>One codebase</h3>
+          <p>GitHub monorepo holds web, mobile starter, shared rules, Firebase config, and docs.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 -->
+    <section class="slide">
+      <p class="eyebrow">Architecture</p>
+      <h2>One repo, three layers</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>apps/web</h3>
+          <p>Public site + staff Follow-Up CMS (React). Live path via Vercel for now.</p>
+        </div>
+        <div class="card">
+          <h3>apps/mobile</h3>
+          <p>Expo (React Native) starter for iOS &amp; Android. Same product, native shells.</p>
+        </div>
+        <div class="card">
+          <h3>packages/shared + Firebase</h3>
+          <p>Shared types &amp; RBAC. Auth + Firestore as the production backend target.</p>
+        </div>
+      </div>
+      <p class="tiny" style="margin-top:1.5rem">Data changes sync across platforms once they share Firebase. App UI updates still ship per client.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="slide">
+      <p class="eyebrow">Shipped so far</p>
+      <h2>Public web experience</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Landing page</h3>
+          <ul class="checklist">
+            <li>Announcements, events, sermons</li>
+            <li>Prayer request entry</li>
+            <li>About / beliefs / ministries</li>
+            <li>Instagram link support</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Newcomer registration</h3>
+          <ul class="checklist">
+            <li>Public form — not account signup</li>
+            <li>Validation + duplicate email handling</li>
+            <li>Optional photo step</li>
+            <li>Staff login kept separate</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section class="slide">
+      <p class="eyebrow">Shipped so far</p>
+      <h2>Follow-Up staff system</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Queue &amp; assign</h3>
+          <p>Newcomers land in a queue. Leaders assign with a card picker, not a raw dropdown.</p>
+        </div>
+        <div class="card">
+          <h3>Assigned work</h3>
+          <p>Ministers see their people, profiles, reports, attendance, and bio notes.</p>
+        </div>
+        <div class="card">
+          <h3>Team ops</h3>
+          <p>Notifications popup, calendar events, chat shell, notes &amp; tasks, table search.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <h3>Roles demo</h3>
+        <p>Leader · Assistant · Minister — different permissions. Account page with photo. Mobile-friendly CMS sidebar.</p>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="slide">
+      <p class="eyebrow">Current operating mode</p>
+      <h2>Demo first, Firebase ready</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="status-done">Working today</h3>
+          <ul>
+            <li>Demo mode (no Firebase required)</li>
+            <li>Seeded leader / assistant / minister logins</li>
+            <li>Emulator seed script for Auth + Firestore</li>
+            <li>Rules, indexes, client hydrate/persist path</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="status-next">Production still needs</h3>
+          <ul>
+            <li>Confirmed Firebase project</li>
+            <li>Deploy rules + first staff Auth users</li>
+            <li>Invite flow (so ministers are not console-only)</li>
+            <li>Tighter production write model</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section class="slide">
+      <p class="eyebrow">Platforms</p>
+      <h2>Web vs mobile today</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Web — primary</h3>
+          <p>Most Follow-Up product work lives here. Deployed for demos via Vercel (temporary hosting choice).</p>
+        </div>
+        <div class="card">
+          <h3>Mobile — scaffolded</h3>
+          <p>Expo app exists for iOS + Android. Not full Follow-Up parity yet. Store release comes after feature parity + TestFlight.</p>
+        </div>
+      </div>
+      <p class="tiny" style="margin-top:1.5rem">One change request can cover all platforms when both clients are built — shared logic first, then each UI.</p>
+    </section>
+
+    <!-- 9 -->
+    <section class="slide">
+      <p class="eyebrow">End-to-end picture</p>
+      <h2>Ministry workflow we support</h2>
+      <div class="flow">
+        <span class="chip">Visit / hear about YA</span>
+        <span class="arrow">→</span>
+        <span class="chip">Register online</span>
+        <span class="arrow">→</span>
+        <span class="chip">Enter Follow-Up queue</span>
+        <span class="arrow">→</span>
+        <span class="chip">Leader assigns</span>
+        <span class="arrow">→</span>
+        <span class="chip">Minister follows up</span>
+        <span class="arrow">→</span>
+        <span class="chip">Report &amp; next step</span>
+      </div>
+      <div class="grid-2" style="margin-top:1.75rem">
+        <div class="card">
+          <h3>Leaders</h3>
+          <p>See the queue, balance load, manage roles, stay notified.</p>
+        </div>
+        <div class="card">
+          <h3>Ministers</h3>
+          <p>Work assigned people, log contact, keep notes and tasks together.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="slide">
+      <p class="eyebrow">Roadmap</p>
+      <h2>Recommended next phases</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>1 · Production web</h3>
+          <p>Confirm Firebase → staff accounts → turn off demo for live use.</p>
+        </div>
+        <div class="card">
+          <h3>2 · Complete Follow-Up</h3>
+          <p>Invite ministers from the app; harden permissions and Firestore writes.</p>
+        </div>
+        <div class="card">
+          <h3>3 · Mobile parity</h3>
+          <p>Build Follow-Up screens from Figma into Expo (iOS + Android together).</p>
+        </div>
+        <div class="card">
+          <h3>4 · Stores</h3>
+          <p>TestFlight → App Store / Play. Privacy page, screenshots, reviewer demo login.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 -->
+    <section class="slide">
+      <p class="eyebrow">Stakeholder model</p>
+      <h2>What you own vs what the agent owns</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Leadership / IT owners</h3>
+          <ul>
+            <li>Product decisions &amp; priorities</li>
+            <li>Firebase, Apple, Google, hosting accounts</li>
+            <li>Approve PRs / releases</li>
+            <li>Privacy wording &amp; store submit clicks</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Cursor agent + codebase</h3>
+          <ul>
+            <li>Implement features from your requests</li>
+            <li>Match Figma into code (when shared)</li>
+            <li>Draft listing / privacy text</li>
+            <li>Keep one GitHub monorepo healthy</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section class="slide">
+      <p class="eyebrow">Summary</p>
+      <h2>Where we are</h2>
+      <ul class="checklist">
+        <li><span class="status-done">Done:</span> Monorepo, public landing + registration, Follow-Up CMS core, RBAC demo, Vercel web path, Firebase scaffolding, mobile starter</li>
+        <li><span class="status-next">Next:</span> Live Firebase, invite flow, mobile feature build, TestFlight</li>
+        <li>You stay in the product conversation — not in the code — unless you want to</li>
+      </ul>
+      <p class="lead" style="margin-top:2rem">Follow-Up first. One system. Web leading. Mobile and stores when the product is ready.</p>
+    </section>
+
+  </div>
+
+  <div class="footer-bar">
+    <div>
+      <button type="button" id="prev">← Prev</button>
+      <button type="button" id="next">Next →</button>
+    </div>
+    <div id="counter">1 / 12</div>
+    <div class="tiny">Keys: ← → · Space · F fullscreen · P print/PDF</div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let i = 0;
+
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+      document.getElementById('counter').textContent = `${i + 1} / ${slides.length}`;
+    }
+
+    document.getElementById('prev').onclick = () => show(i - 1);
+    document.getElementById('next').onclick = () => show(i + 1);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        show(i + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        show(i - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      } else if (e.key === 'Home') show(0);
+      else if (e.key === 'End') show(slides.length - 1);
+    });
+  </script>
+</body>
+</html>
