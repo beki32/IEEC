@@ -6,6 +6,9 @@ dist/
 .env
 .env.local
 .env.*.local
+*-firebase-adminsdk-*.json
+serviceAccount*.json
+.runtimeconfig.json
 apps/web/dist/
 apps/mobile/.expo/
 apps/mobile/dist/
