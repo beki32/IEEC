@@ -69,6 +69,8 @@ docs/             Architecture + Follow-Up planning pack
 
 ## Firebase (Auth + Firestore)
 
+**Production setup checklist:** [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md)
+
 Default remains **demo mode** (`VITE_USE_DEMO=true`). To run against emulators:
 
 ```bash
@@ -129,6 +131,9 @@ Progress & Follow-Up workflow slides:
 | `npm run typecheck` | Typecheck shared + web |
 | `npm run emulators` | Auth + Firestore emulators |
 | `npm run seed:emulator` | Seed emulator Auth/Firestore demo data |
+| `npm run firebase:login` | Login to Firebase CLI |
+| `npm run firebase:deploy` | Deploy Firestore rules + indexes |
+| `npm run seed:bootstrap` | Bootstrap real project (needs `ALLOW_FIREBASE_BOOTSTRAP=YES`) |
 
 ## Coding authority
 
