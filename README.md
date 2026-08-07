@@ -88,7 +88,7 @@ npm run dev:web
 
 Sign in with the same demo emails and password `demo-password`.
 
-Confirm the Firebase project with a human before deploying rules or writing to production (`ieec-ya-connect` if that is yours).
+Confirmed Firebase project: **`ieec-ya-connect-a1ae1`**. Setup steps: [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md).
 
 Firestore rules live in `firebase/firestore.rules` (includes calendar + chat collections). Client writes hydrate through the existing app store for emulator/dev; production should move to collection-scoped repositories and stricter permission-aware rules.
 
