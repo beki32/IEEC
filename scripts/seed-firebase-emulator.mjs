@@ -2,7 +2,7 @@
  * Seeds Auth + Firestore emulators with the same demo accounts/data as the web demo store.
  *
  * Prerequisites:
- *   npx firebase-tools emulators:start --only auth,firestore --project ieec-ya-connect
+ *   npx firebase-tools emulators:start --only auth,firestore --project ieec-ya-connect-a1ae1
  *   (or: npm run emulators)
  *
  * Usage:
@@ -15,7 +15,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8080';
 process.env.FIREBASE_AUTH_EMULATOR_HOST ||= '127.0.0.1:9099';
 
-const PROJECT_ID = process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID || 'ieec-ya-connect';
+const PROJECT_ID = process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID || 'ieec-ya-connect-a1ae1';
 const PASSWORD = 'demo-password';
 const ORG_ID = 'ieec_ya';
 const TEAM_ID = 'team_follow_up';

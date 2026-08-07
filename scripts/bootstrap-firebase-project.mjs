@@ -5,7 +5,7 @@
  *
  * Production:
  *   export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccount.json
- *   export FIREBASE_PROJECT_ID=ieec-ya-connect
+ *   export FIREBASE_PROJECT_ID=ieec-ya-connect-a1ae1
  *   export ALLOW_FIREBASE_BOOTSTRAP=YES
  *   npm run seed:bootstrap
  *
@@ -20,7 +20,7 @@ import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
-const PROJECT_ID = process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID || 'ieec-ya-connect';
+const PROJECT_ID = process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID || 'ieec-ya-connect-a1ae1';
 const PASSWORD = process.env.BOOTSTRAP_STAFF_PASSWORD || 'demo-password';
 const ORG_ID = 'ieec_ya';
 const TEAM_ID = 'team_follow_up';

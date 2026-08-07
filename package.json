@@ -13,7 +13,7 @@
     "dev:mobile": "npm run start -w @ieec/mobile",
     "build:shared": "npm run build -w @ieec/shared",
     "typecheck": "npm run typecheck -w @ieec/shared && npm run typecheck -w @ieec/web",
-    "emulators": "npx -y firebase-tools@14.11.0 emulators:start --only auth,firestore --project ieec-ya-connect",
+    "emulators": "npx -y firebase-tools@14.11.0 emulators:start --only auth,firestore --project ieec-ya-connect-a1ae1",
     "seed:emulator": "npm install --prefix scripts && node scripts/seed-firebase-emulator.mjs",
     "seed:bootstrap": "npm install --prefix scripts && node scripts/bootstrap-firebase-project.mjs",
     "firebase:deploy": "npx -y firebase-tools@14.11.0 deploy --only firestore",

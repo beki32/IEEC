@@ -4,38 +4,39 @@ The web app defaults to **demo mode**. Follow this checklist to run against real
 
 ## 1. Create / confirm the Firebase project
 
-1. Open [Firebase Console](https://console.firebase.google.com/)
-2. Use project **`ieec-ya-connect`** if it is yours, **or create a new project** and tell the team the project ID
-3. Enable **Authentication → Sign-in method → Email/Password**
-4. Create a **Cloud Firestore** database (production mode is fine — we deploy rules next)
-5. (Optional) Enable **Storage** later for photos
+1. Open [Firebase Console](https://console.firebase.google.com/) → project **`ieec-ya-connect-a1ae1`**
+2. Enable **Authentication → Sign-in method → Email/Password**
+3. Create a **Cloud Firestore** database if you have not already (production mode is fine — we deploy rules next)
+4. (Optional) Enable **Storage** later for photos
 
-## 2. Register the web app
+## 2. Web app config (already registered)
 
-1. Project settings → **Your apps** → Add app → **Web**
-2. Nickname: `ieec-web`
-3. Copy the config values into Vercel (next step)
+Project ID: **`ieec-ya-connect-a1ae1`**
 
-You need:
+Paste these into Vercel (Production + Preview):
 
-| Env var | From Firebase config |
-| --- | --- |
-| `VITE_FIREBASE_API_KEY` | `apiKey` |
-| `VITE_FIREBASE_AUTH_DOMAIN` | `authDomain` |
-| `VITE_FIREBASE_PROJECT_ID` | `projectId` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | `storageBucket` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
-| `VITE_FIREBASE_APP_ID` | `appId` |
-| `VITE_USE_DEMO` | `false` |
-| `VITE_USE_FIREBASE_EMULATORS` | `false` |
+```bash
+VITE_USE_DEMO=false
+VITE_USE_FIREBASE_EMULATORS=false
+VITE_FIREBASE_API_KEY=AIzaSyC3q0X39QtmqSwlAHx8fiWk9Fl0ZxgqxC8
+VITE_FIREBASE_AUTH_DOMAIN=ieec-ya-connect-a1ae1.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=ieec-ya-connect-a1ae1
+VITE_FIREBASE_STORAGE_BUCKET=ieec-ya-connect-a1ae1.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=1061724194168
+VITE_FIREBASE_APP_ID=1:1061724194168:web:08b363171c3b37330db48d
+VITE_FIREBASE_MEASUREMENT_ID=G-0RSD7DJ59Q
+```
 
 ## 3. Set Vercel Production env vars
 
-Project **ieec-web** → Settings → Environment Variables → add the table above for **Production** (and Preview if you want).
+Project **ieec-web** → Settings → Environment Variables → add the block above for **Production** (and Preview if you want).
 
 Redeploy Production after saving.
 
-Authorized domains: Authentication → Settings → **Authorized domains** → add `ieec-web.vercel.app` and any custom domain.
+Authorized domains: Authentication → Settings → **Authorized domains** → add:
+
+- `ieec-web.vercel.app`
+- `localhost` (for local testing)
 
 ## 4. Deploy rules + indexes (from this repo)
 
@@ -43,8 +44,8 @@ Authorized domains: Authentication → Settings → **Authorized domains** → a
 # one-time: login with a Google account that owns the Firebase project
 npx firebase-tools login
 
-# confirm project (edit .firebaserc if your project id differs)
-npx firebase-tools use ieec-ya-connect
+# confirm project
+npx firebase-tools use ieec-ya-connect-a1ae1
 
 # deploy Firestore rules + indexes
 npm run firebase:deploy
@@ -60,7 +61,7 @@ This creates the organization, roles, demo-shaped staff users, and sample newcom
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="/absolute/path/to/serviceAccount.json"
-export FIREBASE_PROJECT_ID="ieec-ya-connect"   # or your project id
+export FIREBASE_PROJECT_ID="ieec-ya-connect-a1ae1"
 export ALLOW_FIREBASE_BOOTSTRAP=YES
 npm run seed:bootstrap
 ```
