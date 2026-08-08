@@ -40,30 +40,23 @@ Authorized domains: Authentication → Settings → **Authorized domains** → a
 
 ## 4. Deploy rules + indexes
 
-### Option A — Firebase Console (easiest)
+### Option A — deploy from your laptop with the service account (recommended)
 
-1. Open https://console.firebase.google.com/project/ieec-ya-connect-a1ae1/firestore/rules
-2. Select all → delete the old rules
-3. Open the **raw** file (copy is clean, no GitHub HTML):  
-   https://raw.githubusercontent.com/beki32/IEEC/main/firebase/firestore.rules
-4. Select all → copy → paste into the Rules editor
-5. Click **Publish**
-6. Confirm the editor still contains `match /userAccounts` after publishing
-
-Indexes (optional for first login): Firestore → **Indexes** — or run Option B later.
-
-### Option B — from your laptop (repo clone)
+Uses the same `key.json` as bootstrap (no browser paste):
 
 ```bash
-# one-time: login with a Google account that owns the Firebase project
-npx firebase-tools login
-
-# confirm project
-npx firebase-tools use ieec-ya-connect-a1ae1
-
-# deploy Firestore rules + indexes
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json"
 npm run firebase:deploy
 ```
+
+You should see `Deploy complete!` for firestore rules/indexes.
+
+### Option B — Firebase Console
+
+1. Open https://console.firebase.google.com/project/ieec-ya-connect-a1ae1/firestore/rules
+2. Paste from https://raw.githubusercontent.com/beki32/IEEC/main/firebase/firestore.rules
+3. **Publish**
+4. Confirm the file contains `allow read, write: if signedIn();`
 
 ## 5. Bootstrap org + staff accounts
 

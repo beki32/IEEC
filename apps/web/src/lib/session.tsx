@@ -39,8 +39,13 @@ function formatFirebaseLoginError(err: unknown): string {
     err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
   const message = err instanceof Error ? err.message : 'Sign-in failed';
 
+  // Keep detailed hydrate guidance if we already produced it.
+  if (/Cannot read userAccounts|loading org data failed|Publish firebase\/firestore\.rules/i.test(message)) {
+    return message;
+  }
+
   if (code === 'permission-denied' || /missing or insufficient permissions/i.test(message)) {
-    return 'Firestore blocked this login. Deploy rules (npm run firebase:deploy) and bootstrap staff accounts (npm run seed:bootstrap), then try again.';
+    return 'Firestore blocked this login. From your laptop run: export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json" && npm run firebase:deploy';
   }
   if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
     return 'Email or password is incorrect. If this is a new project, run seed:bootstrap first.';
