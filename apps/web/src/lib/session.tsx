@@ -118,8 +118,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           refresh();
           return { ok: true as const };
         } catch (err) {
-          const message = err instanceof Error ? err.message : 'Sign-in failed';
-          return { ok: false as const, error: message };
+          return { ok: false as const, error: formatFirebaseLoginError(err) };
         }
       },
       logout: async () => {

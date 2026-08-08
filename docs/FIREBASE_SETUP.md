@@ -84,6 +84,15 @@ Default staff logins after bootstrap:
 
 If login fails: check Auth email/password enabled, authorized domain, and that `userAccounts/{uid}` exists for that Auth user.
 
+### “Missing or insufficient permissions” on login
+
+Auth succeeded, but Firestore blocked reading your staff data. Fix:
+
+1. `npm run firebase:deploy` (rules are still the default deny-all until you deploy)
+2. `npm run seed:bootstrap` (creates `userAccounts` + org data)
+3. Confirm Vercel has `VITE_USE_DEMO=false` and the Firebase web keys, then redeploy
+4. Retry `leader@ieec.demo` / `demo-password`
+
 ## Local emulator (optional)
 
 ```bash
