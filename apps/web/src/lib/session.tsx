@@ -34,6 +34,26 @@ interface SessionValue {
 
 const SessionContext = createContext<SessionValue | null>(null);
 
+function formatFirebaseLoginError(err: unknown): string {
+  const code =
+    err && typeof err === 'object' && 'code' in err ? String((err as { code?: string }).code) : '';
+  const message = err instanceof Error ? err.message : 'Sign-in failed';
+
+  if (code === 'permission-denied' || /missing or insufficient permissions/i.test(message)) {
+    return 'Firestore blocked this login. Deploy rules (npm run firebase:deploy) and bootstrap staff accounts (npm run seed:bootstrap), then try again.';
+  }
+  if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+    return 'Email or password is incorrect. If this is a new project, run seed:bootstrap first.';
+  }
+  if (code === 'auth/unauthorized-domain') {
+    return 'This domain is not authorized in Firebase Auth. Add ieec-web.vercel.app under Authentication → Settings → Authorized domains.';
+  }
+  if (/No userAccounts document/i.test(message)) {
+    return 'Signed in to Auth, but no staff profile exists in Firestore. Run npm run seed:bootstrap.';
+  }
+  return message;
+}
+
 async function hydrateFirebaseSession(authUid: string) {
   const db = getFirestoreDb();
   if (!db) throw new Error('Firestore is not configured');
