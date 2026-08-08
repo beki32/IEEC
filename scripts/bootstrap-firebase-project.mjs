@@ -377,6 +377,21 @@ async function main() {
   set('teamMemberships', 'tm_assistant_fu', mkTm(TEAM_ID, assistantPersonId, 'Assistant Leader'));
   set('teamMemberships', 'tm_minister_fu', mkTm(TEAM_ID, ministerPersonId, 'Minister'));
 
+  set('announcements', 'ann_welcome', {
+    title: 'Welcome to IEEC YA',
+    body: 'New faces are invited to stay after the gathering for food and introductions.',
+    publishedAt: ts,
+    pinned: true,
+  });
+  set('sermons', 'sermon_featured', {
+    title: 'Walking Together in Faith',
+    speaker: 'YA Teaching Team',
+    kind: 'sermon',
+    mediaUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    publishedAt: ts,
+    summary: 'A word of encouragement for young adults finding community.',
+  });
+
   await batch.commit();
 
   console.log('Bootstrapped Firebase project:', PROJECT_ID);
@@ -384,7 +399,7 @@ async function main() {
   console.log('  leader@ieec.demo');
   console.log('  assistant@ieec.demo');
   console.log('  minister@ieec.demo');
-  console.log('Next: set Vercel env VITE_USE_DEMO=false + Firebase web config, then redeploy.');
+  console.log('Deploy rules after pull: npm run firebase:deploy');
 }
 
 main().catch((err) => {

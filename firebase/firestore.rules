@@ -5,8 +5,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Org id comes from Auth custom claims (set by bootstrap / Admin SDK).
-    // Using token claims (not get()) so collection queries are allowed.
     function accountOrgId() {
       return request.auth.token.organizationId;
     }
@@ -29,18 +27,49 @@ service cloud.firestore {
       return hasActiveAccount() && request.resource.data.organizationId == accountOrgId();
     }
 
-    // Public newcomer form — create only.
+    // Public newcomer intake — anyone can create; staff process into people/journeys.
     match /publicRegistrations/{id} {
       allow create: if true
         && request.resource.data.keys().hasAll(['organizationId', 'firstName', 'lastName', 'email', 'phone'])
         && !request.resource.data.keys().hasAny(['currentMinistryStatus', 'hasUserAccount', 'roleTemplateId']);
-      allow read, update, delete: if false;
+      allow read, update: if hasActiveAccount()
+        && resource.data.organizationId == accountOrgId();
+      allow delete: if false;
+    }
+
+    // Public prayer intake.
+    match /prayerRequests/{id} {
+      allow create: if true
+        && request.resource.data.keys().hasAll(['organizationId', 'name', 'request', 'status', 'createdAt']);
+      allow read, update: if orgRead();
+      allow delete: if false;
+    }
+
+    // Public landing content (readable by anyone).
+    match /announcements/{id} {
+      allow read: if true;
+      allow write: if orgWrite();
+    }
+
+    match /sermons/{id} {
+      allow read: if true;
+      allow write: if orgWrite();
+    }
+
+    match /meetingNotes/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /teamTasks/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
     }
 
     match /userAccounts/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow read: if orgRead();
-      allow write: if false; // Admin SDK / Cloud Functions only
+      allow write: if false;
     }
 
     match /organizations/{orgId} {
@@ -95,7 +124,8 @@ service cloud.firestore {
     }
 
     match /calendarEvents/{id} {
-      allow read: if orgRead();
+      // Church calendar is public on the landing page; writes stay staff-only.
+      allow read: if true;
       allow write: if orgWrite();
     }
 

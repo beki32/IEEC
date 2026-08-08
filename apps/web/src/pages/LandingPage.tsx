@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { demoStore } from '../lib/demoStore';
+import { isDemoMode } from '../lib/firebase';
 import {
   getDemoInstagramFeed,
   INSTAGRAM_HANDLE,
@@ -8,11 +9,14 @@ import {
 } from '../lib/instagram';
 import {
   CHURCH_ABOUT,
+  type ChurchAnnouncement,
+  type SermonOrDevotional,
   validateOptionalEmail,
   validatePrayerRequest,
   validateRequiredName,
   youtubeEmbedUrl,
 } from '../lib/publicContent';
+import { loadPublishedPublicContent, submitPublicPrayerRequest } from '../lib/publicIntake';
 
 function formatWhen(iso: string) {
   try {
@@ -75,12 +79,46 @@ export function LandingPage() {
   const [params, setParams] = useSearchParams();
   const [navOpen, setNavOpen] = useState(false);
   const [navSolid, setNavSolid] = useState(false);
-  const [tick, setTick] = useState(0);
   const registered = params.get('registered') === '1';
+  const [announcements, setAnnouncements] = useState<ChurchAnnouncement[]>([]);
+  const [sermons, setSermons] = useState<SermonOrDevotional[]>([]);
+  const [events, setEvents] = useState<
+    Array<{ id: string; title: string; description: string; startAt: string; endAt: string }>
+  >([]);
+  const [, setContentReady] = useState(false);
 
   useEffect(() => {
-    demoStore.ensureLatestSeed();
-    setTick((t) => t + 1);
+    let cancelled = false;
+    (async () => {
+      if (isDemoMode()) demoStore.ensureLatestSeed();
+      try {
+        const content = await loadPublishedPublicContent();
+        if (cancelled) return;
+        setAnnouncements(content.announcements);
+        setSermons(content.sermons);
+        setEvents(content.events);
+      } catch (err) {
+        console.warn('Public content load failed', err);
+        if (!cancelled && isDemoMode()) {
+          setAnnouncements(demoStore.listAnnouncements());
+          setSermons(demoStore.listSermons());
+          setEvents(
+            demoStore.listUpcomingPublicEvents(5).map((e) => ({
+              id: e.id,
+              title: e.title,
+              description: e.description || '',
+              startAt: e.startAt,
+              endAt: e.endAt,
+            })),
+          );
+        }
+      } finally {
+        if (!cancelled) setContentReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -99,10 +137,6 @@ export function LandingPage() {
     return () => document.removeEventListener('keydown', onKey);
   }, [navOpen]);
 
-  void tick;
-  const announcements = demoStore.listAnnouncements();
-  const events = demoStore.listUpcomingPublicEvents(5);
-  const sermons = demoStore.listSermons();
   const featured = sermons[0] ?? null;
   const moreSermons = sermons.slice(1);
   const igPosts = useMemo(() => getDemoInstagramFeed(), []);
@@ -113,13 +147,14 @@ export function LandingPage() {
   const [prayerPrivate, setPrayerPrivate] = useState(true);
   const [prayerErrors, setPrayerErrors] = useState<Record<string, string>>({});
   const [prayerOk, setPrayerOk] = useState('');
+  const [prayerBusy, setPrayerBusy] = useState(false);
 
   function dismissRegistered() {
     params.delete('registered');
     setParams(params, { replace: true });
   }
 
-  function onPrayerSubmit(e: FormEvent) {
+  async function onPrayerSubmit(e: FormEvent) {
     e.preventDefault();
     const next: Record<string, string> = {};
     const nameErr = validateRequiredName(prayerName, 'Name');
@@ -132,18 +167,35 @@ export function LandingPage() {
     setPrayerOk('');
     if (Object.keys(next).length) return;
 
-    demoStore.submitPrayerRequest({
-      name: prayerName,
-      email: prayerEmail || null,
-      request: prayerBody,
-      isPrivate: prayerPrivate,
-    });
-    setPrayerName('');
-    setPrayerEmail('');
-    setPrayerBody('');
-    setPrayerPrivate(true);
-    setPrayerOk('Received. Our prayer team will hold this with care.');
-    setTick((t) => t + 1);
+    setPrayerBusy(true);
+    try {
+      if (isDemoMode()) {
+        demoStore.submitPrayerRequest({
+          name: prayerName,
+          email: prayerEmail || null,
+          request: prayerBody,
+          isPrivate: prayerPrivate,
+        });
+      } else {
+        const result = await submitPublicPrayerRequest({
+          name: prayerName,
+          email: prayerEmail || null,
+          request: prayerBody,
+          isPrivate: prayerPrivate,
+        });
+        if (!result.ok) {
+          setPrayerErrors({ request: result.message });
+          return;
+        }
+      }
+      setPrayerName('');
+      setPrayerEmail('');
+      setPrayerBody('');
+      setPrayerPrivate(true);
+      setPrayerOk('Received. Our prayer team will hold this with care.');
+    } finally {
+      setPrayerBusy(false);
+    }
   }
 
   return (
@@ -384,7 +436,9 @@ export function LandingPage() {
               Keep this request private to the prayer team
             </label>
             {prayerOk ? <p className="success">{prayerOk}</p> : null}
-            <button type="submit" className="landing-btn-primary">Submit request</button>
+            <button type="submit" className="landing-btn-primary" disabled={prayerBusy}>
+              {prayerBusy ? 'Sending…' : 'Submit request'}
+            </button>
           </form>
         </Reveal>
       </section>

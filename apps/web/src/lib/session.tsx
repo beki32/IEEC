@@ -13,6 +13,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { demoStore, DEMO_SEED_VERSION } from './demoStore';
 import { getFirebaseAuth, getFirestoreDb, isDemoMode } from './firebase';
 import { hydrateDemoStateFromFirestore } from './firestoreSync';
+import { ingestPendingPublicRegistrations } from './publicIntake';
 
 interface SessionValue {
   person: Person | null;
@@ -90,6 +91,8 @@ async function hydrateFirebaseSession(authUid: string) {
     const ua = state.userAccounts.find((a) => a.id === authUid);
     if (ua) ua.lastLoginAt = new Date().toISOString();
     demoStore.adoptFirebaseState(state);
+    // Convert public web registrations into Follow-Up queue people/journeys.
+    await ingestPendingPublicRegistrations();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     throw new Error(

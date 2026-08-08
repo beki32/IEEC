@@ -2,6 +2,8 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { demoStore } from '../lib/demoStore';
+import { isDemoMode } from '../lib/firebase';
+import { submitPublicRegistration } from '../lib/publicIntake';
 import {
   validateEmail,
   validatePhone,
@@ -59,7 +61,8 @@ export function RegisterPage() {
     if (!form.sex) next.sex = 'Please choose an option.';
     if (!form.contactMethod) next.contactMethod = 'Please choose a contact preference.';
 
-    if (!emailErr && demoStore.isEmailRegistered(form.email)) {
+    // Duplicate email check against local/demo store only (public Firebase clients cannot read people).
+    if (!emailErr && isDemoMode() && demoStore.isEmailRegistered(form.email)) {
       next.email = 'Already registered. This email is already on file.';
     }
 
@@ -93,7 +96,7 @@ export function RegisterPage() {
     }
   }
 
-  function onSubmitRegistration(e: FormEvent) {
+  async function onSubmitRegistration(e: FormEvent) {
     e.preventDefault();
     setFormError('');
     if (!validateDetails()) {
@@ -101,22 +104,36 @@ export function RegisterPage() {
       return;
     }
     setBusy(true);
-    const result = demoStore.registerNewcomer({
-      ...form,
-      photoUrl,
-    });
-    setBusy(false);
-    if (!result.ok) {
-      if (result.error === 'already_registered') {
-        setErrors((prev) => ({ ...prev, email: result.message }));
-        setFormError(result.message);
-        setStep('details');
-        return;
+    try {
+      if (!isDemoMode()) {
+        const result = await submitPublicRegistration({
+          ...form,
+          photoUrl,
+        });
+        if (!result.ok) {
+          setFormError(result.message);
+          return;
+        }
+      } else {
+        const result = demoStore.registerNewcomer({
+          ...form,
+          photoUrl,
+        });
+        if (!result.ok) {
+          if (result.error === 'already_registered') {
+            setErrors((prev) => ({ ...prev, email: result.message }));
+            setFormError(result.message);
+            setStep('details');
+            return;
+          }
+          setFormError(result.message);
+          return;
+        }
       }
-      setFormError(result.message);
-      return;
+      navigate('/?registered=1', { replace: true });
+    } finally {
+      setBusy(false);
     }
-    navigate('/?registered=1', { replace: true });
   }
 
   const fullName = `${form.firstName || 'New'} ${form.lastName || 'friend'}`.trim();

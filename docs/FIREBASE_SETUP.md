@@ -120,6 +120,24 @@ cp apps/web/.env.example apps/web/.env.local
 npm run dev:web
 ```
 
+## Firestore-backed app features
+
+After rules deploy + bootstrap:
+
+| Feature | Firestore |
+| --- | --- |
+| Public `/register` | Writes `publicRegistrations` → ingested into `people` / `newcomerJourneys` on staff login |
+| Prayer form | Writes `prayerRequests` |
+| Landing announcements / sermons / events | Reads `announcements`, `sermons`, `calendarEvents` |
+| Staff Follow-Up, notes, tasks, chat, calendar | Hydrate + persist for the signed-in org |
+
+Re-apply rules anytime:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json"
+npm run firebase:deploy
+```
+
 ## Tightened rules (org-scoped)
 
 After the temporary MVP `signedIn()` rules, production uses **Auth custom claims** (`organizationId`, `accountStatus`, `personId`) so Firestore queries are allowed safely.

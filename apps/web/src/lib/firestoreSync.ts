@@ -48,6 +48,11 @@ export async function hydrateDemoStateFromFirestore(
     chatMessages,
     notifications,
     auditLogs,
+    announcements,
+    sermons,
+    prayerRequests,
+    meetingNotes,
+    teamTasks,
   ] = await Promise.all([
     loadOrgCollection(db, 'ministries', organizationId),
     loadOrgCollection(db, 'teams', organizationId),
@@ -68,6 +73,11 @@ export async function hydrateDemoStateFromFirestore(
     loadOrgCollection(db, 'chatMessages', organizationId),
     loadOrgCollection(db, 'notifications', organizationId),
     loadOrgCollection(db, 'auditLogs', organizationId),
+    loadOrgCollection(db, 'announcements', organizationId),
+    loadOrgCollection(db, 'sermons', organizationId),
+    loadOrgCollection(db, 'prayerRequests', organizationId),
+    loadOrgCollection(db, 'meetingNotes', organizationId),
+    loadOrgCollection(db, 'teamTasks', organizationId),
   ]);
 
   return {
@@ -96,11 +106,11 @@ export async function hydrateDemoStateFromFirestore(
     chatMemberships: chatMemberships as unknown as DemoState['chatMemberships'],
     chatMessages: chatMessages as unknown as DemoState['chatMessages'],
     notifications: notifications as unknown as DemoState['notifications'],
-    announcements: [],
-    sermons: [],
-    prayerRequests: [],
-    meetingNotes: [],
-    teamTasks: [],
+    announcements: announcements as unknown as DemoState['announcements'],
+    sermons: sermons as unknown as DemoState['sermons'],
+    prayerRequests: prayerRequests as unknown as DemoState['prayerRequests'],
+    meetingNotes: meetingNotes as unknown as DemoState['meetingNotes'],
+    teamTasks: teamTasks as unknown as DemoState['teamTasks'],
     auditLogs: auditLogs as unknown as DemoState['auditLogs'],
     sessionAuthUid: null,
   };
@@ -137,6 +147,11 @@ export async function persistDemoStateToFirestore(db: Firestore, state: DemoStat
   writeRows('chatMemberships', state.chatMemberships);
   writeRows('chatMessages', state.chatMessages);
   writeRows('notifications', state.notifications);
+  writeRows('announcements', state.announcements ?? []);
+  writeRows('sermons', state.sermons ?? []);
+  writeRows('prayerRequests', state.prayerRequests ?? []);
+  writeRows('meetingNotes', state.meetingNotes ?? []);
+  writeRows('teamTasks', state.teamTasks ?? []);
   writeRows('auditLogs', state.auditLogs);
 
   for (let i = 0; i < pending.length; i += 400) {
