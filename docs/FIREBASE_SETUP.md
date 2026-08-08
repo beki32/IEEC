@@ -98,14 +98,20 @@ Default staff logins after bootstrap:
 
 If login fails: check Auth email/password enabled, authorized domain, and that `userAccounts/{uid}` exists for that Auth user.
 
-### “Missing or insufficient permissions” on login
+### “Missing or insufficient permissions” / “Firestore blocked this login”
 
-Auth succeeded, but Firestore blocked reading your staff data. Fix:
+Auth succeeded, but Firestore blocked reading staff data. Usually the Rules tab still has the default deny-all (or a bad paste).
 
-1. `npm run firebase:deploy` (rules are still the default deny-all until you deploy)
-2. `npm run seed:bootstrap` (creates `userAccounts` + org data)
-3. Confirm Vercel has `VITE_USE_DEMO=false` and the Firebase web keys, then redeploy
-4. Retry `leader@ieec.demo` / `demo-password`
+1. Re-publish rules from the **raw** URL in §4 Option A (must see `match /userAccounts` after Publish)
+2. Confirm bootstrap data exists:
+   ```bash
+   export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json"
+   export FIREBASE_PROJECT_ID="ieec-ya-connect-a1ae1"
+   npm run verify:firebase
+   ```
+   You want `userAccounts=YES` for each staff email.
+3. If verify shows MISSING, run `npm run seed:bootstrap` again
+4. Retry login (hard refresh)
 
 ## Local emulator (optional)
 
