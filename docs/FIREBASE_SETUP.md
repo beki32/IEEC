@@ -38,7 +38,18 @@ Authorized domains: Authentication → Settings → **Authorized domains** → a
 - `ieec-web.vercel.app`
 - `localhost` (for local testing)
 
-## 4. Deploy rules + indexes (from this repo)
+## 4. Deploy rules + indexes
+
+### Option A — Firebase Console (easiest)
+
+1. Open Firestore → **Rules** for project `ieec-ya-connect-a1ae1`
+2. Delete the default rules
+3. Paste the full contents of [`firebase/firestore.rules`](../firebase/firestore.rules) from GitHub
+4. Click **Publish**
+
+Indexes (optional for first login): Firestore → **Indexes** — or run Option B later.
+
+### Option B — from your laptop (repo clone)
 
 ```bash
 # one-time: login with a Google account that owns the Firebase project
