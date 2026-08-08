@@ -120,8 +120,28 @@ cp apps/web/.env.example apps/web/.env.local
 npm run dev:web
 ```
 
+## Tightened rules (org-scoped)
+
+After the temporary MVP `signedIn()` rules, production uses **Auth custom claims** (`organizationId`, `accountStatus`, `personId`) so Firestore queries are allowed safely.
+
+Apply tightened rules:
+
+```bash
+git pull origin main
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json"
+export FIREBASE_PROJECT_ID="ieec-ya-connect-a1ae1"
+export ALLOW_FIREBASE_BOOTSTRAP=YES
+npm run seed:bootstrap    # refreshes custom claims
+npm run firebase:deploy   # deploys org-scoped rules
+npm run verify:firebase   # claims.org should be ieec_ya
+```
+
+Then **sign out and sign in again** (custom claims only appear on a fresh token).
+
+Or paste [`firebase/firestore.rules`](https://raw.githubusercontent.com/beki32/IEEC/main/firebase/firestore.rules) in the Console and Publish, after bootstrap has set claims.
+
 ## Security notes
 
 - Never commit service account JSON or `.env.local`
 - `userAccounts` writes are denied to clients (rules) — bootstrap / Admin SDK / future Cloud Functions only
-- Tighten rules further before a wide public launch
+- Org scoping uses Auth custom claims (not `get(userAccounts)`), so list queries work under rules

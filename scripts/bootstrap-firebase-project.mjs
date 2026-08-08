@@ -126,6 +126,20 @@ async function main() {
     displayName: 'Marta Minister',
   });
 
+  // Custom claims power tightened Firestore rules (query-safe org scoping).
+  const staffClaims = [
+    [leaderUid, leaderPersonId],
+    [assistantUid, assistantPersonId],
+    [ministerUid, ministerPersonId],
+  ];
+  for (const [uid, personId] of staffClaims) {
+    await auth.setCustomUserClaims(uid, {
+      organizationId: ORG_ID,
+      accountStatus: 'active',
+      personId,
+    });
+  }
+
   const leaderPerms = [
     'follow_up.view',
     'follow_up.newcomers.view_unassigned',

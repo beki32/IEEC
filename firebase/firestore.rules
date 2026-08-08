@@ -5,7 +5,31 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Public newcomer form (no login).
+    // Org id comes from Auth custom claims (set by bootstrap / Admin SDK).
+    // Using token claims (not get()) so collection queries are allowed.
+    function accountOrgId() {
+      return request.auth.token.organizationId;
+    }
+
+    function hasActiveAccount() {
+      return signedIn()
+        && accountOrgId() is string
+        && request.auth.token.accountStatus == 'active';
+    }
+
+    function sameOrg(orgId) {
+      return hasActiveAccount() && accountOrgId() == orgId;
+    }
+
+    function orgRead() {
+      return hasActiveAccount() && resource.data.organizationId == accountOrgId();
+    }
+
+    function orgWrite() {
+      return hasActiveAccount() && request.resource.data.organizationId == accountOrgId();
+    }
+
+    // Public newcomer form — create only.
     match /publicRegistrations/{id} {
       allow create: if true
         && request.resource.data.keys().hasAll(['organizationId', 'firstName', 'lastName', 'email', 'phone'])
@@ -13,10 +37,118 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // TEMP MVP: any signed-in staff can read/write.
-    // Tighten to org-scoped RBAC after first successful production login.
+    match /userAccounts/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow read: if orgRead();
+      allow write: if false; // Admin SDK / Cloud Functions only
+    }
+
+    match /organizations/{orgId} {
+      allow read: if sameOrg(orgId);
+      allow write: if false;
+    }
+
+    match /people/{personId} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /roleTemplates/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /roleAssignments/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /permissionOverrides/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /newcomerJourneys/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /followUpAssignments/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /followUpReports/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /newcomerAttendance/{id} {
+      allow read: if orgRead();
+      allow create, update: if orgWrite();
+      allow delete: if false;
+    }
+
+    match /newcomerBioEntries/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /calendarEvents/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /chatChannels/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /chatMemberships/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /chatMessages/{id} {
+      allow read: if orgRead();
+      allow create, update: if orgWrite();
+      allow delete: if false;
+    }
+
+    match /ministries/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /teams/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /teamMemberships/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /notifications/{id} {
+      allow read: if hasActiveAccount()
+        && resource.data.organizationId == accountOrgId()
+        && resource.data.recipientPersonId == request.auth.token.personId;
+      allow create: if orgWrite();
+      allow update: if hasActiveAccount()
+        && resource.data.organizationId == accountOrgId()
+        && resource.data.recipientPersonId == request.auth.token.personId;
+      allow delete: if false;
+    }
+
+    match /auditLogs/{id} {
+      allow read: if orgRead();
+      allow create: if orgWrite();
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
-      allow read, write: if signedIn();
+      allow read, write: if false;
     }
   }
 }

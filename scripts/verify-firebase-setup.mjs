@@ -23,11 +23,13 @@ async function main() {
     try {
       const user = await auth.getUserByEmail(email);
       const account = await db.collection('userAccounts').doc(user.uid).get();
+      const claims = user.customClaims || {};
       console.log(
         `✓ ${email}\n  authUid=${user.uid}\n  userAccounts=${account.exists ? 'YES' : 'MISSING'}` +
           (account.exists
             ? ` org=${account.data()?.organizationId} status=${account.data()?.accountStatus}`
-            : ''),
+            : '') +
+          `\n  claims.org=${claims.organizationId || 'MISSING'} claims.status=${claims.accountStatus || 'MISSING'}`,
       );
     } catch (err) {
       console.log(`✗ ${email}: ${err.message}`);
