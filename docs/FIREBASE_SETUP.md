@@ -95,7 +95,11 @@ If login fails: check Auth email/password enabled, authorized domain, and that `
 
 Auth succeeded, but Firestore blocked reading staff data. Usually the Rules tab still has the default deny-all (or a bad paste).
 
-1. Re-publish rules from the **raw** URL in §4 Option A (must see `match /userAccounts` after Publish)
+1. Deploy rules from your laptop (same key as bootstrap):
+   ```bash
+   export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json"
+   npm run firebase:deploy
+   ```
 2. Confirm bootstrap data exists:
    ```bash
    export GOOGLE_APPLICATION_CREDENTIALS="$HOME/Downloads/key.json"
