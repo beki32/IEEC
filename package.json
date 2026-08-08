@@ -16,6 +16,7 @@
     "emulators": "npx -y firebase-tools@14.11.0 emulators:start --only auth,firestore --project ieec-ya-connect-a1ae1",
     "seed:emulator": "npm install --prefix scripts && node scripts/seed-firebase-emulator.mjs",
     "seed:bootstrap": "npm install --prefix scripts && node scripts/bootstrap-firebase-project.mjs",
+    "verify:firebase": "npm install --prefix scripts && node scripts/verify-firebase-setup.mjs",
     "firebase:deploy": "npx -y firebase-tools@14.11.0 deploy --only firestore",
     "firebase:deploy:rules": "npx -y firebase-tools@14.11.0 deploy --only firestore:rules",
     "firebase:login": "npx -y firebase-tools@14.11.0 login"

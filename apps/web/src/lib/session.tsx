@@ -57,19 +57,40 @@ function formatFirebaseLoginError(err: unknown): string {
 async function hydrateFirebaseSession(authUid: string) {
   const db = getFirestoreDb();
   if (!db) throw new Error('Firestore is not configured');
-  const accountSnap = await getDoc(doc(db, 'userAccounts', authUid));
+
+  let accountSnap;
+  try {
+    accountSnap = await getDoc(doc(db, 'userAccounts', authUid));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `Cannot read userAccounts/${authUid}. Publish firebase/firestore.rules in Firebase Console, then retry. (${message})`,
+    );
+  }
+
   if (!accountSnap.exists()) {
-    throw new Error('No userAccounts document for this Auth UID. Seed the emulator/project first.');
+    throw new Error('No userAccounts document for this Auth UID. Run npm run seed:bootstrap.');
   }
   const account = accountSnap.data() as { organizationId: string; accountStatus?: string };
   if (account.accountStatus && account.accountStatus !== 'active') {
     throw new Error('Account is not active');
   }
-  const state = await hydrateDemoStateFromFirestore(db, account.organizationId, DEMO_SEED_VERSION);
-  state.sessionAuthUid = authUid;
-  const ua = state.userAccounts.find((a) => a.id === authUid);
-  if (ua) ua.lastLoginAt = new Date().toISOString();
-  demoStore.adoptFirebaseState(state);
+  if (!account.organizationId) {
+    throw new Error('userAccounts doc is missing organizationId. Re-run npm run seed:bootstrap.');
+  }
+
+  try {
+    const state = await hydrateDemoStateFromFirestore(db, account.organizationId, DEMO_SEED_VERSION);
+    state.sessionAuthUid = authUid;
+    const ua = state.userAccounts.find((a) => a.id === authUid);
+    if (ua) ua.lastLoginAt = new Date().toISOString();
+    demoStore.adoptFirebaseState(state);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `Signed in, but loading org data failed. Re-publish firestore.rules from GitHub main, wait a few seconds, retry. (${message})`,
+    );
+  }
 }
 
 export function SessionProvider({ children }: { children: ReactNode }) {

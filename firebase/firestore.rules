@@ -5,13 +5,30 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function userAccount() {
-      return get(/databases/$(database)/documents/userAccounts/$(request.auth.uid)).data;
+    function accountPath() {
+      return /databases/$(database)/documents/userAccounts/$(request.auth.uid);
+    }
+
+    function hasActiveAccount() {
+      return signedIn()
+        && exists(accountPath())
+        && get(accountPath()).data.accountStatus == 'active';
+    }
+
+    function accountOrgId() {
+      return get(accountPath()).data.organizationId;
     }
 
     function sameOrg(orgId) {
-      return signedIn() && userAccount().organizationId == orgId
-        && userAccount().accountStatus == 'active';
+      return hasActiveAccount() && accountOrgId() == orgId;
+    }
+
+    function orgRead() {
+      return hasActiveAccount() && resource.data.organizationId == accountOrgId();
+    }
+
+    function orgWrite() {
+      return hasActiveAccount() && request.resource.data.organizationId == accountOrgId();
     }
 
     // Public registration intake only — no reads of people from public clients.
@@ -22,78 +39,11 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    match /people/{personId} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
+    // Own account first (needed before any sameOrg check).
     match /userAccounts/{uid} {
-      allow read: if signedIn() && (request.auth.uid == uid || sameOrg(resource.data.organizationId));
-      allow write: if false; // trusted admin / Cloud Functions only
-    }
-
-    match /roleTemplates/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /roleAssignments/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /permissionOverrides/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /newcomerJourneys/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /followUpAssignments/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /followUpReports/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /newcomerAttendance/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow create: if sameOrg(request.resource.data.organizationId);
-      allow update: if sameOrg(resource.data.organizationId);
-      allow delete: if false;
-    }
-
-    match /newcomerBioEntries/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /calendarEvents/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /chatChannels/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /chatMemberships/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
-    }
-
-    match /chatMessages/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow create: if sameOrg(request.resource.data.organizationId);
-      allow update: if sameOrg(resource.data.organizationId);
-      allow delete: if false;
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow read: if orgRead();
+      allow write: if false; // Admin SDK / Cloud Functions only
     }
 
     match /organizations/{orgId} {
@@ -101,31 +51,100 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /people/{personId} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /roleTemplates/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /roleAssignments/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /permissionOverrides/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /newcomerJourneys/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /followUpAssignments/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /followUpReports/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /newcomerAttendance/{id} {
+      allow read: if orgRead();
+      allow create, update: if orgWrite();
+      allow delete: if false;
+    }
+
+    match /newcomerBioEntries/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /calendarEvents/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /chatChannels/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /chatMemberships/{id} {
+      allow read: if orgRead();
+      allow write: if orgWrite();
+    }
+
+    match /chatMessages/{id} {
+      allow read: if orgRead();
+      allow create, update: if orgWrite();
+      allow delete: if false;
+    }
+
     match /ministries/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
+      allow read: if orgRead();
+      allow write: if orgWrite();
     }
 
     match /teams/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
+      allow read: if orgRead();
+      allow write: if orgWrite();
     }
 
     match /teamMemberships/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow write: if sameOrg(request.resource.data.organizationId);
+      allow read: if orgRead();
+      allow write: if orgWrite();
     }
 
     match /notifications/{id} {
-      allow read: if signedIn() && userAccount().personId == resource.data.recipientPersonId;
-      allow create: if sameOrg(request.resource.data.organizationId);
-      allow update: if signedIn() && userAccount().personId == resource.data.recipientPersonId;
+      allow read: if hasActiveAccount()
+        && get(accountPath()).data.personId == resource.data.recipientPersonId;
+      allow create: if orgWrite();
+      allow update: if hasActiveAccount()
+        && get(accountPath()).data.personId == resource.data.recipientPersonId;
       allow delete: if false;
     }
 
     match /auditLogs/{id} {
-      allow read: if sameOrg(resource.data.organizationId);
-      allow create: if sameOrg(request.resource.data.organizationId);
+      allow read: if orgRead();
+      allow create: if orgWrite();
       allow update, delete: if false;
     }
 

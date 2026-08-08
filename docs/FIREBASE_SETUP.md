@@ -42,10 +42,13 @@ Authorized domains: Authentication → Settings → **Authorized domains** → a
 
 ### Option A — Firebase Console (easiest)
 
-1. Open Firestore → **Rules** for project `ieec-ya-connect-a1ae1`
-2. Delete the default rules
-3. Paste the full contents of [`firebase/firestore.rules`](../firebase/firestore.rules) from GitHub
-4. Click **Publish**
+1. Open https://console.firebase.google.com/project/ieec-ya-connect-a1ae1/firestore/rules
+2. Select all → delete the old rules
+3. Open the **raw** file (copy is clean, no GitHub HTML):  
+   https://raw.githubusercontent.com/beki32/IEEC/main/firebase/firestore.rules
+4. Select all → copy → paste into the Rules editor
+5. Click **Publish**
+6. Confirm the editor still contains `match /userAccounts` after publishing
 
 Indexes (optional for first login): Firestore → **Indexes** — or run Option B later.
 
