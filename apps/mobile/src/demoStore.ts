@@ -20,6 +20,39 @@ import {
   type UserAccount,
 } from '@ieec/shared';
 
+export type TeamNote = {
+  id: string;
+  title: string;
+  body: string;
+  authorPersonId: string;
+  relatedPersonId: string | null;
+  createdAt: string;
+};
+
+export type TeamTask = {
+  id: string;
+  title: string;
+  done: boolean;
+  assigneePersonId: string | null;
+  createdAt: string;
+};
+
+export type AppNotification = {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  read: boolean;
+};
+
+export type ChatMessage = {
+  id: string;
+  contactPersonId: string;
+  fromPersonId: string;
+  text: string;
+  createdAt: string;
+};
+
 type State = {
   people: Person[];
   userAccounts: UserAccount[];
@@ -30,14 +63,61 @@ type State = {
   reports: FollowUpReport[];
   attendance: NewcomerAttendance[];
   bioEntries: NewcomerBioEntry[];
+  notes: TeamNote[];
+  tasks: TeamTask[];
+  notifications: AppNotification[];
+  messages: ChatMessage[];
   calendarEventId: string;
   calendarTitle: string;
   sessionAuthUid: string | null;
   organizationId: string;
 };
 
+type Listener = () => void;
+const listeners = new Set<Listener>();
+
 function nowIso() {
   return new Date().toISOString();
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+function mkPerson(
+  orgId: string,
+  id: string,
+  first: string,
+  last: string,
+  email: string,
+  status: string,
+  jid: string | null,
+  hasAcc: boolean,
+  sex: Person['sex'] = 'unspecified',
+  phone = '202-555-0100',
+): Person {
+  const ts = nowIso();
+  return {
+    id,
+    organizationId: orgId,
+    firstName: first,
+    lastName: last,
+    normalizedFirstName: normalizeName(first),
+    normalizedLastName: normalizeName(last),
+    sex,
+    phone: { display: phone, normalized: normalizePhone(phone) },
+    email: { address: email, normalized: normalizeEmail(email), verified: true },
+    contactPreference: { method: 'text', preferredTime: null, customTimeNote: null },
+    photoFileId: null,
+    currentMinistryStatus: status,
+    recordStatus: 'active',
+    hasUserAccount: hasAcc,
+    activeJourneyId: jid,
+    createdAt: ts,
+    createdBy: 'system',
+    updatedAt: ts,
+    updatedBy: 'system',
+  };
 }
 
 function seed(): State {
@@ -45,8 +125,13 @@ function seed(): State {
   const ts = nowIso();
   const leaderPersonId = 'person_leader';
   const ministerPersonId = 'person_minister';
+  const assistantPersonId = 'person_assistant';
+  const newcomer1Id = 'person_newcomer_1';
   const newcomer2Id = 'person_newcomer_2';
+  const newcomer3Id = 'person_newcomer_3';
+  const journey1 = 'journey_1';
   const journey2 = 'journey_2';
+  const journey3 = 'journey_3';
 
   const roleLeader: RoleTemplate = {
     id: 'role_fu_leader',
@@ -68,35 +153,26 @@ function seed(): State {
     createdAt: ts,
     updatedAt: ts,
   };
-
-  const mkPerson = (id: string, first: string, last: string, email: string, status: string, jid: string | null, hasAcc: boolean): Person => ({
-    id,
+  const roleAssistant: RoleTemplate = {
+    id: 'role_fu_assistant',
     organizationId: orgId,
-    firstName: first,
-    lastName: last,
-    normalizedFirstName: normalizeName(first),
-    normalizedLastName: normalizeName(last),
-    sex: 'female',
-    phone: { display: '202-555-0100', normalized: '2025550100' },
-    email: { address: email, normalized: normalizeEmail(email), verified: true },
-    contactPreference: { method: 'text', preferredTime: null, customTimeNote: null },
-    photoFileId: null,
-    currentMinistryStatus: status,
+    name: 'Assistant',
+    description: 'Support',
+    permissions: [...FOLLOW_UP_MINISTER_PERMISSIONS],
     recordStatus: 'active',
-    hasUserAccount: hasAcc,
-    activeJourneyId: jid,
     createdAt: ts,
-    createdBy: 'system',
     updatedAt: ts,
-    updatedBy: 'system',
-  });
+  };
 
   return {
     organizationId: orgId,
     people: [
-      mkPerson(leaderPersonId, 'Sarah', 'Leader', 'leader@ieec.demo', 'minister', null, true),
-      mkPerson(ministerPersonId, 'Marta', 'Minister', 'minister@ieec.demo', 'minister', null, true),
-      mkPerson(newcomer2Id, 'Hanna', 'Tesfaye', 'hanna@example.com', 'newcomer', journey2, false),
+      mkPerson(orgId, leaderPersonId, 'Ruth', 'Desta', 'leader@ieec.demo', 'minister', null, true, 'female'),
+      mkPerson(orgId, ministerPersonId, 'Marcus', 'Yohannes', 'minister@ieec.demo', 'minister', null, true, 'male'),
+      mkPerson(orgId, assistantPersonId, 'Michael', 'Tadesse', 'assistant@ieec.demo', 'minister', null, true, 'male'),
+      mkPerson(orgId, newcomer1Id, 'Samuel', 'Bekele', 'samuel@example.com', 'newcomer', journey1, false, 'male', '202-555-0142'),
+      mkPerson(orgId, newcomer2Id, 'Hanna', 'Tesfaye', 'hanna@example.com', 'newcomer', journey2, false, 'female', '202-555-0188'),
+      mkPerson(orgId, newcomer3Id, 'Amanuel', 'Bekele', 'amanuel@example.com', 'newcomer', journey3, false, 'male', '202-555-0199'),
     ],
     userAccounts: [
       {
@@ -127,8 +203,22 @@ function seed(): State {
         createdAt: ts,
         updatedAt: ts,
       },
+      {
+        id: 'uid_assistant',
+        organizationId: orgId,
+        personId: assistantPersonId,
+        email: 'assistant@ieec.demo',
+        accountStatus: 'active',
+        emailVerified: true,
+        invitationStatus: 'accepted',
+        invitedAt: ts,
+        activatedAt: ts,
+        lastLoginAt: ts,
+        createdAt: ts,
+        updatedAt: ts,
+      },
     ],
-    roleTemplates: [roleLeader, roleMinister],
+    roleTemplates: [roleLeader, roleMinister, roleAssistant],
     roleAssignments: [
       {
         id: 'ra_m',
@@ -160,8 +250,43 @@ function seed(): State {
         createdAt: ts,
         updatedAt: ts,
       },
+      {
+        id: 'ra_a',
+        organizationId: orgId,
+        personId: assistantPersonId,
+        roleTemplateId: roleAssistant.id,
+        scopeType: 'team',
+        ministryId: 'ministry_ya',
+        teamId: 'team_follow_up',
+        groupId: null,
+        startAt: null,
+        endAt: null,
+        active: true,
+        createdAt: ts,
+        updatedAt: ts,
+      },
     ],
     journeys: [
+      {
+        id: journey1,
+        organizationId: orgId,
+        personId: newcomer1Id,
+        registrationDate: ts,
+        registrationSource: 'mobile',
+        journeyStatus: 'awaiting_assignment',
+        membershipReadinessStatus: 'not_ready',
+        previousJourneyId: null,
+        isCurrentJourney: true,
+        welcomeMessageStatus: 'queued',
+        startedAt: ts,
+        completedAt: null,
+        closureReason: null,
+        lastStatusReason: null,
+        createdAt: ts,
+        createdBy: 'system',
+        updatedAt: ts,
+        updatedBy: 'system',
+      },
       {
         id: journey2,
         organizationId: orgId,
@@ -176,7 +301,27 @@ function seed(): State {
         startedAt: ts,
         completedAt: null,
         closureReason: null,
-      lastStatusReason: null,
+        lastStatusReason: null,
+        createdAt: ts,
+        createdBy: 'system',
+        updatedAt: ts,
+        updatedBy: 'system',
+      },
+      {
+        id: journey3,
+        organizationId: orgId,
+        personId: newcomer3Id,
+        registrationDate: ts,
+        registrationSource: 'web',
+        journeyStatus: 'assigned',
+        membershipReadinessStatus: 'not_ready',
+        previousJourneyId: null,
+        isCurrentJourney: true,
+        welcomeMessageStatus: 'sent',
+        startedAt: ts,
+        completedAt: null,
+        closureReason: null,
+        lastStatusReason: null,
         createdAt: ts,
         createdBy: 'system',
         updatedAt: ts,
@@ -199,10 +344,72 @@ function seed(): State {
         createdAt: ts,
         updatedAt: ts,
       },
+      {
+        id: 'assign_3',
+        organizationId: orgId,
+        journeyId: journey3,
+        newcomerPersonId: newcomer3Id,
+        assignedPersonId: ministerPersonId,
+        assignmentType: 'primary',
+        assignmentStatus: 'active',
+        reportingRequired: true,
+        startDate: ts,
+        endDate: null,
+        assignedByPersonId: leaderPersonId,
+        createdAt: ts,
+        updatedAt: ts,
+      },
     ],
     reports: [],
     attendance: [],
     bioEntries: [],
+    notes: [
+      {
+        id: 'note_1',
+        title: 'Friday Night Fellowship Check-In',
+        body: 'Hanna felt welcomed and wants to join a small group next month.',
+        authorPersonId: leaderPersonId,
+        relatedPersonId: newcomer2Id,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
+    tasks: [
+      { id: 'task_1', title: 'Text Samuel a welcome message', done: false, assigneePersonId: ministerPersonId, createdAt: ts },
+      { id: 'task_2', title: 'Confirm Hanna for Saturday program', done: true, assigneePersonId: ministerPersonId, createdAt: ts },
+      { id: 'task_3', title: 'Prepare weekly report summary', done: false, assigneePersonId: leaderPersonId, createdAt: ts },
+    ],
+    notifications: [
+      {
+        id: 'notif_1',
+        title: 'New registration',
+        body: 'Samuel Bekele is awaiting assignment.',
+        createdAt: ts,
+        read: false,
+      },
+      {
+        id: 'notif_2',
+        title: 'Assignment',
+        body: 'Hanna Tesfaye was assigned to Marcus Yohannes.',
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        read: true,
+      },
+    ],
+    messages: [
+      {
+        id: 'msg_1',
+        contactPersonId: newcomer2Id,
+        fromPersonId: ministerPersonId,
+        text: 'Hi Hanna — welcome to IEEC YA! Looking forward to connecting this week.',
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        id: 'msg_2',
+        contactPersonId: newcomer2Id,
+        fromPersonId: newcomer2Id,
+        text: 'Thank you! Excited to visit again on Friday.',
+        createdAt: new Date(Date.now() - 1800000).toISOString(),
+      },
+    ],
     calendarEventId: 'cal_sat_program',
     calendarTitle: 'IEEC YA Saturday Program',
     sessionAuthUid: null,
@@ -212,17 +419,31 @@ function seed(): State {
 let state = seed();
 
 export const mobileStore = {
+  subscribe(listener: Listener) {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  },
   reset() {
     state = seed();
+    emit();
+  },
+  getState() {
+    return state;
   },
   login(email: string) {
     const account = state.userAccounts.find((a) => a.email.toLowerCase() === email.toLowerCase());
-    if (!account) return { ok: false as const, error: 'Use minister@ieec.demo or leader@ieec.demo' };
+    if (!account) {
+      return { ok: false as const, error: 'Use leader@, assistant@, or minister@ieec.demo' };
+    }
     state.sessionAuthUid = account.id;
+    emit();
     return { ok: true as const };
   },
   logout() {
     state.sessionAuthUid = null;
+    emit();
   },
   getSession() {
     if (!state.sessionAuthUid) return null;
@@ -235,7 +456,38 @@ export const mobileStore = {
       roleAssignments: state.roleAssignments,
       overrides: [],
     });
-    return { account, person, permissions: resolved.permissions, config: DEFAULT_FOLLOW_UP_CONFIG };
+    const role = state.roleTemplates.find((t) =>
+      state.roleAssignments.some((ra) => ra.personId === person.id && ra.active && ra.roleTemplateId === t.id),
+    );
+    return {
+      account,
+      person,
+      permissions: resolved.permissions,
+      config: DEFAULT_FOLLOW_UP_CONFIG,
+      roleName: role?.name ?? 'Team member',
+    };
+  },
+  queueRows(filter: 'all' | 'unassigned' | 'assigned' = 'all') {
+    return state.journeys
+      .filter((j) => j.isCurrentJourney)
+      .map((j) => {
+        const person = state.people.find((p) => p.id === j.personId)!;
+        const assignment = state.assignments.find((a) => a.journeyId === j.id && a.assignmentStatus === 'active');
+        const assignee = assignment
+          ? state.people.find((p) => p.id === assignment.assignedPersonId) ?? null
+          : null;
+        return { journey: j, person, assignment: assignment ?? null, assignee };
+      })
+      .filter((r) => r.person.currentMinistryStatus === 'newcomer')
+      .filter((r) => {
+        if (filter === 'unassigned') return !r.assignment;
+        if (filter === 'assigned') return !!r.assignment;
+        return true;
+      })
+      .sort((a, b) => a.person.lastName.localeCompare(b.person.lastName));
+  },
+  unassignedCount() {
+    return this.queueRows('unassigned').length;
   },
   myAssignments() {
     const session = this.getSession();
@@ -247,6 +499,85 @@ export const mobileStore = {
         person: state.people.find((p) => p.id === a.newcomerPersonId)!,
         journey: state.journeys.find((j) => j.id === a.journeyId)!,
       }));
+  },
+  assignableStaff() {
+    const assignableRoleIds = new Set(['role_fu_minister', 'role_fu_leader', 'role_fu_assistant']);
+    return state.people
+      .filter(
+        (p) =>
+          p.recordStatus === 'active' &&
+          state.roleAssignments.some(
+            (ra) => ra.personId === p.id && ra.active && assignableRoleIds.has(ra.roleTemplateId),
+          ),
+      )
+      .map((p) => {
+        const role = state.roleTemplates.find((t) =>
+          state.roleAssignments.some(
+            (ra) => ra.personId === p.id && ra.active && ra.roleTemplateId === t.id && assignableRoleIds.has(t.id),
+          ),
+        );
+        const activeCount = state.assignments.filter(
+          (a) => a.assignedPersonId === p.id && a.assignmentStatus === 'active',
+        ).length;
+        return { person: p, roleName: role?.name ?? 'Team member', activeCount };
+      })
+      .sort((a, b) => a.person.firstName.localeCompare(b.person.firstName));
+  },
+  assignNewcomer(journeyId: string, assignedPersonId: string) {
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const journey = state.journeys.find((j) => j.id === journeyId);
+    if (!journey) throw new Error('Journey not found');
+    const active = state.assignments.filter(
+      (a) => a.journeyId === journeyId && a.assignmentStatus === 'active' && a.assignmentType === 'primary',
+    );
+    for (const a of active) {
+      a.assignmentStatus = 'ended';
+      a.endDate = nowIso();
+      a.updatedAt = nowIso();
+    }
+    const assignment: FollowUpAssignment = {
+      id: `assign_${Date.now()}`,
+      organizationId: state.organizationId,
+      journeyId,
+      newcomerPersonId: journey.personId,
+      assignedPersonId,
+      assignmentType: 'primary',
+      assignmentStatus: 'active',
+      reportingRequired: true,
+      startDate: nowIso(),
+      endDate: null,
+      assignedByPersonId: session.person.id,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+    };
+    state.assignments.push(assignment);
+    journey.journeyStatus = 'assigned';
+    journey.updatedAt = nowIso();
+    journey.updatedBy = session.person.id;
+    const person = state.people.find((p) => p.id === journey.personId)!;
+    const assignee = state.people.find((p) => p.id === assignedPersonId)!;
+    state.notifications.unshift({
+      id: `notif_${Date.now()}`,
+      title: 'Assignment confirmed',
+      body: `${person.firstName} ${person.lastName} was assigned to ${assignee.firstName} ${assignee.lastName}.`,
+      createdAt: nowIso(),
+      read: false,
+    });
+    emit();
+    return assignment;
+  },
+  getPersonBundle(personId: string) {
+    const person = state.people.find((p) => p.id === personId);
+    if (!person) return null;
+    const journey = state.journeys.find((j) => j.personId === personId && j.isCurrentJourney) ?? null;
+    const assignment = journey
+      ? state.assignments.find((a) => a.journeyId === journey.id && a.assignmentStatus === 'active') ?? null
+      : null;
+    const assignee = assignment
+      ? state.people.find((p) => p.id === assignment.assignedPersonId) ?? null
+      : null;
+    return { person, journey, assignment, assignee };
   },
   submitReport(assignmentId: string, journeyId: string, newcomerPersonId: string, summary: string) {
     const session = this.getSession();
@@ -277,6 +608,12 @@ export const mobileStore = {
       updatedAt: nowIso(),
     };
     state.reports.push(report);
+    const journey = state.journeys.find((j) => j.id === journeyId);
+    if (journey && journey.journeyStatus === 'assigned') {
+      journey.journeyStatus = 'active_follow_up';
+      journey.updatedAt = nowIso();
+    }
+    emit();
     return report;
   },
   recordAttendance(personId: string, journeyId: string, assignmentId: string, status: AttendanceStatus) {
@@ -289,6 +626,7 @@ export const mobileStore = {
       existing.attendanceStatus = status;
       existing.updatedAt = nowIso();
       existing.updatedByPersonId = session.person.id;
+      emit();
       return existing;
     }
     const row: NewcomerAttendance = {
@@ -306,6 +644,7 @@ export const mobileStore = {
       updatedByPersonId: session.person.id,
     };
     state.attendance.push(row);
+    emit();
     return row;
   },
   addBio(personId: string, journeyId: string, content: string) {
@@ -329,9 +668,80 @@ export const mobileStore = {
       deletedByPersonId: null,
     };
     state.bioEntries.push(entry);
+    emit();
     return entry;
   },
-  register(input: { firstName: string; lastName: string; email: string; phone: string }) {
+  notes() {
+    return [...state.notes].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  },
+  tasks() {
+    return [...state.tasks];
+  },
+  toggleTask(taskId: string) {
+    const task = state.tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    task.done = !task.done;
+    emit();
+  },
+  addNote(input: { title: string; body: string; relatedPersonId?: string | null }) {
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const note: TeamNote = {
+      id: `note_${Date.now()}`,
+      title: input.title,
+      body: input.body,
+      authorPersonId: session.person.id,
+      relatedPersonId: input.relatedPersonId ?? null,
+      createdAt: nowIso(),
+    };
+    state.notes.unshift(note);
+    emit();
+    return note;
+  },
+  notifications() {
+    return [...state.notifications];
+  },
+  messagesFor(contactPersonId: string) {
+    return state.messages
+      .filter((m) => m.contactPersonId === contactPersonId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  },
+  sendMessage(contactPersonId: string, text: string) {
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    const msg: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      contactPersonId,
+      fromPersonId: session.person.id,
+      text,
+      createdAt: nowIso(),
+    };
+    state.messages.push(msg);
+    emit();
+    return msg;
+  },
+  updateProfile(input: { firstName: string; lastName: string; phone: string }) {
+    const session = this.getSession();
+    if (!session) throw new Error('Not signed in');
+    session.person.firstName = input.firstName.trim();
+    session.person.lastName = input.lastName.trim();
+    session.person.normalizedFirstName = normalizeName(input.firstName);
+    session.person.normalizedLastName = normalizeName(input.lastName);
+    session.person.phone = {
+      display: input.phone,
+      normalized: normalizePhone(input.phone),
+    };
+    session.person.updatedAt = nowIso();
+    emit();
+  },
+  register(input: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    sex?: Person['sex'];
+    contactMethod?: 'text' | 'call' | 'email';
+  }) {
     const ts = nowIso();
     const personId = `person_${Date.now()}`;
     const journeyId = `journey_${Date.now()}`;
@@ -342,10 +752,14 @@ export const mobileStore = {
       lastName: input.lastName,
       normalizedFirstName: normalizeName(input.firstName),
       normalizedLastName: normalizeName(input.lastName),
-      sex: 'unspecified',
+      sex: input.sex ?? 'unspecified',
       phone: { display: input.phone, normalized: normalizePhone(input.phone) },
       email: { address: input.email, normalized: normalizeEmail(input.email), verified: false },
-      contactPreference: { method: 'text', preferredTime: null, customTimeNote: null },
+      contactPreference: {
+        method: input.contactMethod ?? 'text',
+        preferredTime: null,
+        customTimeNote: null,
+      },
       photoFileId: null,
       currentMinistryStatus: 'newcomer',
       recordStatus: 'active',
@@ -377,6 +791,18 @@ export const mobileStore = {
       updatedAt: ts,
       updatedBy: 'public',
     });
+    state.notifications.unshift({
+      id: `notif_${Date.now()}`,
+      title: 'New registration',
+      body: `${person.firstName} ${person.lastName} joined the queue.`,
+      createdAt: ts,
+      read: false,
+    });
+    emit();
     return { personId, journeyId };
+  },
+  personName(personId: string) {
+    const p = state.people.find((x) => x.id === personId);
+    return p ? `${p.firstName} ${p.lastName}` : 'Unknown';
   },
 };
