@@ -121,49 +121,64 @@ export function PersonProfilePage() {
     setTick((t) => t + 1);
   }
 
-  function onReport(e: FormEvent) {
+  async function onReport(e: FormEvent) {
     e.preventDefault();
     if (!journey || !assignment) return;
     if (!has(Permissions.reportsSubmit) && assignment.assignedPersonId !== me?.id) {
       setMessage('Missing report permission');
       return;
     }
-    demoStore.submitReport({
-      journeyId: journey.id,
-      assignmentId: assignment.id,
-      contactMade: true,
-      expectedToAttend: 'yes',
-      summary,
-    });
-    setSummary('');
-    setMessage('Weekly report submitted (separate from attendance).');
-    bump();
+    try {
+      demoStore.submitReport({
+        journeyId: journey.id,
+        assignmentId: assignment.id,
+        contactMade: true,
+        expectedToAttend: 'yes',
+        summary,
+      });
+      await demoStore.waitForPersist();
+      setSummary('');
+      setMessage('Weekly report submitted and saved to Firestore.');
+      bump();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Could not save weekly report');
+    }
   }
 
-  function onAttendance(e: FormEvent) {
+  async function onAttendance(e: FormEvent) {
     e.preventDefault();
     if (!journey || !selectedEvent) {
       setMessage('Select a calendar event before recording attendance.');
       return;
     }
-    demoStore.recordAttendance({
-      personId: person!.id,
-      journeyId: journey.id,
-      assignmentId: assignment?.id ?? null,
-      calendarEventId: selectedEvent.id,
-      status: attStatus,
-    });
-    setMessage(`Attendance saved for ${selectedEvent.title}: ${attStatus}`);
-    bump();
+    try {
+      demoStore.recordAttendance({
+        personId: person!.id,
+        journeyId: journey.id,
+        assignmentId: assignment?.id ?? null,
+        calendarEventId: selectedEvent.id,
+        status: attStatus,
+      });
+      await demoStore.waitForPersist();
+      setMessage(`Attendance saved for ${selectedEvent.title}: ${attStatus}`);
+      bump();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Could not save attendance');
+    }
   }
 
-  function onBio(e: FormEvent) {
+  async function onBio(e: FormEvent) {
     e.preventDefault();
     if (!journey) return;
-    demoStore.addBio({ personId: person!.id, journeyId: journey.id, content: bio });
-    setBio('');
-    setMessage('Bio entry added.');
-    bump();
+    try {
+      demoStore.addBio({ personId: person!.id, journeyId: journey.id, content: bio });
+      await demoStore.waitForPersist();
+      setBio('');
+      setMessage('Bio entry added.');
+      bump();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Could not save bio entry');
+    }
   }
 
   function startJourneyAction(action: JourneyAction) {

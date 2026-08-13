@@ -207,7 +207,7 @@ export function CalendarPage() {
     setError('');
   }
 
-  function onCreate(e: FormEvent) {
+  async function onCreate(e: FormEvent) {
     e.preventDefault();
     setError('');
     try {
@@ -221,6 +221,7 @@ export function CalendarPage() {
         recurrenceWeeklySaturday: form.recurrenceWeeklySaturday,
         forceOverride,
       });
+      await demoStore.waitForPersist();
       setShowCreate(false);
       setForceOverride(false);
       const created = new Date(result.event.startAt);

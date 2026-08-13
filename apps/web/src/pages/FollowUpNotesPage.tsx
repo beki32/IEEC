@@ -45,7 +45,7 @@ export function FollowUpNotesPage() {
     setTick((n) => n + 1);
   }
 
-  function onAddNote(e: FormEvent) {
+  async function onAddNote(e: FormEvent) {
     e.preventDefault();
     setNoteError('');
     try {
@@ -54,6 +54,7 @@ export function FollowUpNotesPage() {
         title: noteTitle,
         body: noteBody,
       });
+      await demoStore.waitForPersist();
       setNoteTitle('');
       setNoteBody('');
       bump();
@@ -62,7 +63,7 @@ export function FollowUpNotesPage() {
     }
   }
 
-  function onAddTask(e: FormEvent) {
+  async function onAddTask(e: FormEvent) {
     e.preventDefault();
     setTaskError('');
     try {
@@ -70,6 +71,7 @@ export function FollowUpNotesPage() {
         teamId,
         title: taskTitle,
       });
+      await demoStore.waitForPersist();
       setTaskTitle('');
       bump();
     } catch (err) {
@@ -157,8 +159,15 @@ export function FollowUpNotesPage() {
                     type="checkbox"
                     checked={task.completed}
                     onChange={() => {
-                      demoStore.toggleTeamTask(task.id);
-                      bump();
+                      void (async () => {
+                        try {
+                          demoStore.toggleTeamTask(task.id);
+                          await demoStore.waitForPersist();
+                          bump();
+                        } catch (err) {
+                          setTaskError(err instanceof Error ? err.message : 'Could not update task');
+                        }
+                      })();
                     }}
                   />
                   <span>{task.title}</span>
@@ -169,8 +178,15 @@ export function FollowUpNotesPage() {
                     type="button"
                     className="linkish"
                     onClick={() => {
-                      demoStore.deleteTeamTask(task.id);
-                      bump();
+                      void (async () => {
+                        try {
+                          demoStore.deleteTeamTask(task.id);
+                          await demoStore.waitForPersist();
+                          bump();
+                        } catch (err) {
+                          setTaskError(err instanceof Error ? err.message : 'Could not remove task');
+                        }
+                      })();
                     }}
                   >
                     Remove

@@ -126,10 +126,17 @@ After rules deploy + bootstrap:
 
 | Feature | Firestore |
 | --- | --- |
-| Public `/register` | Writes `publicRegistrations` → ingested into `people` / `newcomerJourneys` on staff login |
-| Prayer form | Writes `prayerRequests` |
+| Public `/register` | Writes `publicRegistrations` → ingested into queue on staff login **and** when opening Queue |
 | Landing announcements / sermons / events | Reads `announcements`, `sermons`, `calendarEvents` |
-| Staff Follow-Up, notes, tasks, chat, calendar | Hydrate + persist for the signed-in org |
+| Queue assign / reassign / duplicate resolve | Persists `followUpAssignments`, journeys, people |
+| Weekly reports | Persists `followUpReports` |
+| Attendance + bio | Persists `newcomerAttendance`, `newcomerBioEntries` |
+| Calendar create/update | Persists `calendarEvents` |
+| Notes & tasks | Persists `meetingNotes`, `teamTasks` |
+| Chat + notifications | Persists chat collections + `notifications` |
+| Prayer form | Wired in code (`prayerRequests`) — can polish later |
+
+Staff mutations wait for Firestore write-through (`waitForPersist`) so failures surface in the UI.
 
 Re-apply rules anytime:
 

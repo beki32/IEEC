@@ -695,27 +695,37 @@ function load(): DemoState {
   }
 }
 
+/** In-memory + optional Firestore write-through (Firebase / emulator mode). */
+let runtimeState: DemoState | null = null;
+let persistFirebase = false;
+let persistChain: Promise<void> = Promise.resolve();
+let lastPersistError: string | null = null;
+
 function save(state: DemoState) {
   if (runtimeState) {
     runtimeState = state;
     if (persistFirebase) {
-      void import('./firebase').then(async ({ getFirestoreDb }) => {
-        const db = getFirestoreDb();
-        if (!db) return;
-        const { persistDemoStateToFirestore } = await import('./firestoreSync');
-        await persistDemoStateToFirestore(db, state);
-      }).catch((err) => {
-        console.warn('Firestore persist failed', err);
-      });
+      // Serialize writes so rapid UI actions don't race / drop updates.
+      persistChain = persistChain
+        .catch(() => undefined)
+        .then(async () => {
+          const { getFirestoreDb } = await import('./firebase');
+          const db = getFirestoreDb();
+          if (!db) throw new Error('Firestore is not configured');
+          const { persistDemoStateToFirestore } = await import('./firestoreSync');
+          await persistDemoStateToFirestore(db, state);
+          lastPersistError = null;
+        })
+        .catch((err) => {
+          lastPersistError = err instanceof Error ? err.message : 'Firestore persist failed';
+          console.error('Firestore persist failed', err);
+          throw err;
+        });
     }
     return;
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
-
-/** In-memory + optional Firestore write-through (Firebase / emulator mode). */
-let runtimeState: DemoState | null = null;
-let persistFirebase = false;
 
 export function buildDemoSeed(): DemoState {
   return createSeed();
@@ -823,6 +833,19 @@ export const demoStore = {
 
   isFirebaseRuntime() {
     return persistFirebase;
+  },
+
+  /** Await the latest Firestore write-through (no-op in demo/local mode). */
+  async waitForPersist() {
+    if (!persistFirebase) return;
+    await persistChain;
+    if (lastPersistError) {
+      throw new Error(lastPersistError);
+    }
+  },
+
+  lastPersistError() {
+    return lastPersistError;
   },
 
   ensureLatestSeed() {

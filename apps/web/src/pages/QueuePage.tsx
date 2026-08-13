@@ -1,9 +1,10 @@
 import { Permissions } from '@ieec/shared';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { matchesPersonSearch, TableSearch } from '../components/TableSearch';
 import { demoStore } from '../lib/demoStore';
+import { ingestPendingPublicRegistrations } from '../lib/publicIntake';
 import { useSession } from '../lib/session';
 
 export function QueuePage() {
@@ -15,6 +16,26 @@ export function QueuePage() {
   const [selectedAssigneeId, setSelectedAssigneeId] = useState('');
   const [assignError, setAssignError] = useState('');
   const [query, setQuery] = useState('');
+  const [intakeNote, setIntakeNote] = useState('');
+
+  useEffect(() => {
+    if (!demoStore.isFirebaseRuntime()) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const n = await ingestPendingPublicRegistrations();
+        if (cancelled || n <= 0) return;
+        setIntakeNote(`${n} new registration(s) pulled into the queue from the public form.`);
+        refresh();
+        setTick((t) => t + 1);
+      } catch (err) {
+        console.warn('Queue intake failed', err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refresh]);
 
   if (!has(Permissions.newcomersViewUnassigned) && !has(Permissions.newcomersViewAll)) {
     return <Navigate to="/app" replace />;
@@ -97,7 +118,7 @@ export function QueuePage() {
     setAssignError('');
   }
 
-  function confirmAssign(e: FormEvent) {
+  async function confirmAssign(e: FormEvent) {
     e.preventDefault();
     if (!assignJourneyId) return;
     if (!selectedAssigneeId) {
@@ -112,6 +133,7 @@ export function QueuePage() {
     }
     try {
       demoStore.assignNewcomer(assignJourneyId, selectedAssigneeId, 'primary');
+      await demoStore.waitForPersist();
       setAssignJourneyId(null);
       setSelectedAssigneeId('');
       setAssignError('');
@@ -122,10 +144,15 @@ export function QueuePage() {
     }
   }
 
-  function resolveDup(journeyId: string) {
-    demoStore.resolveDuplicate(journeyId, 'create_new');
-    refresh();
-    setTick((t) => t + 1);
+  async function resolveDup(journeyId: string) {
+    try {
+      demoStore.resolveDuplicate(journeyId, 'create_new');
+      await demoStore.waitForPersist();
+      refresh();
+      setTick((t) => t + 1);
+    } catch (err) {
+      setAssignError(err instanceof Error ? err.message : 'Could not resolve duplicate');
+    }
   }
 
   function bump() {
@@ -138,6 +165,7 @@ export function QueuePage() {
       <section className="hero">
         <h1>Follow-Up queue</h1>
         <p className="muted">Assign newcomers by choosing a team member from the list.</p>
+        {intakeNote ? <p className="muted">{intakeNote}</p> : null}
       </section>
       <div className="panel">
         {assignees.length === 0 ? (
